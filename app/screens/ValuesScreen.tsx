@@ -4,6 +4,8 @@ import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import Screen from '../components/Screen';
 import ValueCard from '../components/ValueCard';
 import type { DeleteValue, MainProps, SwitchValues, UpdateValue } from '../types';
+import TitleBar from '../components/TitleBar';
+import { COLORS } from '../constants/theme';
 
 const THEME = {
   colorOne: '#213448',
@@ -44,8 +46,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
 
   return (
     <Screen>
-      <Text style={styles.title}>{habits[habitIndex].habit.name}</Text>
-      <View style={styles.dayContainer}>
+      <TitleBar>
         <TouchableOpacity
           style={styles.backArrowContainer}
           onPress={() => router.push(`/day/${dateIndex}/habits`)}
@@ -55,6 +56,9 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
             source={require('../assets/arrow-left.png')}
           />
         </TouchableOpacity>
+        <Text style={styles.title}>{habits[habitIndex].habit.name}</Text>
+      </TitleBar>
+      <View style={styles.dayContainer}>
         <ScrollView style={styles.scrollContainer}>
           {habits[habitIndex].values.map((v, index) => (
             <ValueCard
@@ -86,17 +90,12 @@ const styles = StyleSheet.create({
   text: {
     color: THEME.text,
   },
-  buffer: {
-    height: 40,
-    width: '100%',
-    backgroundColor: '#000000',
-  },
   title: {
     fontSize: 24,
     fontWeight: '600',
-    textAlign: 'center',
-    marginVertical: 15,
-    color: THEME.text,
+    textAlign: 'left',
+    color: COLORS.text,
+    flex: 5
   },
   dayContainer: {
     flex: 1,
@@ -104,14 +103,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   backArrowContainer: {
-    position: 'absolute',
-    top: 40,
-    left: 0,
-    width: 40,
-    height: 40,
-    margin: 5,
-    marginTop: 15,
-    zIndex: 1,
+    flex: 1,
   },
   backArrow: {
     width: 40,
