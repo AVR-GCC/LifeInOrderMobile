@@ -102,7 +102,8 @@ const styles = StyleSheet.create({
     flex: 2,
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginLeft: -3
   },
   backArrow: {
     width: 40,
