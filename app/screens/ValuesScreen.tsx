@@ -7,14 +7,6 @@ import type { DeleteValue, MainProps, SwitchValues, UpdateValue } from '../types
 import TitleBar from '../components/TitleBar';
 import { COLORS } from '../constants/theme';
 
-const THEME = {
-  colorOne: '#213448',
-  colorTwo: '#547792',
-  colorThree: '#94b4c1',
-  colorFour: '#ecefca',
-  text: '#ecefca',
-};
-
 interface ValuesScreenProps {
   data: MainProps | null;
   switchValues: SwitchValues;
@@ -85,10 +77,10 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.colorOne,
+    backgroundColor: COLORS.colorOne,
   },
   text: {
-    color: THEME.text,
+    color: COLORS.text,
   },
   title: {
     fontSize: 24,
