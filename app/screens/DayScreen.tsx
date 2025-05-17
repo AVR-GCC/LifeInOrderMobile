@@ -36,9 +36,11 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
 
   return (
     <Screen>
-      <Text style={styles.dayTitle}>
-        {dayNames[moment(dates[dateIndex].date).day()]}, {moment(dates[dateIndex].date).format('MMMM DD, YYYY')}
-      </Text>
+      <View style={styles.dayTitleContainer}>
+        <Text style={styles.dayTitle}>
+          {dayNames[moment(dates[dateIndex].date).day()]}, {moment(dates[dateIndex].date).format('MMMM DD, YYYY')}
+        </Text>
+      </View>
       <View style={styles.dayContainer}>
         <View style={styles.verticalChevronsContainer}>
           <VerticalChevrons
@@ -96,15 +98,17 @@ const styles = StyleSheet.create({
   text: {
     color: COLORS.text,
   },
-  dayTitle: {
-    fontSize: 20,
-    fontWeight: '500',
-    textAlign: 'left',
+  dayTitleContainer: {
     width: '100%',
     padding: 25,
     paddingLeft: 60,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.colorThree,
+  },
+  dayTitle: {
+    fontSize: 20,
+    fontWeight: '500',
+    textAlign: 'left',
     color: COLORS.text,
   },
   dayContainer: {
