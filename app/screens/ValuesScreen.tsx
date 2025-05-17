@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { AntDesign } from '@expo/vector-icons';
 import Screen from '../components/Screen';
 import ValueCard from '../components/ValueCard';
 import type { DeleteValue, MainProps, SwitchValues, UpdateValue } from '../types';
@@ -43,10 +44,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
           style={styles.backArrowContainer}
           onPress={() => router.push(`/day/${dateIndex}/habits`)}
         >
-          <Image
-            style={styles.backArrow}
-            source={require('../assets/arrow-left.png')}
-          />
+          <AntDesign name="arrowleft" size={30} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={styles.title}>{habits[habitIndex].habit.name}</Text>
       </TitleBar>
@@ -75,10 +73,6 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
 });
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.colorOne,
-  },
   text: {
     color: COLORS.text,
   },
@@ -96,6 +90,9 @@ const styles = StyleSheet.create({
   },
   backArrowContainer: {
     flex: 1,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   backArrow: {
     width: 40,

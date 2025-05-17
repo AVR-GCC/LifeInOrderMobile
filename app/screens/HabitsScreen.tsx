@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { AntDesign } from '@expo/vector-icons';
 import Screen from '../components/Screen';
 import HabitCard from '../components/HabitCard';
 import { COLORS } from '../constants/theme';
@@ -35,10 +36,7 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
           style={styles.backArrowContainer}
           onPress={() => router.push(`/day/${dateIndex}`)}
         >
-          <Image
-            style={styles.backArrow}
-            source={require('../assets/arrow-left.png')}
-          />
+          <AntDesign name="arrowleft" size={30} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={styles.title}>Habits</Text>
       </TitleBar>
@@ -77,6 +75,9 @@ const styles = StyleSheet.create({
   },
   backArrowContainer: {
     flex: 1,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   backArrow: {
     width: 40,

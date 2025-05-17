@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import moment from 'moment';
 import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { AntDesign } from '@expo/vector-icons';
 import Screen from '../components/Screen';
 import VerticalChevrons from '../components/VerticalChevrons';
 import type { GetDayHabitValue, MainProps, SetDayValue } from '../types';
@@ -42,10 +43,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
           style={styles.backArrowContainer}
           onPress={() => router.push('/')}
         >
-          <Image
-            style={styles.backArrow}
-            source={require('../assets/arrow-left.png')}
-          />
+          <AntDesign name="arrowleft" size={30} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={styles.dayTitle}>
           {dayNames[moment(dates[dateIndex].date).day()]}, {moment(dates[dateIndex].date).format('MMMM DD, YYYY')}
@@ -104,20 +102,23 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   backArrowContainer: {
-    flex: 1,
+    flex: 2,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   backArrow: {
     width: 40,
     height: 40,
   },
   dayTitle: {
-    flex: 3,
+    flex: 6,
     fontSize: 16,
     fontWeight: '500',
     color: COLORS.text,
   },
   rightIcons: {
-    flex: 1,
+    flex: 3,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
