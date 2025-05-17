@@ -81,6 +81,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
               <TouchableOpacity
                 key={h.habit.id}
                 style={[styles.habitButton, { borderColor: value?.color }]}
+                activeOpacity={1}
                 onPress={() => {
                   const nextIndex = valueIndex === -1 ? 0 : (valueIndex + 1) % h.values.length;
                   const nextValue = h.values[nextIndex];
