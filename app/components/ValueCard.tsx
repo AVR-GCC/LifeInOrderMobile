@@ -64,6 +64,7 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
                 {
                   backgroundColor: value.color,
                   borderColor: palleteOpen ? COLORS.colorOne : 'transparent',
+                  borderWidth: palleteOpen ? 2 : 0,
                 },
               ]}
             />
@@ -89,6 +90,7 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
                   {
                     backgroundColor: color,
                     borderColor: color === value.color ? COLORS.colorOne : 'transparent',
+                    borderWidth: color === value.color ? 2 : 0,
                   },
                 ]}
               />
@@ -154,7 +156,6 @@ const styles = StyleSheet.create({
   valueColorCircle: {
     height: 30,
     width: 30,
-    borderWidth: 2,
     borderRadius: '50%',
     margin: 10,
   },
