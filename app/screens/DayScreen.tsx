@@ -49,7 +49,17 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
         <Text style={styles.dayTitle}>
           {dayNames[moment(dates[dateIndex].date).day()]}, {moment(dates[dateIndex].date).format('MMMM DD, YYYY')}
         </Text>
-        <View style={styles.rightIcons}></View>
+        <View style={styles.rightIcons}>
+          <TouchableOpacity
+            style={styles.settingsButtonContainer}
+            onPress={() => router.push(`/day/${dateIndex}/habits`)}
+          >
+            <Image
+              style={styles.settingsButton}
+              source={require('../assets/settings2.png')}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.dayContainer}>
         <View style={styles.verticalChevronsContainer}>
@@ -59,15 +69,6 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
             downDisabled={dateIndex === dates.length - 1}
           />
         </View>
-        <TouchableOpacity
-          style={styles.settingsButtonContainer}
-          onPress={() => router.push(`/day/${dateIndex}/habits`)}
-        >
-          <Image
-            style={styles.settingsButton}
-            source={require('../assets/settings2.png')}
-          />
-        </TouchableOpacity>
         <ScrollView style={styles.scrollContainer}>
           {habits.map((h, habitIndex) => {
             const value = getDayHabitValue(dateIndex, habitIndex);
@@ -123,7 +124,16 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   rightIcons: {
-    flex: 2
+    flex: 2,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  settingsButtonContainer: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dayContainer: {
     flex: 1,
@@ -135,17 +145,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     top: 20,
-    zIndex: 1,
-  },
-  settingsButtonContainer: {
-    position: 'absolute',
-    top: 40,
-    right: 30,
-    width: 40,
-    height: 40,
-    margin: 5,
-    marginTop: 15,
-    alignItems: 'center',
     zIndex: 1,
   },
   settingsButton: {
