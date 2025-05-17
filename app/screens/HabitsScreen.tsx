@@ -52,7 +52,6 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
               editHabit={() => router.push(`/day/${dateIndex}/habits/${index}`)}
             />
           ))}
-          <View style={styles.clearBuffer} />
         </ScrollView>
       </View>
     </Screen>
@@ -89,9 +88,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 60,
-  },
-  clearBuffer: {
-    height: 40,
   },
 });
 
