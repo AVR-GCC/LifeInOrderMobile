@@ -3,14 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { DeleteValue, HabitWithValues, SwitchValues, UpdateValue, Value } from '../types';
 import VerticalChevrons from './VerticalChevrons';
-
-const THEME = {
-  colorOne: '#213448',
-  colorTwo: '#547792',
-  colorThree: '#94b4c1',
-  colorFour: '#ecefca',
-  text: '#ecefca',
-};
+import { COLORS } from '../constants/theme';
 
 // Predefined color options
 const colorOptions = [
@@ -50,14 +43,15 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
   palleteOpen,
 }) => {
   return (
-    <View style={styles.valueCard}>
+    <View style={[styles.valueCard, palleteOpen ? {} : { paddingBottom: 0 }]}>
       <View style={styles.valueCardMain}>
         <View style={styles.leftSide}>
-          <Text style={styles.habitName}>{value.name}</Text>
+          <Text style={styles.habitName}>{value.label}</Text>
         </View>
         <View style={styles.rightSide}>
           <View style={styles.chevronSection}>
             <VerticalChevrons
+              dark
               onPress={(isDown) => switchValues(isDown, habitIndex, valueIndex)}
               upDisabled={valueIndex === 0}
               downDisabled={valueIndex === habit.values.length - 1}
@@ -69,7 +63,7 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
                 styles.valueColorCircle,
                 {
                   backgroundColor: value.color,
-                  borderColor: palleteOpen ? THEME.colorFour : 'transparent',
+                  borderColor: palleteOpen ? COLORS.colorOne : 'transparent',
                 },
               ]}
             />
@@ -78,7 +72,7 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
             style={styles.buttonHolder}
             onPress={() => deleteValue(habitIndex, valueIndex)}
           >
-            <Ionicons name="trash" size={22} color="#222222" style={styles.delete} />
+            <Ionicons name="trash" size={24} color="#ef4444" style={styles.delete} />
           </TouchableOpacity>
         </View>
       </View>
@@ -94,7 +88,7 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
                   styles.valueColorCircle,
                   {
                     backgroundColor: color,
-                    borderColor: color === value.color ? THEME.colorFour : 'transparent',
+                    borderColor: color === value.color ? COLORS.colorOne : 'transparent',
                   },
                 ]}
               />
@@ -111,10 +105,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'column',
-    backgroundColor: THEME.colorThree,
+    backgroundColor: COLORS.colorThree,
     width: '80%',
     borderWidth: 1,
-    borderColor: THEME.colorFour,
+    borderColor: COLORS.colorFour,
     borderRadius: 10,
     padding: 20,
     paddingTop: 0,
@@ -122,6 +116,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   valueCardMain: {
+    display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -130,6 +125,10 @@ const styles = StyleSheet.create({
   },
   leftSide: {
     flex: 1,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   habitName: {
     flex: 1,
@@ -139,6 +138,7 @@ const styles = StyleSheet.create({
   },
   rightSide: {
     flex: 1,
+    display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -154,19 +154,18 @@ const styles = StyleSheet.create({
   valueColorCircle: {
     height: 30,
     width: 30,
-    borderRadius: 15,
-    margin: 10,
     borderWidth: 2,
+    borderRadius: '50%',
+    margin: 10,
   },
   colorPallete: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    backgroundColor: THEME.colorTwo,
+    backgroundColor: COLORS.colorTwo,
     borderRadius: 5,
     justifyContent: 'center',
   },
   delete: {
-    marginLeft: 15,
   },
 });
 
