@@ -37,9 +37,19 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
   return (
     <Screen>
       <View style={styles.dayTitleContainer}>
+        <TouchableOpacity
+          style={styles.backArrowContainer}
+          onPress={() => router.push('/')}
+        >
+          <Image
+            style={styles.backArrow}
+            source={require('../assets/arrow-left.png')}
+          />
+        </TouchableOpacity>
         <Text style={styles.dayTitle}>
           {dayNames[moment(dates[dateIndex].date).day()]}, {moment(dates[dateIndex].date).format('MMMM DD, YYYY')}
         </Text>
+        <View style={styles.rightIcons}></View>
       </View>
       <View style={styles.dayContainer}>
         <View style={styles.verticalChevronsContainer}>
@@ -56,15 +66,6 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
           <Image
             style={styles.settingsButton}
             source={require('../assets/settings2.png')}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.backArrowContainer}
-          onPress={() => router.push('/')}
-        >
-          <Image
-            style={styles.backArrow}
-            source={require('../assets/arrow-left.png')}
           />
         </TouchableOpacity>
         <ScrollView style={styles.scrollContainer}>
@@ -99,17 +100,30 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   dayTitleContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
     width: '100%',
-    padding: 25,
-    paddingLeft: 60,
+    paddingVertical: 25,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.colorThree,
   },
+  backArrowContainer: {
+    flex: 1,
+    paddingLeft: 10
+  },
+  backArrow: {
+    width: 40,
+    height: 40,
+  },
   dayTitle: {
+    flex: 4,
     fontSize: 20,
     fontWeight: '500',
-    textAlign: 'left',
     color: COLORS.text,
+  },
+  rightIcons: {
+    flex: 2
   },
   dayContainer: {
     flex: 1,
@@ -137,19 +151,6 @@ const styles = StyleSheet.create({
   settingsButton: {
     width: 20,
     height: 20,
-  },
-  backArrowContainer: {
-    position: 'absolute',
-    top: 40,
-    width: 40,
-    height: 40,
-    margin: 5,
-    marginTop: 15,
-    zIndex: 1,
-  },
-  backArrow: {
-    width: 40,
-    height: 40,
   },
   scrollContainer: {
     flex: 1,
