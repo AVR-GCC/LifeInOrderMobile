@@ -49,13 +49,13 @@ const HabitCard: React.FC<HabitCardProps> = React.memo(({
           />
         </View>
         <TouchableOpacity style={styles.buttonHolder} onPress={editHabit}>
-          <Ionicons name="pencil" size={24} color={COLORS.text} />
+          <Ionicons name="pencil" size={24} color={COLORS.colorOne} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.buttonHolder}
           onPress={() => deleteHabit(index)}
         >
-          <Ionicons name="trash" size={24} color={COLORS.text} />
+          <Ionicons name="trash" size={24} color="#ef4444" />
         </TouchableOpacity>
       </View>
     </View>
@@ -71,14 +71,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   leftSide: {
     flex: 1,
@@ -92,12 +84,13 @@ const styles = StyleSheet.create({
   },
   valueColors: {
     flexDirection: 'row',
+    backgroundColor: COLORS.colorTwo
   },
   valueColor: {
     width: 24,
     height: 24,
-    borderRadius: 12,
-    marginRight: 8,
+    borderRadius: '50%',
+    margin: 3,
   },
   rightSide: {
     flexDirection: 'row',
