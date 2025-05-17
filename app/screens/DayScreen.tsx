@@ -59,16 +59,16 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
               source={require('../assets/settings2.png')}
             />
           </TouchableOpacity>
+          <View style={styles.verticalChevronsContainer}>
+            <VerticalChevrons
+              onPress={handleChevronPress}
+              upDisabled={dateIndex === 0}
+              downDisabled={dateIndex === dates.length - 1}
+            />
+          </View>
         </View>
       </View>
       <View style={styles.dayContainer}>
-        <View style={styles.verticalChevronsContainer}>
-          <VerticalChevrons
-            onPress={handleChevronPress}
-            upDisabled={dateIndex === 0}
-            downDisabled={dateIndex === dates.length - 1}
-          />
-        </View>
         <ScrollView style={styles.scrollContainer}>
           {habits.map((h, habitIndex) => {
             const value = getDayHabitValue(dateIndex, habitIndex);
@@ -106,19 +106,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     paddingVertical: 25,
+    paddingHorizontal: 10,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.colorThree,
   },
   backArrowContainer: {
     flex: 1,
-    paddingLeft: 10
   },
   backArrow: {
     width: 40,
     height: 40,
   },
   dayTitle: {
-    flex: 4,
+    flex: 6,
     fontSize: 20,
     fontWeight: '500',
     color: COLORS.text,
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   rightIcons: {
     flex: 2,
     display: 'flex',
-    justifyContent: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
   },
   settingsButtonContainer: {
@@ -135,17 +135,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  verticalChevronsContainer: {
+  },
   dayContainer: {
     flex: 1,
     alignItems: 'center',
     height: '100%',
     width: '100%',
-  },
-  verticalChevronsContainer: {
-    position: 'absolute',
-    right: 20,
-    top: 20,
-    zIndex: 1,
   },
   settingsButton: {
     width: 20,
