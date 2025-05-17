@@ -20,9 +20,9 @@ interface MainScreenProps {
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitValue }) => {
   const router = useRouter();
-  const { height, width } = useWindowDimensions();
+  const { height/*, width*/ } = useWindowDimensions();
   const dayHeightPixels = 20;
-  const leftBarWidth = 30;
+  //const leftBarWidth = 30;
 
   if (data === null) {
     return (

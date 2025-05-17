@@ -3,7 +3,7 @@ import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Screen from '../components/Screen';
 import HabitCard from '../components/HabitCard';
-import { COLORS, STYLES } from '../constants/theme';
+import { COLORS } from '../constants/theme';
 import type { DeleteHabit, MainProps, SwitchHabits } from '../types';
 
 interface HabitsScreenProps {

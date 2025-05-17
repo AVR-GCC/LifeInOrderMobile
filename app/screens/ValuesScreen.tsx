@@ -72,7 +72,6 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
               }}
             />
           ))}
-          <View style={styles.clearBuffer} />
         </ScrollView>
       </View>
     </Screen>
@@ -121,9 +120,6 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     width: '100%',
-  },
-  clearBuffer: {
-    height: 35,
   },
 });
 
