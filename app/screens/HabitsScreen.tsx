@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Screen from '../components/Screen';
 import HabitCard from '../components/HabitCard';
 import { COLORS, STYLES } from '../constants/theme';
 import type { DeleteHabit, MainProps, SwitchHabits } from '../types';
@@ -17,9 +18,9 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
 
   if (data === null || date === undefined) {
     return (
-      <View style={[STYLES.container]}>
+      <Screen>
         <Text style={styles.text}>Loading...</Text>
-      </View>
+      </Screen>
     );
   }
 
@@ -27,8 +28,7 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
   const { habits } = data;
 
   return (
-    <View style={[STYLES.container]}>
-      <View style={styles.buffer} />
+    <Screen>
       <Text style={styles.title}>Habits</Text>
       <View style={styles.dayContainer}>
         <TouchableOpacity
@@ -55,16 +55,13 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
           <View style={styles.clearBuffer} />
         </ScrollView>
       </View>
-    </View>
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
   text: {
     color: COLORS.text,
-  },
-  buffer: {
-    height: 20,
   },
   title: {
     fontSize: 24,

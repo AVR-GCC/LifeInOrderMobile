@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import moment from 'moment';
 import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Screen from '../components/Screen';
 import VerticalChevrons from '../components/VerticalChevrons';
 import type { GetDayHabitValue, MainProps, SetDayValue } from '../types';
 import { COLORS } from '../constants/theme';
@@ -20,9 +21,9 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
 
   if (data === null || date === undefined) {
     return (
-      <View style={styles.container}>
+      <Screen>
         <Text style={styles.text}>Loading...</Text>
-      </View>
+      </Screen>
     );
   }
 
@@ -34,8 +35,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.buffer} />
+    <Screen>
       <Text style={styles.dayTitle}>
         {dayNames[moment(dates[dateIndex].date).day()]}, {moment(dates[dateIndex].date).format('MMMM DD, YYYY')}
       </Text>
@@ -86,25 +86,15 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
               </TouchableOpacity>
             );
           })}
-          <View style={styles.clearBuffer} />
         </ScrollView>
       </View>
-    </View>
+    </Screen>
   );
 });
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.colorOne,
-  },
   text: {
     color: COLORS.text,
-  },
-  buffer: {
-    height: 40,
-    width: '100%',
-    backgroundColor: '#000000',
   },
   dayTitle: {
     fontSize: 20,
@@ -185,9 +175,6 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-  },
-  clearBuffer: {
-    height: 35,
   },
 });
 

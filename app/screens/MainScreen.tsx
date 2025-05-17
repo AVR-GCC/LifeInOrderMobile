@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import type { GetDayHabitValue, MainProps } from '../types';
+import Screen from '../components/Screen';
 
 const UNFILLED_COLOR = '#555555';
 const THEME = {
@@ -25,9 +26,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
 
   if (data === null) {
     return (
-      <View style={styles.container}>
+      <Screen>
         <Text style={styles.text}>Loading...</Text>
-      </View>
+      </Screen>
     );
   }
 
@@ -35,15 +36,14 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
 
   if (!dates) {
     return (
-      <View style={styles.container}>
+      <Screen>
         <Text style={styles.text}>Hi</Text>
-      </View>
+      </Screen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.buffer} />
+    <Screen>
       <View style={styles.topBar}>
         {habits.map((h, index) => (
           <Text 
@@ -99,22 +99,13 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
           </View>
         </View>
       </ScrollView>
-    </View>
+    </Screen>
   );
 });
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: THEME.colorOne,
-  },
   text: {
     color: THEME.text,
-  },
-  buffer: {
-    height: 40,
-    width: '100%',
-    backgroundColor: '#000000',
   },
   topBar: {
     flexDirection: 'row',

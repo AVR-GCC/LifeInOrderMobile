@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Screen from '../components/Screen';
 import ValueCard from '../components/ValueCard';
 import type { DeleteValue, MainProps, SwitchValues, UpdateValue } from '../types';
 
@@ -31,9 +32,9 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
 
   if (data === null || date === undefined || habit === undefined) {
     return (
-      <View style={styles.container}>
+      <Screen>
         <Text style={styles.text}>Loading...</Text>
-      </View>
+      </Screen>
     );
   }
 
@@ -42,8 +43,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
   const { habits } = data;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.buffer} />
+    <Screen>
       <Text style={styles.title}>{habits[habitIndex].habit.name}</Text>
       <View style={styles.dayContainer}>
         <TouchableOpacity
@@ -75,7 +75,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
           <View style={styles.clearBuffer} />
         </ScrollView>
       </View>
-    </View>
+    </Screen>
   );
 });
 
