@@ -71,22 +71,23 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
       <View style={styles.dayContainer}>
         <ScrollView style={styles.scrollContainer}>
           {habits.map((h, habitIndex) => {
-            const value = getDayHabitValue(dateIndex, habitIndex);
-            if (value === null) return <Text key={h.habit.id} style={styles.text}>Value not found</Text>;
+            const valueId = getDayHabitValue(dateIndex, habitIndex);
+            if (valueId === null) return <Text key={h.habit.id} style={styles.text}>Value not found</Text>;
+            const valueIndex = h.values_hashmap[valueId];
+            const value = h.values[valueIndex];
             
             return (
               <TouchableOpacity
                 key={h.habit.id}
-                style={styles.habitButton}
+                style={[styles.habitButton, { borderColor: value?.color }]}
                 onPress={() => {
-                  const currentIndex = h.values.findIndex(v => v.id === value);
-                  const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % h.values.length;
+                  const nextIndex = valueIndex === -1 ? 0 : (valueIndex + 1) % h.values.length;
                   const nextValue = h.values[nextIndex];
                   setDayHabitValue(dateIndex, habitIndex, nextValue.id);
                 }}
               >
                 <Text style={styles.habitTitle}>{h.habit.name}</Text>
-                <View style={[styles.valueIndicator, { backgroundColor: value }]} />
+                <Text style={styles.valueLabel}>{value?.label}</Text>
               </TouchableOpacity>
             );
           })}
@@ -160,21 +161,22 @@ const styles = StyleSheet.create({
     width: '80%',
     height: 80,
     borderWidth: 5,
-    borderColor: '#000000',
     borderRadius: 10,
     padding: 20,
     marginVertical: 15,
     alignSelf: 'center',
   },
   habitTitle: {
+    flex: 1,
     fontSize: 16,
     fontWeight: '500',
-    color: COLORS.text,
+    color: '#222',
   },
-  valueIndicator: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+  valueLabel: {
+    flex: 2,
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#444',
   },
 });
 
