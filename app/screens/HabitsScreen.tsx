@@ -5,6 +5,7 @@ import Screen from '../components/Screen';
 import HabitCard from '../components/HabitCard';
 import { COLORS } from '../constants/theme';
 import type { DeleteHabit, MainProps, SwitchHabits } from '../types';
+import TitleBar from '../components/TitleBar';
 
 interface HabitsScreenProps {
   data: MainProps | null;
@@ -29,8 +30,7 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
 
   return (
     <Screen>
-      <Text style={styles.title}>Habits</Text>
-      <View style={styles.dayContainer}>
+      <TitleBar>
         <TouchableOpacity
           style={styles.backArrowContainer}
           onPress={() => router.push(`/day/${dateIndex}`)}
@@ -40,6 +40,9 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
             source={require('../assets/arrow-left.png')}
           />
         </TouchableOpacity>
+        <Text style={styles.title}>Habits</Text>
+      </TitleBar>
+      <View style={styles.dayContainer}>
         <ScrollView style={styles.scrollContainer}>
           {habits.map((h, index) => (
             <HabitCard
@@ -65,24 +68,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '600',
-    textAlign: 'center',
-    marginVertical: 15,
+    textAlign: 'left',
     color: COLORS.text,
+    flex: 5
   },
   dayContainer: {
     flex: 1,
-    position: 'relative',
   },
   backArrowContainer: {
-    position: 'absolute',
-    left: 20,
-    top: 20,
-    zIndex: 1,
+    flex: 1,
   },
   backArrow: {
-    width: 24,
-    height: 24,
-    tintColor: COLORS.text,
+    width: 40,
+    height: 40,
   },
   scrollContainer: {
     flex: 1,
