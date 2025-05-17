@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { COLORS } from '../constants/theme';
 
 interface VerticalChevronsProps {
   onPress: (isDown: boolean) => void;
@@ -22,8 +23,8 @@ function VerticalChevrons({
       >
         <Ionicons
           name="chevron-up"
-          size={24}
-          color={upDisabled ? '#ccc' : '#000'}
+          size={20}
+          color={COLORS.colorFour}
         />
       </TouchableOpacity>
       <TouchableOpacity
@@ -33,8 +34,8 @@ function VerticalChevrons({
       >
         <Ionicons
           name="chevron-down"
-          size={24}
-          color={downDisabled ? '#ccc' : '#000'}
+          size={20}
+          color={COLORS.colorFour}
         />
       </TouchableOpacity>
     </View>
@@ -45,22 +46,13 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: '#fff',
     borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   button: {
-    padding: 8,
+    padding: 4,
   },
   disabled: {
-    opacity: 0.5,
+    opacity: 0.3,
   },
 });
 
