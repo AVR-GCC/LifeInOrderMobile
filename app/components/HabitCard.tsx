@@ -42,6 +42,7 @@ const HabitCard: React.FC<HabitCardProps> = React.memo(({
       <View style={styles.rightSide}>
         <View style={styles.buttonHolder}>
           <VerticalChevrons
+            dark
             onPress={(isDown) => switchHabits(isDown, index)}
             upDisabled={index === 0}
             downDisabled={index === totalHabits - 1}

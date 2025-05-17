@@ -7,13 +7,16 @@ interface VerticalChevronsProps {
   onPress: (isDown: boolean) => void;
   upDisabled: boolean;
   downDisabled: boolean;
+  dark?: boolean;
 }
 
 function VerticalChevrons({
   onPress,
   upDisabled,
   downDisabled,
+  dark
 }: VerticalChevronsProps) {
+  const color = dark ? COLORS.colorOne : COLORS.colorFour;
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -24,7 +27,7 @@ function VerticalChevrons({
         <Ionicons
           name="chevron-up"
           size={20}
-          color={COLORS.colorFour}
+          color={color}
         />
       </TouchableOpacity>
       <TouchableOpacity
@@ -35,7 +38,7 @@ function VerticalChevrons({
         <Ionicons
           name="chevron-down"
           size={20}
-          color={COLORS.colorFour}
+          color={color}
         />
       </TouchableOpacity>
     </View>
