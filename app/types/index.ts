@@ -36,4 +36,6 @@ export type DeleteHabit = (index: number) => void;
 export type SwitchHabits = (isDown: boolean, index: number) => void;
 export type DeleteValue = (habitIndex: number, valueIndex: number) => void;
 export type SwitchValues = (isDown: boolean, habitIndex: number, valueIndex: number) => void;
-export type UpdateValue = (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void; 
+export type UpdateValue = (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
+
+export default {};

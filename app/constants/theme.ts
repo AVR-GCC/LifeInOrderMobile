@@ -19,3 +19,7 @@ export const STYLES = StyleSheet.create({
     padding: 16,
   },
 }); 
+
+export default {
+  COLORS, STYLES
+}
