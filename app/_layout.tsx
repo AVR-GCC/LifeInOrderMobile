@@ -4,7 +4,7 @@ import { AppProvider } from './context/AppContext';
 export default function RootLayout() {
   return (
     <AppProvider>
-      <Stack>
+      <Stack screenOptions={{ animation: 'none' }}>
         <Stack.Screen
           name="index"
           options={{
