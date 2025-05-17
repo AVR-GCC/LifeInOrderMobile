@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import moment from 'moment';
 import React from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import Screen from '../components/Screen';
 import VerticalChevrons from '../components/VerticalChevrons';
@@ -53,10 +53,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
             style={styles.settingsButtonContainer}
             onPress={() => router.push(`/day/${dateIndex}/habits`)}
           >
-            <Image
-              style={styles.settingsButton}
-              source={require('../assets/settings2.png')}
-            />
+            <AntDesign name="setting" size={30} color={COLORS.text} />
           </TouchableOpacity>
           <View style={styles.verticalChevronsContainer}>
             <VerticalChevrons
