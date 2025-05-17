@@ -6,6 +6,7 @@ import Screen from '../components/Screen';
 import VerticalChevrons from '../components/VerticalChevrons';
 import type { GetDayHabitValue, MainProps, SetDayValue } from '../types';
 import { COLORS } from '../constants/theme';
+import TitleBar from '../components/TitleBar';
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -36,7 +37,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
 
   return (
     <Screen>
-      <View style={styles.dayTitleContainer}>
+      <TitleBar>
         <TouchableOpacity
           style={styles.backArrowContainer}
           onPress={() => router.push('/')}
@@ -67,7 +68,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
             />
           </View>
         </View>
-      </View>
+      </TitleBar>
       <View style={styles.dayContainer}>
         <ScrollView style={styles.scrollContainer}>
           {habits.map((h, habitIndex) => {
@@ -101,16 +102,6 @@ const styles = StyleSheet.create({
   text: {
     color: COLORS.text,
   },
-  dayTitleContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    paddingVertical: 25,
-    paddingHorizontal: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.colorThree,
-  },
   backArrowContainer: {
     flex: 1,
   },
@@ -119,16 +110,17 @@ const styles = StyleSheet.create({
     height: 40,
   },
   dayTitle: {
-    flex: 6,
-    fontSize: 20,
+    flex: 3,
+    fontSize: 16,
     fontWeight: '500',
     color: COLORS.text,
   },
   rightIcons: {
-    flex: 2,
+    flex: 1,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-around'
   },
   settingsButtonContainer: {
     width: 40,
