@@ -4,14 +4,7 @@ import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import VerticalChevrons from '../components/VerticalChevrons';
 import type { GetDayHabitValue, MainProps, SetDayValue } from '../types';
-
-const THEME = {
-  colorOne: '#213448',
-  colorTwo: '#547792',
-  colorThree: '#94b4c1',
-  colorFour: '#ecefca',
-  text: '#ecefca',
-};
+import { COLORS } from '../constants/theme';
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -103,10 +96,10 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.colorOne,
+    backgroundColor: COLORS.colorOne,
   },
   text: {
-    color: THEME.text,
+    color: COLORS.text,
   },
   buffer: {
     height: 40,
@@ -121,8 +114,8 @@ const styles = StyleSheet.create({
     padding: 25,
     paddingLeft: 60,
     borderBottomWidth: 1,
-    borderBottomColor: THEME.colorThree,
-    color: THEME.text,
+    borderBottomColor: COLORS.colorThree,
+    color: COLORS.text,
   },
   dayContainer: {
     flex: 1,
@@ -173,7 +166,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: THEME.colorThree,
+    backgroundColor: COLORS.colorThree,
     width: '80%',
     height: 80,
     borderWidth: 5,
@@ -186,7 +179,7 @@ const styles = StyleSheet.create({
   habitTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: THEME.text,
+    color: COLORS.text,
   },
   valueIndicator: {
     width: 20,
