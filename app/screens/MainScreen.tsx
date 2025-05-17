@@ -3,15 +3,9 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import type { GetDayHabitValue, MainProps } from '../types';
 import Screen from '../components/Screen';
+import { COLORS } from '../constants/theme';
 
 const UNFILLED_COLOR = '#555555';
-const THEME = {
-  colorOne: '#213448',
-  colorTwo: '#547792',
-  colorThree: '#94b4c1',
-  colorFour: '#ecefca',
-  text: '#ecefca',
-};
 
 interface MainScreenProps {
   data: MainProps | null;
@@ -105,11 +99,11 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
 
 const styles = StyleSheet.create({
   text: {
-    color: THEME.text,
+    color: COLORS.text,
   },
   topBar: {
     flexDirection: 'row',
-    backgroundColor: THEME.colorOne,
+    backgroundColor: COLORS.colorOne,
     paddingLeft: 30, // leftBarWidth
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.133)',
@@ -119,20 +113,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.133)',
     height: 30,
-    color: THEME.text,
+    color: COLORS.text,
   },
   content: {
     flexDirection: 'row',
   },
   leftBar: {
-    backgroundColor: THEME.colorOne,
+    backgroundColor: COLORS.colorOne,
     paddingLeft: 10,
     paddingRight: 5,
     width: 30, // leftBarWidth
   },
   dayMarker: {
     borderBottomWidth: 1,
-    borderBottomColor: THEME.colorFour,
+    borderBottomColor: COLORS.colorFour,
   },
   checklist: {
     flexDirection: 'row',
