@@ -43,6 +43,14 @@ export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, 
   return { ...newData, dates: newDates };
 };
 
+export const updateHabitReducer = (data: MainProps) => (habitIndex: number, newHabitValues: Partial<Value>) => {
+  const newData = { ...data };
+  const newHabits = [...newData.habits];
+  newHabits[habitIndex].habit = { ...newHabits[habitIndex].habit, ...newHabitValues };
+  console.log('newHabits', newHabits);
+  return { ...newData, habits: newHabits };
+};
+
 export const deleteHabitReducer = (data: MainProps) => (index: number) => {
   const newData = { ...data };
   const newHabits = [...newData.habits];

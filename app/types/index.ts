@@ -32,6 +32,7 @@ export interface MainProps {
 
 export type GetDayHabitValue = (dateIndex: number, habitIndex: number) => string | null;
 export type SetDayValue = (dateIndex: number, habitIndex: number, valueId: string) => void;
+export type UpdateHabit = (habitIndex: number, newValueValues: Partial<Habit>) => void;
 export type DeleteHabit = (index: number) => void;
 export type SwitchHabits = (isDown: boolean, index: number) => void;
 export type DeleteValue = (habitIndex: number, valueIndex: number) => void;

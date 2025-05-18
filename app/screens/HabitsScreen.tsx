@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'left',
     color: COLORS.text,
-    flex: 5
+    flex: 5,
   },
   dayContainer: {
     flex: 1,
@@ -77,7 +77,8 @@ const styles = StyleSheet.create({
     flex: 1,
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginRight: 10
   },
   backArrow: {
     width: 40,

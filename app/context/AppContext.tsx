@@ -13,15 +13,17 @@ import {
     setDayHabitValueReducer,
     switchHabitsReducer,
     switchValuesReducer,
+    updateHabitReducer,
     updateValueReducer,
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
-import type { DeleteValue, MainProps, Value } from '../types';
+import type { DeleteValue, Habit, MainProps, Value } from '../types';
 
 interface AppContextType {
   data: MainProps | null;
   setDayHabitValue: (dateIndex: number, habitIndex: number, valueId: string) => void;
   getDayHabitValue: (dateIndex: number, habitIndex: number) => string | null;
+  updateHabit: (habitIndex: number, newHabitValues: Partial<Habit>) => void;
   deleteHabit: (index: number) => void;
   switchHabits: (isDown: boolean, index: number) => void;
   switchValues: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
@@ -55,6 +57,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const getDayHabitValue = (dateIndex: number, habitIndex: number) => {
     if (data === null) return null;
     return getDayHabitValueSelector(data)(dateIndex, habitIndex);
+  };
+
+  const updateHabit = (habitIndex: number, newHabitValues: Partial<Value>) => {
+    if (data === null) return;
+    const newData = updateHabitReducer(data)(habitIndex, newHabitValues);
+    setData(newData);
+    //const { habits } = newData;
+    //updateHabitServer(habits[habitIndex]);
   };
 
   const deleteHabit = (index: number) => {
@@ -112,6 +122,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         data,
         setDayHabitValue,
         getDayHabitValue,
+        updateHabit,
         deleteHabit,
         switchHabits,
         switchValues,

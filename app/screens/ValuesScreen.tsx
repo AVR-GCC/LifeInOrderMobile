@@ -1,10 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import Screen from '../components/Screen';
 import ValueCard from '../components/ValueCard';
-import type { DeleteValue, MainProps, SwitchValues, UpdateValue } from '../types';
+import type { DeleteValue, MainProps, SwitchValues, UpdateHabit, UpdateValue } from '../types';
 import TitleBar from '../components/TitleBar';
 import { COLORS } from '../constants/theme';
 
@@ -13,10 +13,12 @@ interface ValuesScreenProps {
   switchValues: SwitchValues;
   deleteValue: DeleteValue;
   updateValue: UpdateValue;
+  updateHabit: UpdateHabit;
 }
 
 const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
   data,
+  updateHabit,
   switchValues,
   deleteValue,
   updateValue,
@@ -24,6 +26,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
   const { date, habit } = useLocalSearchParams();
   const router = useRouter();
   const [openPallete, setOpenPallete] = useState<string | null>(null);
+  const [inputFocused, setInputFocused] = useState(false);
 
   if (data === null || date === undefined || habit === undefined) {
     return (
@@ -40,13 +43,23 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
   return (
     <Screen>
       <TitleBar>
-        <TouchableOpacity
-          style={styles.backArrowContainer}
-          onPress={() => router.push(`/day/${dateIndex}/habits`)}
-        >
-          <AntDesign name="arrowleft" size={30} color={COLORS.text} />
-        </TouchableOpacity>
-        <Text style={styles.title}>{habits[habitIndex].habit.name}</Text>
+        <View style={styles.titleContainer}>
+          <TouchableOpacity
+            style={styles.backArrowContainer}
+            onPress={() => router.push(`/day/${dateIndex}/habits`)}
+          >
+            <AntDesign name="arrowleft" size={30} color={COLORS.text} />
+          </TouchableOpacity>
+          <TextInput
+            style={[styles.input, inputFocused && styles.inputFocused]}
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
+            value={habits[habitIndex].habit.name}
+            onChangeText={name => {
+              updateHabit(habitIndex, { name })
+            }}
+          />
+        </View>
       </TitleBar>
       <View style={styles.dayContainer}>
         <ScrollView style={styles.scrollContainer}>
@@ -76,17 +89,17 @@ const styles = StyleSheet.create({
   text: {
     color: COLORS.text,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '600',
-    textAlign: 'left',
-    color: COLORS.text,
-    flex: 5
-  },
   dayContainer: {
     flex: 1,
     alignItems: 'center',
     width: '100%',
+  },
+  titleContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '90%',
+    marginLeft: -1
   },
   backArrowContainer: {
     flex: 1,
@@ -101,6 +114,24 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     width: '100%',
+  },
+  input: {
+    flex: 4,
+    fontSize: 24,
+    height: 60,
+    fontWeight: '600',
+    backgroundColor: 'transparent',
+    color: COLORS.text,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    padding: 10,
+    borderRadius: 10,
+  },
+  inputFocused: {
+    backgroundColor: COLORS.text,
+    color: COLORS.colorOne,
+    borderColor: 'black',
+    borderWidth: 1,
   },
 });
 
