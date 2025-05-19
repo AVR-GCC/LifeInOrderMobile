@@ -8,6 +8,7 @@ import VerticalChevrons from '../components/VerticalChevrons';
 import type { GetDayHabitValue, MainProps, SetDayValue } from '../types';
 import { COLORS } from '../constants/theme';
 import TitleBar from '../components/TitleBar';
+import { UNFILLED_COLOR } from './MainScreen';
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -68,17 +69,16 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
         <ScrollView style={styles.scrollContainer}>
           {habits.map((h, habitIndex) => {
             const valueId = getDayHabitValue(dateIndex, habitIndex);
-            if (valueId === null) return <Text key={h.habit.id} style={styles.text}>Value not found</Text>;
-            const valueIndex = h.values_hashmap[valueId];
-            const value = h.values[valueIndex];
+            const valueIndex = valueId === null ? null : h.values_hashmap[valueId];
+            const value = valueIndex === null ? null : h.values[valueIndex];
             
             return (
               <TouchableOpacity
                 key={h.habit.id}
-                style={[styles.habitButton, { borderColor: value?.color }]}
+                style={[styles.habitButton, { borderColor: value?.color || UNFILLED_COLOR }]}
                 activeOpacity={1}
                 onPress={() => {
-                  const nextIndex = valueIndex === -1 ? 0 : (valueIndex + 1) % h.values.length;
+                  const nextIndex = valueIndex === null ? 0 : (valueIndex + 1) % h.values.length;
                   const nextValue = h.values[nextIndex];
                   setDayHabitValue(dateIndex, habitIndex, nextValue.id);
                 }}

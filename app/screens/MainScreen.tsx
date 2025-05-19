@@ -5,7 +5,7 @@ import type { GetDayHabitValue, MainProps } from '../types';
 import Screen from '../components/Screen';
 import { COLORS } from '../constants/theme';
 
-const UNFILLED_COLOR = '#555555';
+export const UNFILLED_COLOR = '#555555';
 
 interface MainScreenProps {
   data: MainProps | null;
