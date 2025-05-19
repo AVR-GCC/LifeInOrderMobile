@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import type { GetDayHabitValue, MainProps } from '../types';
 import Screen from '../components/Screen';
@@ -15,8 +15,10 @@ interface MainScreenProps {
 const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitValue }) => {
   const router = useRouter();
   const { height/*, width*/ } = useWindowDimensions();
-  const dayHeightPixels = 20;
-  //const leftBarWidth = 30;
+
+  const [dayHeightPixels, setDayHeightPixels] = useState(20);
+  const [startDistance, setStartDistance] = useState<number | null>(null);
+  const [startDayHeightPixels, setStartDayHeightPixels] = useState(20);
 
   if (data === null) {
     return (
@@ -50,8 +52,35 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
           </Text>
         ))}
       </View>
-      <ScrollView style={{ height: height * 0.8 }}>
-        <View style={styles.content}>
+      <ScrollView
+        style={{ height: height * 0.8 }}
+        scrollEnabled={startDistance === null}
+        onTouchStart={event => {
+          const { touches } = event.nativeEvent;
+          if (touches.length > 1) {
+            setStartDistance(touches[0].pageY - touches[1].pageY);
+            setStartDayHeightPixels(dayHeightPixels);
+          }
+        }}
+        onTouchEnd={() => {
+          if (startDistance !== null) {
+            setStartDistance(null);
+          }
+        }}
+        onTouchMove={event => {
+          const { touches } = event.nativeEvent;
+          const { ceil, abs } = Math;
+          if (touches.length > 1 && startDistance !== null) {
+            const originalDistanceDays = startDistance / startDayHeightPixels;
+            const curDistance = touches[0].pageY - touches[1].pageY;
+            const newDayHeightPixels = abs(ceil(curDistance / originalDistanceDays));
+            setDayHeightPixels(newDayHeightPixels);
+          }
+        }}
+      >
+        <View 
+          style={styles.content}
+        >
           <View style={styles.leftBar}>
             {dates.map((_, dayIndex) => (
               <TouchableOpacity
