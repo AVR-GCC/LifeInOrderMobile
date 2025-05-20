@@ -1,6 +1,6 @@
 import moment from 'moment';
 import type { MainProps, Value } from '../types';
-const SPARE_DATES = 50;
+const SPARE_DATES = 400;
 const dateFormat = 'YYYY-MM-DD';
 
 export const loadDataReducer = (data: MainProps) => () => {
