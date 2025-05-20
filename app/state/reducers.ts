@@ -47,7 +47,6 @@ export const updateHabitReducer = (data: MainProps) => (habitIndex: number, newH
   const newData = { ...data };
   const newHabits = [...newData.habits];
   newHabits[habitIndex].habit = { ...newHabits[habitIndex].habit, ...newHabitValues };
-  console.log('newHabits', newHabits);
   return { ...newData, habits: newHabits };
 };
 
