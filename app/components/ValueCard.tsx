@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { TextInput, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { DeleteValue, HabitWithValues, SwitchValues, UpdateValue, Value } from '../types';
 import VerticalChevrons from './VerticalChevrons';
 import { COLORS } from '../constants/theme';
@@ -42,11 +42,20 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
   openPallete,
   palleteOpen,
 }) => {
+  const [inputFocused, setInputFocused] = useState(false);
   return (
     <View style={[styles.valueCard, palleteOpen ? {} : { paddingBottom: 0 }]}>
       <View style={styles.valueCardMain}>
         <View style={styles.leftSide}>
-          <Text style={styles.habitName}>{value.label}</Text>
+          <TextInput
+            style={[styles.input, inputFocused && styles.inputFocused]}
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
+            value={value.label}
+            onChangeText={label => {
+              updateValue(habitIndex, valueIndex, { label });
+            }}
+          />
         </View>
         <View style={styles.rightSide}>
           <View style={styles.chevronSection}>
@@ -132,12 +141,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  habitName: {
-    flex: 1,
-    margin: 5,
-    color: '#222222',
-    fontWeight: '500',
-  },
   rightSide: {
     flex: 1,
     display: 'flex',
@@ -167,6 +170,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   delete: {
+  },
+  input: {
+    flex: 4,
+    height: 40,
+    fontWeight: '400',
+    backgroundColor: 'transparent',
+    color: '#222222',
+    borderWidth: 1,
+    borderColor: 'transparent',
+    padding: 10,
+    marginRight: 10,
+    borderRadius: 10,
+  },
+  inputFocused: {
+    backgroundColor: COLORS.colorOne,
+    color: COLORS.text,
+    borderColor: 'black',
+    borderWidth: 1,
   },
 });
 
