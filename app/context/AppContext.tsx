@@ -6,6 +6,7 @@ import {
     reorderValuesServer,
     setDayValueServer,
     updateValueServer,
+    updateHabitServer
 } from '../api/client';
 import {
     deleteHabitReducer,
@@ -63,8 +64,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (data === null) return;
     const newData = updateHabitReducer(data)(habitIndex, newHabitValues);
     setData(newData);
-    //const { habits } = newData;
-    //updateHabitServer(habits[habitIndex]);
+    const { habits } = newData;
+    updateHabitServer(habits[habitIndex].habit);
   };
 
   const deleteHabit = (index: number) => {

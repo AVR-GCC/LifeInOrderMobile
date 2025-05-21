@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { MainProps, Value } from '../types';
+import type { Habit, MainProps, Value } from '../types';
 
 const baseUrl = 'http://10.0.0.8:8080'; // TODO: Make this configurable via environment variables
 
@@ -100,9 +100,21 @@ export const updateValueServer = async (newValue: Value) => {
   }
 };
 
+export const updateHabitServer = async (newHabit: Habit) => {
+  try {
+    const route = `${baseUrl}/user_habits`;
+    const res = await axios.put(route, newHabit);
+    return res.status === 200;
+  } catch (error) {
+    console.error('Error updating habit:', error);
+    return false;
+  }
+};
+
 export default {
   getUserList,
   setDayValueServer,
+  updateHabitServer,
   deleteHabitServer,
   reorderHabitsServer,
   reorderValuesServer,
