@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../constants/theme';
@@ -6,7 +6,7 @@ import type { HabitWithValues } from '../types';
 import VerticalChevrons from './VerticalChevrons';
 
 interface HabitCardProps {
-  habit: HabitWithValues;
+  habit: HabitWithValues | null;
   index: number;
   totalHabits: number;
   switchHabits: (isDown: boolean, index: number) => void;
@@ -22,10 +22,18 @@ const HabitCard: React.FC<HabitCardProps> = React.memo(({
   deleteHabit,
   editHabit,
 }) => {
+  if (!habit) {
+    return (
+      <View style={[styles.habitCard, styles.newHabit]}>
+        <AntDesign name="plus" size={24} color={COLORS.text} />
+        <Text style={styles.newHabitText}>Create Habit</Text>
+      </View>
+    )
+  }
   return (
     <View style={styles.habitCard}>
       <View style={styles.leftSide}>
-        <Text style={styles.habitName}>{habit.habit.name}</Text>
+        <Text style={styles.habitName}>{habit ? habit.habit.name : "New Habit"}</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -99,6 +107,20 @@ const styles = StyleSheet.create({
   buttonHolder: {
     marginLeft: 16,
   },
+  newHabit: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000',
+    borderColor: COLORS.colorThree,
+    borderWidth: 1
+  },
+  newHabitText: {
+    fontSize: 20,
+    color: COLORS.text,
+    margin: 10,
+    marginBottom: 13
+  }
 });
 
 export default HabitCard; 

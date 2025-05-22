@@ -42,6 +42,15 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
       </TitleBar>
       <View style={styles.dayContainer}>
         <ScrollView style={styles.scrollContainer}>
+          <HabitCard
+            key="new"
+            habit={null}
+            index={habits.length}
+            totalHabits={habits.length}
+            switchHabits={switchHabits}
+            deleteHabit={deleteHabit}
+            editHabit={() => router.push(`/day/${dateIndex}/habits/${habits.length}`)}
+          />
           {habits.map((h, index) => (
             <HabitCard
               key={h.habit.id}
