@@ -89,6 +89,17 @@ export const reorderHabitsServer = debounce(reorderHabitsServerUndebounced);
 
 export const reorderValuesServer = debounce(reorderValuesServerUndebounced);
 
+export const createValueServer = async (newValue: Partial<Value>) => {
+  try {
+    const route = `${baseUrl}/habit_values`;
+    const res = await axios.post(route, newValue);
+    return res.data?.id || -1;
+  } catch (error) {
+    console.error('Error creating value:', error);
+    return false;
+  }
+};
+
 export const updateValueServer = async (newValue: Value) => {
   try {
     const route = `${baseUrl}/habit_values`;

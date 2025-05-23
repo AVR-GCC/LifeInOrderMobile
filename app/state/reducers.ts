@@ -1,5 +1,5 @@
 import moment from 'moment';
-import type { MainProps, Value } from '../types';
+import type { Habit, MainProps, Value } from '../types';
 const SPARE_DATES = 400;
 const dateFormat = 'YYYY-MM-DD';
 
@@ -93,11 +93,23 @@ export const updateValueReducer = (data: MainProps) => (habitIndex: number, valu
   return { ...newData, habits: newHabits };
 };
 
+export const addValueReducer = (data: MainProps) => (habitIndex: number, value: Value) => {
+  const newData = { ...data };
+  const newHabits = [...newData.habits];
+  const newHabit = { ...newHabits[habitIndex] };
+  newHabit.values.push(value);
+  newHabit.values_hashmap[value.id] = newHabit.values.length - 1;
+  newHabits[habitIndex] = newHabit;
+  return { ...newData, habits: newHabits };
+}
+
 export default {
   loadDataReducer,
   setDayHabitValueReducer,
+  updateHabitReducer,
   deleteHabitReducer,
   switchHabitsReducer,
   switchValuesReducer,
   updateValueReducer,
+  addValueReducer
 }; 

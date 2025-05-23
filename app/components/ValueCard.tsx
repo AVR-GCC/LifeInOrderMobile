@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { TextInput, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { DeleteValue, HabitWithValues, SwitchValues, UpdateValue, Value } from '../types';
@@ -6,7 +6,7 @@ import VerticalChevrons from './VerticalChevrons';
 import { COLORS } from '../constants/theme';
 
 // Predefined color options
-const colorOptions = [
+export const colorOptions = [
   "#10b981", // Green
   "#b59e0b", // Yellow
   "#ef4444", // Red
@@ -22,13 +22,14 @@ const colorOptions = [
 interface ValueCardProps {
   habit: HabitWithValues;
   habitIndex: number;
-  value: Value;
+  value: Value | null;
   valueIndex: number;
   switchValues: SwitchValues;
   deleteValue: DeleteValue;
   updateValue: UpdateValue;
   openPallete: () => void;
   palleteOpen: boolean;
+  createValue: () => void;
 }
 
 const ValueCard: React.FC<ValueCardProps> = React.memo(({
@@ -41,8 +42,20 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
   updateValue,
   openPallete,
   palleteOpen,
+  createValue
 }) => {
   const [inputFocused, setInputFocused] = useState(false);
+  if (value === null) {
+    return (
+      <TouchableOpacity
+        style={[styles.valueCard, styles.newValue]}
+        onPress={createValue}
+      >
+        <AntDesign name="plus" size={24} color={COLORS.text} />
+        <Text style={styles.newValueText}>Create Value</Text>
+      </TouchableOpacity>
+    );
+  }
   return (
     <View style={[styles.valueCard, palleteOpen ? {} : { paddingBottom: 0 }]}>
       <View style={styles.valueCardMain}>
@@ -189,6 +202,23 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     borderWidth: 1,
   },
+  newValue: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    backgroundColor: '#000',
+    padding: 15,
+    paddingTop: 15,
+    borderColor: COLORS.colorThree,
+    borderWidth: 1
+  },
+  newValueText: {
+    fontSize: 20,
+    color: COLORS.text,
+    margin: 10,
+    marginBottom: 13
+  }
 });
 
 export default ValueCard; 

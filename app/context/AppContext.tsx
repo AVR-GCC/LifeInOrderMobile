@@ -6,9 +6,11 @@ import {
     reorderValuesServer,
     setDayValueServer,
     updateValueServer,
-    updateHabitServer
+    updateHabitServer,
+    createValueServer
 } from '../api/client';
 import {
+    addValueReducer,
     deleteHabitReducer,
     loadDataReducer,
     setDayHabitValueReducer,
@@ -19,6 +21,7 @@ import {
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
 import type { DeleteValue, Habit, MainProps, Value } from '../types';
+import { colorOptions } from '../components/ValueCard';
 
 interface AppContextType {
   data: MainProps | null;
@@ -27,6 +30,7 @@ interface AppContextType {
   updateHabit: (habitIndex: number, newHabitValues: Partial<Habit>) => void;
   deleteHabit: (index: number) => void;
   switchHabits: (isDown: boolean, index: number) => void;
+  createValue: (habitIndex: number, sequence: number) => Promise<null | undefined>;
   switchValues: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
@@ -86,6 +90,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     reorderHabitsServer(ids);
   };
 
+  const createValue = async (habitIndex: number, sequence: number) => {
+    if (data === null) return null;
+    const { habits } = data;
+    const newValue = {
+      label: '',
+      color: colorOptions[0],
+      habit_id: parseInt(habits[habitIndex].habit.id, 10),
+      sequence,
+      created_at: 'new'
+    };
+    const newValueId = await createValueServer(newValue);
+    setData(addValueReducer(data)(habitIndex, { id: newValueId, ...newValue }));
+  };
+
   const switchValues = (isDown: boolean, habitIndex: number, valueIndex: number) => {
     if (data === null) return;
     const { habits } = data;
@@ -126,6 +144,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateHabit,
         deleteHabit,
         switchHabits,
+        createValue,
         switchValues,
         updateValue,
         deleteValue,

@@ -2,7 +2,7 @@ import { useAppContext } from '../../../context/AppContext';
 import ValuesScreen from '../../../screens/ValuesScreen';
 
 export default function ValuesRoute() {
-  const { data, switchValues, deleteValue, updateValue, updateHabit } = useAppContext();
+  const { data, switchValues, deleteValue, createValue, updateValue, updateHabit } = useAppContext();
 
   return (
     <ValuesScreen
@@ -11,6 +11,7 @@ export default function ValuesRoute() {
       deleteValue={deleteValue}
       updateValue={updateValue}
       updateHabit={updateHabit}
+      createValue={createValue}
     />
   );
 } 

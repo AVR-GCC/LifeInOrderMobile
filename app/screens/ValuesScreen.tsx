@@ -1,10 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import Screen from '../components/Screen';
 import ValueCard from '../components/ValueCard';
-import type { DeleteValue, MainProps, SwitchValues, UpdateHabit, UpdateValue } from '../types';
+import type { CreateValue, DeleteValue, MainProps, SwitchValues, UpdateHabit, UpdateValue } from '../types';
 import TitleBar from '../components/TitleBar';
 import { COLORS } from '../constants/theme';
 
@@ -14,6 +14,7 @@ interface ValuesScreenProps {
   deleteValue: DeleteValue;
   updateValue: UpdateValue;
   updateHabit: UpdateHabit;
+  createValue: CreateValue;
 }
 
 const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
@@ -22,11 +23,14 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
   switchValues,
   deleteValue,
   updateValue,
+  createValue
 }) => {
   const { date, habit } = useLocalSearchParams();
   const router = useRouter();
   const [openPallete, setOpenPallete] = useState<string | null>(null);
   const [inputFocused, setInputFocused] = useState(false);
+
+  const scrollViewRef = useRef<ScrollView>(null);
 
   if (data === null || date === undefined || habit === undefined) {
     return (
@@ -39,6 +43,15 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
   const dateIndex = parseInt(date.toString(), 10);
   const habitIndex = parseInt(habit.toString(), 10);
   const { habits } = data;
+
+  const createValueLocal = async () => {
+    const thisHabitValues = habits[habitIndex].values;
+    const sequence = thisHabitValues[thisHabitValues.length - 1].sequence;
+    await createValue(habitIndex, sequence + 1);
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  };
 
   return (
     <Screen>
@@ -62,7 +75,23 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
         </View>
       </TitleBar>
       <View style={styles.dayContainer}>
-        <ScrollView style={styles.scrollContainer}>
+        <ValueCard
+          key="new"
+          habit={habits[habitIndex]}
+          habitIndex={habitIndex}
+          value={null}
+          valueIndex={habits.length}
+          switchValues={switchValues}
+          deleteValue={deleteValue}
+          updateValue={updateValue}
+          createValue={createValueLocal}
+          palleteOpen={false}
+          openPallete={() => {}}
+        />
+        <ScrollView
+          style={styles.scrollContainer}
+          ref={scrollViewRef}
+        >
           {habits[habitIndex].values.map((v, index) => (
             <ValueCard
               key={v.id}
@@ -73,6 +102,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
               switchValues={switchValues}
               deleteValue={deleteValue}
               updateValue={updateValue}
+              createValue={createValueLocal}
               palleteOpen={openPallete === v.id}
               openPallete={() => {
                 setOpenPallete(openPallete === v.id ? null : v.id);
