@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput, Platform, Keyboard, Dimensions } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import Screen from '../components/Screen';
 import ValueCard from '../components/ValueCard';
@@ -29,6 +29,9 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
   const router = useRouter();
   const [openPallete, setOpenPallete] = useState<string | null>(null);
   const [inputFocused, setInputFocused] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [targetY, setTargetY] = useState(0);
+  const [scroll, setScroll] = useState(0);
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -39,6 +42,34 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
       </Screen>
     );
   }
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (event) => {
+        const keyboardHeight = event.endCoordinates.height;
+        setKeyboardHeight(keyboardHeight);
+        if (scrollViewRef.current !== null && targetY > 0) {
+          const windowHeight = Dimensions.get('window').height;
+          const offset = windowHeight - keyboardHeight - 60;
+          const y = scroll + targetY - offset;
+          if (y > 0) {
+            scrollViewRef.current.scrollTo({ y, animated: true });
+          }
+        }
+      }
+    );
+
+    const keyboardDidHideListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardHeight(0)
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, [targetY, scroll]);
 
   const dateIndex = parseInt(date.toString(), 10);
   const habitIndex = parseInt(habit.toString(), 10);
@@ -87,10 +118,14 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
           createValue={createValueLocal}
           palleteOpen={false}
           openPallete={() => {}}
+          onInputFocused={setTargetY}
         />
         <ScrollView
           style={styles.scrollContainer}
           ref={scrollViewRef}
+          onScroll={event => {
+            setScroll(event.nativeEvent.contentOffset.y);
+          }}
         >
           {habits[habitIndex].values.map((v, index) => (
             <ValueCard
@@ -107,8 +142,10 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
               openPallete={() => {
                 setOpenPallete(openPallete === v.id ? null : v.id);
               }}
+              onInputFocused={setTargetY}
             />
           ))}
+          <View style={{ height: keyboardHeight }} />
         </ScrollView>
       </View>
     </Screen>

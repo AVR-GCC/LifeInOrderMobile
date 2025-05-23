@@ -1,5 +1,5 @@
 import { AntDesign, Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { TextInput, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { DeleteValue, HabitWithValues, SwitchValues, UpdateValue, Value } from '../types';
 import VerticalChevrons from './VerticalChevrons';
@@ -30,6 +30,7 @@ interface ValueCardProps {
   openPallete: () => void;
   palleteOpen: boolean;
   createValue: () => void;
+  onInputFocused: (targetY: number) => void;
 }
 
 const ValueCard: React.FC<ValueCardProps> = React.memo(({
@@ -42,9 +43,11 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
   updateValue,
   openPallete,
   palleteOpen,
-  createValue
+  createValue,
+  onInputFocused
 }) => {
   const [inputFocused, setInputFocused] = useState(false);
+  const inputRef = useRef<TextInput>(null);
   if (value === null) {
     return (
       <TouchableOpacity
@@ -62,7 +65,15 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
         <View style={styles.leftSide}>
           <TextInput
             style={[styles.input, inputFocused && styles.inputFocused]}
-            onFocus={() => setInputFocused(true)}
+            ref={inputRef}
+            onFocus={() => {
+              setInputFocused(true);
+              if (inputRef.current) {
+                inputRef.current.measure((_x, _y, _w, height, _px, pageY) => {
+                  onInputFocused(pageY + height);
+                });
+              }
+            }}
             onBlur={() => setInputFocused(false)}
             value={value.label}
             onChangeText={label => {
