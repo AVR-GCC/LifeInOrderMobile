@@ -101,8 +101,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       sequence,
       created_at: 'new'
     };
-    const newValueId = await createValueServer(newValue);
-    setData(addValueReducer(data)(habitIndex, { id: newValueId, ...newValue }));
+    const newValueValues = await createValueServer(newValue);
+    setData(addValueReducer(data)(habitIndex, newValueValues));
   };
 
   const switchValues = (isDown: boolean, habitIndex: number, valueIndex: number) => {

@@ -104,7 +104,7 @@ export const createValueServer = async (newValue: Partial<Value>) => {
   try {
     const route = `${baseUrl}/habit_values`;
     const res = await axios.post(route, newValue);
-    return res.data?.id || -1;
+    return res.data;
   } catch (error) {
     console.error('Error creating value:', error);
     return false;
