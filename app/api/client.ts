@@ -111,7 +111,7 @@ export const createValueServer = async (newValue: Partial<Value>) => {
   }
 };
 
-export const updateValueServer = async (newValue: Value) => {
+const updateValueServerUndebounced = async (newValue: Value) => {
   try {
     const route = `${baseUrl}/habit_values`;
     const res = await axios.put(route, newValue);
@@ -122,6 +122,7 @@ export const updateValueServer = async (newValue: Value) => {
   }
 };
 
+export const updateValueServer = debounce(updateValueServerUndebounced);
 export const updateHabitServer = async (newHabit: Habit) => {
   try {
     const route = `${baseUrl}/user_habits`;
