@@ -89,6 +89,17 @@ export const reorderHabitsServer = debounce(reorderHabitsServerUndebounced);
 
 export const reorderValuesServer = debounce(reorderValuesServerUndebounced);
 
+export const deleteValueServer = async (id: string) => {
+  try {
+    const route = `${baseUrl}/habit_values/${parseInt(id, 10)}`;
+    const res = await axios.delete(route);
+    return res.status === 200;
+  } catch (error) {
+    console.error('Error deleting value:', error);
+    return false;
+  }
+};
+
 export const createValueServer = async (newValue: Partial<Value>) => {
   try {
     const route = `${baseUrl}/habit_values`;
@@ -130,4 +141,5 @@ export default {
   reorderHabitsServer,
   reorderValuesServer,
   updateValueServer,
+  deleteValueServer
 }; 

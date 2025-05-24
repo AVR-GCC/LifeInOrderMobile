@@ -7,7 +7,8 @@ import {
     setDayValueServer,
     updateValueServer,
     updateHabitServer,
-    createValueServer
+    createValueServer,
+    deleteValueServer
 } from '../api/client';
 import {
     addValueReducer,
@@ -130,6 +131,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const { habits } = data;
     const newHabits = [...habits];
     const newValues = [...newHabits[habitIndex].values];
+    deleteValueServer(newValues[valueIndex].id);
     newValues.splice(valueIndex, 1);
     newHabits[habitIndex].values = newValues;
     setData({ ...data, habits: newHabits });
