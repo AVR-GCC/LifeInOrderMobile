@@ -34,6 +34,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
   const [scroll, setScroll] = useState(0);
 
   const scrollViewRef = useRef<ScrollView>(null);
+  const focusLastCardRef = useRef<() => void>(null);
 
   if (data === null || date === undefined || habit === undefined) {
     return (
@@ -79,9 +80,9 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
     const thisHabitValues = habits[habitIndex].values;
     const sequence = thisHabitValues[thisHabitValues.length - 1].sequence;
     await createValue(habitIndex, sequence + 1);
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
-    }
+    setTimeout(() => {
+      focusLastCardRef.current?.();
+    }, 500);
   };
 
   return (
@@ -143,6 +144,11 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
                 setOpenPallete(openPallete === v.id ? null : v.id);
               }}
               onInputFocused={setTargetY}
+              setFocusLastCardRef={focusLastCard => {
+                if (habits[habitIndex].values.length === index + 1) {
+                  focusLastCardRef.current = focusLastCard;
+                }
+              }}
             />
           ))}
           <View style={{ height: keyboardHeight }} />

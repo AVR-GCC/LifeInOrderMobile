@@ -1,5 +1,5 @@
 import { AntDesign, Ionicons } from '@expo/vector-icons';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TextInput, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { DeleteValue, HabitWithValues, SwitchValues, UpdateValue, Value } from '../types';
 import VerticalChevrons from './VerticalChevrons';
@@ -31,6 +31,7 @@ interface ValueCardProps {
   palleteOpen: boolean;
   createValue: () => void;
   onInputFocused: (targetY: number) => void;
+  setFocusLastCardRef: (func: () => void) => void;
 }
 
 const ValueCard: React.FC<ValueCardProps> = React.memo(({
@@ -44,10 +45,12 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
   openPallete,
   palleteOpen,
   createValue,
-  onInputFocused
+  onInputFocused,
+  setFocusLastCardRef
 }) => {
   const [inputFocused, setInputFocused] = useState(false);
   const inputRef = useRef<TextInput>(null);
+
   if (value === null) {
     return (
       <TouchableOpacity
@@ -59,6 +62,20 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
       </TouchableOpacity>
     );
   }
+
+  const onFocus = () => {
+    setInputFocused(true);
+    if (inputRef.current) {
+      inputRef.current.measure((_x, _y, _w, height, _px, pageY) => {
+        onInputFocused(pageY + height);
+      });
+    }
+  };
+
+  useEffect(() => {
+    setFocusLastCardRef(() => inputRef.current?.focus());
+  }, []);
+
   return (
     <View style={[styles.valueCard, palleteOpen ? {} : { paddingBottom: 0 }]}>
       <View style={styles.valueCardMain}>
@@ -66,14 +83,7 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
           <TextInput
             style={[styles.input, inputFocused && styles.inputFocused]}
             ref={inputRef}
-            onFocus={() => {
-              setInputFocused(true);
-              if (inputRef.current) {
-                inputRef.current.measure((_x, _y, _w, height, _px, pageY) => {
-                  onInputFocused(pageY + height);
-                });
-              }
-            }}
+            onFocus={onFocus}
             onBlur={() => setInputFocused(false)}
             value={value.label}
             onChangeText={label => {
