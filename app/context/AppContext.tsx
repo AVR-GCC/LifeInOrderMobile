@@ -13,6 +13,7 @@ import {
 import {
     addValueReducer,
     deleteHabitReducer,
+    deleteValueReducer,
     loadDataReducer,
     setDayHabitValueReducer,
     switchHabitsReducer,
@@ -129,12 +130,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteValue = (habitIndex: number, valueIndex: number) => {
     if (data === null) return;
     const { habits } = data;
-    const newHabits = [...habits];
-    const newValues = [...newHabits[habitIndex].values];
-    deleteValueServer(newValues[valueIndex].id);
-    newValues.splice(valueIndex, 1);
-    newHabits[habitIndex].values = newValues;
-    setData({ ...data, habits: newHabits });
+    deleteValueServer(habits[habitIndex].values[valueIndex].id);
+    setData(deleteValueReducer(data)(habitIndex, valueIndex));
   };
 
   return (

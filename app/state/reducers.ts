@@ -93,6 +93,15 @@ export const updateValueReducer = (data: MainProps) => (habitIndex: number, valu
   return { ...newData, habits: newHabits };
 };
 
+export const deleteValueReducer = (data: MainProps) => (habitIndex: number, valueIndex: number) => {
+    const { habits } = data;
+    const newHabits = [...habits];
+    const newValues = [...newHabits[habitIndex].values];
+    newValues.splice(valueIndex, 1);
+    newHabits[habitIndex].values = newValues;
+    return { ...data, habits: newHabits };
+}
+
 export const addValueReducer = (data: MainProps) => (habitIndex: number, value: Value) => {
   const newData = { ...data };
   const newHabits = [...newData.habits];
