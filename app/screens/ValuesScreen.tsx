@@ -31,6 +31,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
   const [openPallete, setOpenPallete] = useState<string | null>(null);
   const [inputFocused, setInputFocused] = useState(false);
   const [weightInputFocused, setWeightInputFocused] = useState(false);
+  const [weightInputEmpty, setWeightInputEmpty] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [targetY, setTargetY] = useState(0);
   const [scroll, setScroll] = useState(0);
@@ -114,11 +115,16 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
                 style={[styles.smallInput, weightInputFocused && styles.smallInputFocused]}
                 onFocus={() => setWeightInputFocused(true)}
                 onBlur={() => setWeightInputFocused(false)}
-                value={habits[habitIndex].habit.weight.toString()}
+                value={weightInputEmpty ? '' : habits[habitIndex].habit.weight.toString()}
                 keyboardType="number-pad"
                 onChangeText={weightText => {
+                  if (weightText === '') {
+                    setWeightInputEmpty(true);
+                    return;
+                  }
                   const weight = parseInt(weightText, 10);
                   if (weight > 0) {
+                    setWeightInputEmpty(false);
                     updateHabit(habitIndex, { weight });
                   }
                 }}
