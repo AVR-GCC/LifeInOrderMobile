@@ -93,7 +93,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
         <View style={styles.titleContainer}>
           <TouchableOpacity
             style={styles.backArrowContainer}
-            onPress={() => router.push(`/day/${dateIndex}/habits`)}
+            onPress={() => router.replace(`/day/${dateIndex}/habits`)}
           >
             <AntDesign name="arrowleft" size={30} color={COLORS.text} />
           </TouchableOpacity>
