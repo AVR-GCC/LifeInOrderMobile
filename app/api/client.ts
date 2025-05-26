@@ -134,8 +134,7 @@ const updateValueServerUndebounced = async (newValue: Value) => {
   }
 };
 
-export const updateValueServer = debounce(updateValueServerUndebounced);
-export const updateHabitServer = async (newHabit: Habit) => {
+export const updateHabitServerUndebounced = async (newHabit: Habit) => {
   try {
     const route = `${baseUrl}/user_habits`;
     const res = await axios.put(route, newHabit);
@@ -145,6 +144,9 @@ export const updateHabitServer = async (newHabit: Habit) => {
     return false;
   }
 };
+
+export const updateValueServer = debounce(updateValueServerUndebounced);
+export const updateHabitServer = debounce(updateHabitServerUndebounced);
 
 export default {
   getUserList,

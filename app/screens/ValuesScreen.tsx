@@ -7,6 +7,7 @@ import ValueCard from '../components/ValueCard';
 import type { CreateValue, DeleteValue, MainProps, SwitchValues, UpdateHabit, UpdateValue } from '../types';
 import TitleBar from '../components/TitleBar';
 import { COLORS } from '../constants/theme';
+import VerticalChevrons from '../components/VerticalChevrons';
 
 interface ValuesScreenProps {
   data: MainProps | null;
@@ -29,6 +30,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
   const router = useRouter();
   const [openPallete, setOpenPallete] = useState<string | null>(null);
   const [inputFocused, setInputFocused] = useState(false);
+  const [weightInputFocused, setWeightInputFocused] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [targetY, setTargetY] = useState(0);
   const [scroll, setScroll] = useState(0);
@@ -84,7 +86,6 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
       focusLastCardRef.current?.();
     }, 500);
   };
-
   return (
     <Screen>
       <TitleBar>
@@ -101,9 +102,36 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
             onBlur={() => setInputFocused(false)}
             value={habits[habitIndex].habit.name}
             onChangeText={name => {
-              updateHabit(habitIndex, { name })
+              updateHabit(habitIndex, { name });
             }}
           />
+          {!inputFocused && (
+            <View
+              style={styles.weightSection}
+            >
+              <Text style={styles.weightLabel}>Weight:</Text>
+              <TextInput
+                style={[styles.smallInput, weightInputFocused && styles.smallInputFocused]}
+                onFocus={() => setWeightInputFocused(true)}
+                onBlur={() => setWeightInputFocused(false)}
+                value={habits[habitIndex].habit.weight.toString()}
+                keyboardType="number-pad"
+                onChangeText={weightText => {
+                  const weight = parseInt(weightText, 10);
+                  if (weight > 0) {
+                    updateHabit(habitIndex, { weight });
+                  }
+                }}
+              />
+              <VerticalChevrons
+                onPress={(isDown) => {
+                  updateHabit(habitIndex, { weight: habits[habitIndex].habit.weight + (isDown ? -1 : 1) });
+                }}
+                upDisabled={false}
+                downDisabled={habits[habitIndex].habit.weight === 1}
+              />
+            </View>
+          )}
         </View>
       </TitleBar>
       <View style={styles.dayContainer}>
@@ -202,6 +230,33 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   inputFocused: {
+    backgroundColor: COLORS.text,
+    color: COLORS.colorOne,
+    borderColor: 'black',
+    borderWidth: 1,
+  },
+  weightSection: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  weightLabel: {
+    fontSize: 12,
+    fontWeight: '300',
+    color: COLORS.text
+  },
+  smallInput: {
+    fontSize: 14,
+    fontWeight: '400',
+    backgroundColor: 'transparent',
+    color: COLORS.text,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    padding: 10,
+    borderRadius: 10,
+  },
+  smallInputFocused: {
     backgroundColor: COLORS.text,
     color: COLORS.colorOne,
     borderColor: 'black',
