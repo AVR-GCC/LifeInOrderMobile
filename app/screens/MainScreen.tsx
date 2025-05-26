@@ -41,15 +41,19 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   return (
     <Screen>
       <View style={styles.topBar}>
-        {habits.map((h, index) => (
-          <Text 
-            key={h.habit.id} 
-            style={[styles.columnTitle, { flex: Number(h.habit.weight) || 1 }]}
-            numberOfLines={1}
-            ellipsizeMode="tail"
+        {habits.map(h => (
+          <View
+            key={h.habit.id}
+            style={[styles.columnTitleHolder, { flex: Number(h.habit.weight) || 1 }]}
           >
-            {h.habit.name}
-          </Text>
+            <Text 
+              style={styles.columnTitle}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {h.habit.name}
+            </Text>
+          </View>
         ))}
       </View>
       <ScrollView
@@ -137,11 +141,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.133)',
   },
-  columnTitle: {
-    padding: 5,
+  columnTitleHolder: {
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.133)',
+    overflow: 'hidden',
     height: 30,
+  },
+  columnTitle: {
+    padding: 5,
     color: COLORS.text,
   },
   content: {
