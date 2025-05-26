@@ -34,8 +34,11 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
     <Screen>
       <TitleBar>
         <TouchableOpacity
-          style={styles.backArrowContainer}
-          onPress={() => router.replace(`/day/${dateIndex}`)}
+          style={[styles.backArrowContainer, habits.length === 0 && { opacity: 0 }]}
+          activeOpacity={habits.length === 0 ? 0 : 1}
+          onPress={() => {
+            if (habits.length !== 0) router.replace(`/day/${dateIndex}`)
+          }}
         >
           <AntDesign name="arrowleft" size={30} color={COLORS.text} />
         </TouchableOpacity>

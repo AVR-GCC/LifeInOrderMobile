@@ -20,6 +20,17 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   const [startDistance, setStartDistance] = useState<number | null>(null);
   const [startDayHeightPixels, setStartDayHeightPixels] = useState(20);
 
+  useEffect(() => {
+    if (data !== null) {
+      const { habits } = data;
+      setTimeout(() => {
+        if (habits.length === 0) {
+          router.push('/day/0/habits');
+        }
+      });
+    }
+  }, [data]);
+
   if (data === null) {
     return (
       <Screen>
