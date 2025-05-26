@@ -120,6 +120,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
           palleteOpen={false}
           openPallete={() => {}}
           onInputFocused={setTargetY}
+          setFocusLastCardRef={_focusLastCard => {}}
         />
         <ScrollView
           style={styles.scrollContainer}
