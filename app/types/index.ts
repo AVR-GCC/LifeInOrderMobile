@@ -11,6 +11,7 @@ export interface Habit {
   id: string;
   name: string;
   weight: number;
+  sequence: number;
   habit_type: string;
 }
 
@@ -32,6 +33,7 @@ export interface MainProps {
 
 export type GetDayHabitValue = (dateIndex: number, habitIndex: number) => string | null;
 export type SetDayValue = (dateIndex: number, habitIndex: number, valueId: string) => void;
+export type CreateHabit = (sequence: number) => Promise<null | undefined>;
 export type UpdateHabit = (habitIndex: number, newValueValues: Partial<Habit>) => void;
 export type DeleteHabit = (index: number) => void;
 export type SwitchHabits = (isDown: boolean, index: number) => void;

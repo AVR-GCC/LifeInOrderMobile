@@ -52,6 +52,18 @@ export const setDayValueServer: SetDayValueServer = (() => {
   return debounced;
 })();
 
+export const createHabitServer = async (newHabit: Partial<Habit>) => {
+  try {
+    const route = `${baseUrl}/user_habits`;
+    const withUserId = { user_id: 1, ...newHabit };
+    const res = await axios.post(route, withUserId);
+    return res.data;
+  } catch (error) {
+    console.error('Error creating habit:', error);
+    return false;
+  }
+};
+
 export const deleteHabitServer = async (id: string) => {
   try {
     const route = `${baseUrl}/user_habits/${parseInt(id, 10)}`;

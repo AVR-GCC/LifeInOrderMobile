@@ -5,16 +5,17 @@ import { AntDesign } from '@expo/vector-icons';
 import Screen from '../components/Screen';
 import HabitCard from '../components/HabitCard';
 import { COLORS } from '../constants/theme';
-import type { DeleteHabit, MainProps, SwitchHabits } from '../types';
+import type { CreateHabit, DeleteHabit, MainProps, SwitchHabits } from '../types';
 import TitleBar from '../components/TitleBar';
 
 interface HabitsScreenProps {
   data: MainProps | null;
   switchHabits: SwitchHabits;
   deleteHabit: DeleteHabit;
+  createHabit: CreateHabit;
 }
 
-export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, deleteHabit }) => {
+export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, deleteHabit, createHabit }) => {
   const { date } = useLocalSearchParams();
   const router = useRouter();
 
@@ -49,7 +50,11 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
             totalHabits={habits.length}
             switchHabits={switchHabits}
             deleteHabit={deleteHabit}
-            editHabit={() => router.push(`/day/${dateIndex}/habits/${habits.length}`)}
+            editHabit={() => {}}
+            createHabit={async () => {
+              await createHabit(habits[habits.length - 1].habit.sequence);
+              router.push(`/day/${dateIndex}/habits/${habits.length}`)
+            }}
           />
           {habits.map((h, index) => (
             <HabitCard
@@ -60,6 +65,7 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
               switchHabits={switchHabits}
               deleteHabit={deleteHabit}
               editHabit={() => router.push(`/day/${dateIndex}/habits/${index}`)}
+              createHabit={() => {}}
             />
           ))}
         </ScrollView>

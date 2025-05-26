@@ -12,6 +12,7 @@ interface HabitCardProps {
   switchHabits: (isDown: boolean, index: number) => void;
   deleteHabit: (index: number) => void;
   editHabit: () => void;
+  createHabit: () => void;
 }
 
 const HabitCard: React.FC<HabitCardProps> = React.memo(({
@@ -21,13 +22,17 @@ const HabitCard: React.FC<HabitCardProps> = React.memo(({
   switchHabits,
   deleteHabit,
   editHabit,
+  createHabit,
 }) => {
   if (!habit) {
     return (
-      <View style={[styles.habitCard, styles.newHabit]}>
+      <TouchableOpacity
+        style={[styles.habitCard, styles.newHabit]}
+        onPress={createHabit}
+      >
         <AntDesign name="plus" size={24} color={COLORS.text} />
         <Text style={styles.newHabitText}>Create Habit</Text>
-      </View>
+      </TouchableOpacity>
     )
   }
   return (

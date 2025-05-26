@@ -8,9 +8,11 @@ import {
     updateValueServer,
     updateHabitServer,
     createValueServer,
-    deleteValueServer
+    deleteValueServer,
+    createHabitServer
 } from '../api/client';
 import {
+    addHabitReducer,
     addValueReducer,
     deleteHabitReducer,
     deleteValueReducer,
@@ -29,6 +31,7 @@ interface AppContextType {
   data: MainProps | null;
   setDayHabitValue: (dateIndex: number, habitIndex: number, valueId: string) => void;
   getDayHabitValue: (dateIndex: number, habitIndex: number) => string | null;
+  createHabit: (sequence: number) => Promise<null | undefined>;
   updateHabit: (habitIndex: number, newHabitValues: Partial<Habit>) => void;
   deleteHabit: (index: number) => void;
   switchHabits: (isDown: boolean, index: number) => void;
@@ -65,6 +68,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (data === null) return null;
     return getDayHabitValueSelector(data)(dateIndex, habitIndex);
   };
+
+  const createHabit = async (sequence: number) => {
+    if (data === null) return null;
+    const newHabit = {
+      name: '',
+      weight: 1,
+      sequence,
+      habit_type: 'color',
+    };
+    const newHabitValue = await createHabitServer(newHabit);
+    setData(addHabitReducer(data)(newHabitValue));
+  }
 
   const updateHabit = (habitIndex: number, newHabitValues: Partial<Value>) => {
     if (data === null) return;
@@ -140,6 +155,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         data,
         setDayHabitValue,
         getDayHabitValue,
+        createHabit,
         updateHabit,
         deleteHabit,
         switchHabits,

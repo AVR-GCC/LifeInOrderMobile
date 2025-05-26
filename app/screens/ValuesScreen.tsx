@@ -78,7 +78,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
 
   const createValueLocal = async () => {
     const thisHabitValues = habits[habitIndex].values;
-    const sequence = thisHabitValues[thisHabitValues.length - 1].sequence;
+    const sequence = thisHabitValues?.[thisHabitValues.length - 1]?.sequence || 1;
     await createValue(habitIndex, sequence + 1);
     setTimeout(() => {
       focusLastCardRef.current?.();
