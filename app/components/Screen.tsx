@@ -23,6 +23,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   bottomBuffer: {
+    position: 'absolute',
+    bottom: 0,
     height: 50,
     width: '100%',
     backgroundColor: '#000000',

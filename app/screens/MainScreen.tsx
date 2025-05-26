@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import type { GetDayHabitValue, MainProps } from '../types';
 import Screen from '../components/Screen';
 import { COLORS } from '../constants/theme';
@@ -12,9 +12,17 @@ interface MainScreenProps {
   getDayHabitValue: GetDayHabitValue;
 }
 
+const Loading = () => (
+  <Screen>
+    <View style={styles.loadingIndicatorHolder}>
+      <ActivityIndicator size="large" color={COLORS.text} />
+    </View>
+  </Screen>
+)
+
 const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitValue }) => {
   const router = useRouter();
-  const { height/*, width*/ } = useWindowDimensions();
+  const { height } = useWindowDimensions();
 
   const [dayHeightPixels, setDayHeightPixels] = useState(20);
   const [startDistance, setStartDistance] = useState<number | null>(null);
@@ -32,21 +40,17 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   }, [data]);
 
   if (data === null) {
-    return (
-      <Screen>
-        <Text style={styles.text}>Loading...</Text>
-      </Screen>
-    );
+    return Loading();
   }
 
   const { dates, habits } = data;
 
   if (!dates) {
-    return (
-      <Screen>
-        <Text style={styles.text}>Hi</Text>
-      </Screen>
-    );
+    return Loading();
+  }
+
+  if (habits.length === 0) {
+    return Loading();
   }
 
   return (
@@ -111,7 +115,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
                 key={h.habit.id}
                 style={[styles.column, { flex: Number(h.habit.weight) || 1 }]}
               >
-                {dates.map((day, dayIndex) => {
+                {dates.map((_, dayIndex) => {
                   const valueId = getDayHabitValue(dayIndex, habitIndex);
                   let background = UNFILLED_COLOR;
                   if (valueId !== null) {
@@ -187,6 +191,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.133)',
   },
+  loadingIndicatorHolder: {
+    ...StyleSheet.absoluteFillObject,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });
 
 export default MainScreen; 
