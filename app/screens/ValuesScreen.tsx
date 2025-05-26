@@ -96,6 +96,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
       focusLastCardRef.current?.();
     }, 500);
   };
+
   return (
     <Screen>
       <TitleBar>
