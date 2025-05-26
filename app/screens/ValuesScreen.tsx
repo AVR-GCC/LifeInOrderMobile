@@ -37,6 +37,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
   const [scroll, setScroll] = useState(0);
 
   const scrollViewRef = useRef<ScrollView>(null);
+  const inputRef = useRef<TextInput>(null);
   const focusLastCardRef = useRef<() => void>(null);
 
   if (data === null || date === undefined || habit === undefined) {
@@ -79,6 +80,14 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
   const habitIndex = parseInt(habit.toString(), 10);
   const { habits } = data;
 
+  useEffect(() => {
+    setTimeout(() => {
+      if (habits[habitIndex].freshly_created && inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 500);
+  }, []);
+
   const createValueLocal = async () => {
     const thisHabitValues = habits[habitIndex].values;
     const sequence = thisHabitValues?.[thisHabitValues.length - 1]?.sequence || 1;
@@ -98,6 +107,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
             <AntDesign name="arrowleft" size={30} color={COLORS.text} />
           </TouchableOpacity>
           <TextInput
+            ref={inputRef}
             style={[styles.input, inputFocused && styles.inputFocused]}
             onFocus={() => setInputFocused(true)}
             onBlur={() => setInputFocused(false)}
