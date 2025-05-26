@@ -80,7 +80,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
                 onPress={() => {
                   const nextIndex = valueIndex === null ? 0 : (valueIndex + 1) % h.values.length;
                   const nextValue = h.values[nextIndex];
-                  setDayHabitValue(dateIndex, habitIndex, nextValue.id);
+                  if (nextValue) setDayHabitValue(dateIndex, habitIndex, nextValue.id);
                 }}
               >
                 <Text style={styles.habitTitle}>{h.habit.name}</Text>
