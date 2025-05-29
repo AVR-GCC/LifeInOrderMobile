@@ -4,8 +4,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, useW
 import type { GetDayHabitValue, MainProps } from '../types';
 import Screen from '../components/Screen';
 import { COLORS } from '../constants/theme';
-
-export const UNFILLED_COLOR = '#555555';
+import DayRow from '../components/DayRow';
 
 interface MainScreenProps {
   data: MainProps | null;
@@ -54,33 +53,12 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   }
 
   const list = () => dates.map((_, dayIndex) => (
-    <View
-      key={dayIndex}
-      style={styles.dayRow}
-    >
-      {habits.map((h, habitIndex) => {
-        const valueId = getDayHabitValue(dayIndex, habitIndex);
-        let background = UNFILLED_COLOR;
-        if (valueId !== null) {
-          const valueIndex = h.values_hashmap[valueId];
-          const value = h.values[valueIndex];
-          background = value?.color || UNFILLED_COLOR;
-        }
-        return (
-          <View 
-            key={h.habit.id}
-            style={[
-              styles.square,
-              { 
-                flex: Number(h.habit.weight) || 1,
-                height: dayHeightPixels,
-                backgroundColor: background
-              }
-            ]}
-          />
-        );
-      })}
-    </View>
+    <DayRow
+      dayHeightPixels={dayHeightPixels}
+      dayIndex={dayIndex}
+      habits={habits}
+      getDayHabitValue={getDayHabitValue}
+    />
   ));
 
   return (
@@ -184,14 +162,6 @@ const styles = StyleSheet.create({
   },
   checklist: {
     flex: 1,
-  },
-  dayRow: {
-    display: 'flex',
-    flexDirection: 'row'
-  },
-  square: {
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.133)',
   },
   loadingIndicatorHolder: {
     ...StyleSheet.absoluteFillObject,
