@@ -32,7 +32,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       const { habits } = data;
       setTimeout(() => {
         if (habits.length === 0) {
-          router.push('/day/0/habits');
+          router.replace('/day/0/habits');
         }
       });
     }
@@ -112,7 +112,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
             {dates.map((_, dayIndex) => (
               <TouchableOpacity
                 key={dayIndex}
-                onPress={() => router.push(`/day/${dayIndex}`)}
+                onPress={() => router.replace(`/day/${dayIndex}`)}
                 style={[styles.dayMarker, { height: dayHeightPixels }]}
               />
             ))}

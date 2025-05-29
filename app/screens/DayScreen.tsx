@@ -8,7 +8,7 @@ import VerticalChevrons from '../components/VerticalChevrons';
 import type { GetDayHabitValue, MainProps, SetDayValue } from '../types';
 import { COLORS } from '../constants/theme';
 import TitleBar from '../components/TitleBar';
-import { UNFILLED_COLOR } from './MainScreen';
+import { UNFILLED_COLOR } from '../components/DayRow';
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -34,7 +34,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
   const { dates, habits } = data;
 
   const handleChevronPress = (isDown: boolean) => {
-    router.push(`/day/${dateIndex + (isDown ? 1 : -1)}`);
+    router.replace(`/day/${dateIndex + (isDown ? 1 : -1)}`);
   };
 
   return (
@@ -42,7 +42,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
       <TitleBar>
         <TouchableOpacity
           style={styles.backArrowContainer}
-          onPress={() => router.push('/')}
+          onPress={() => router.replace('/')}
         >
           <AntDesign name="arrowleft" size={30} color={COLORS.text} />
         </TouchableOpacity>
@@ -52,7 +52,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
         <View style={styles.rightIcons}>
           <TouchableOpacity
             style={styles.settingsButtonContainer}
-            onPress={() => router.push(`/day/${dateIndex}/habits`)}
+            onPress={() => router.replace(`/day/${dateIndex}/habits`)}
           >
             <AntDesign name="setting" size={30} color={COLORS.text} />
           </TouchableOpacity>
