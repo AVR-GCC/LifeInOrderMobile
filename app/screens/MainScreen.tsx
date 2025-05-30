@@ -23,9 +23,15 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   const router = useRouter();
   const { height } = useWindowDimensions();
 
-  const [dayHeightPixels, setDayHeightPixels] = useState(20);
+  const [{
+    scale, contentHeight, transform
+  }, setZoomState] = useState({
+    scale: 1.0,
+    contentHeight: data ? data.dates.length * 20 : 800,
+    transform: [{ translateY: 0 }, { scaleY: 1.0 }]
+  });
   const [startDistance, setStartDistance] = useState<number | null>(null);
-  const [startDayHeightPixels, setStartDayHeightPixels] = useState(20);
+  const [startChecklistScale, setStartChecklistScale] = useState(1.0);
 
   useEffect(() => {
     if (data !== null) {
@@ -52,9 +58,40 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     return Loading();
   }
 
+  const onTouchStart = (event: { nativeEvent: { touches: { pageY: number }[] } }) => {
+    const { touches } = event.nativeEvent;
+    if (touches.length > 1) {
+      setStartDistance(touches[0].pageY - touches[1].pageY);
+      setStartChecklistScale(scale);
+    }
+  };
+
+  const onTouchEnd = () => {
+    if (startDistance !== null) {
+      setStartDistance(null);
+    }
+  };
+
+  const onTouchMove = (event: { nativeEvent: { touches: { pageY: number }[] } }) => {
+    const { touches } = event.nativeEvent;
+    const { abs } = Math;
+    if (touches.length > 1 && startDistance !== null) {
+      const originalDistanceScale = startDistance / startChecklistScale;
+      const curDistance = touches[0].pageY - touches[1].pageY;
+      const newScale = abs(curDistance / originalDistanceScale);
+      const newContentHeight = dates.length * 20 * newScale;
+      const newTransform = [{ translateY: (newScale - 1) * newContentHeight * 0.5 }, { scaleY: newScale }];
+      setZoomState({
+        scale: newScale,
+        contentHeight: newContentHeight,
+        transform: newTransform
+      });
+    }
+  };
+
   const list = () => dates.map((_, dayIndex) => (
     <DayRow
-      dayHeightPixels={dayHeightPixels}
+      key={`${dayIndex}_day`}
       dayIndex={dayIndex}
       habits={habits}
       getDayHabitValue={getDayHabitValue}
@@ -82,42 +119,24 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       <ScrollView
         style={{ height: height * 0.8 }}
         scrollEnabled={startDistance === null}
-        onTouchStart={event => {
-          const { touches } = event.nativeEvent;
-          if (touches.length > 1) {
-            setStartDistance(touches[0].pageY - touches[1].pageY);
-            setStartDayHeightPixels(dayHeightPixels);
-          }
-        }}
-        onTouchEnd={() => {
-          if (startDistance !== null) {
-            setStartDistance(null);
-          }
-        }}
-        onTouchMove={event => {
-          const { touches } = event.nativeEvent;
-          const { ceil, abs } = Math;
-          if (touches.length > 1 && startDistance !== null) {
-            const originalDistanceDays = startDistance / startDayHeightPixels;
-            const curDistance = touches[0].pageY - touches[1].pageY;
-            const newDayHeightPixels = abs(ceil(curDistance / originalDistanceDays));
-            setDayHeightPixels(newDayHeightPixels);
-          }
-        }}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        onTouchMove={onTouchMove}
       >
-        <View 
-          style={styles.content}
+        <View
+          key="content"
+          style={[styles.content, { height: contentHeight, transform }]}
         >
-          <View style={styles.leftBar}>
+          <View key="leftBar" style={styles.leftBar}>
             {dates.map((_, dayIndex) => (
               <TouchableOpacity
                 key={dayIndex}
                 onPress={() => router.replace(`/day/${dayIndex}`)}
-                style={[styles.dayMarker, { height: dayHeightPixels }]}
+                style={styles.dayMarker}
               />
             ))}
           </View>
-          <View style={styles.checklist}>
+          <View key="checklist" style={styles.checklist}>
             {list()}
           </View>
         </View>
@@ -157,6 +176,7 @@ const styles = StyleSheet.create({
     width: 30, // leftBarWidth
   },
   dayMarker: {
+    height: 20,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.colorFour,
   },

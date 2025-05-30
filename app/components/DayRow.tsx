@@ -5,14 +5,12 @@ import { GetDayHabitValue, HabitWithValues } from '../types';
 export const UNFILLED_COLOR = '#555555';
 
 interface DayRowProps {
-  dayHeightPixels: number;
   dayIndex: number; 
   habits: HabitWithValues[];
   getDayHabitValue: GetDayHabitValue;
 }
 
 function DayRow({
-  dayHeightPixels,
   dayIndex,
   habits,
   getDayHabitValue
@@ -37,7 +35,6 @@ function DayRow({
               styles.square,
               { 
                 flex: Number(h.habit.weight) || 1,
-                height: dayHeightPixels,
                 backgroundColor: background
               }
             ]}
@@ -54,8 +51,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row'
   },
   square: {
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.133)',
+    height: 20,
   },
 });
 
