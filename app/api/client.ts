@@ -18,11 +18,11 @@ export const getUserList = async () => {
   }
 };
 
-const debounce = (func: (args: any) => any) => {
+export const debounce = (func: (args: any) => any, milis: number) => {
   let deb: ReturnType<typeof setTimeout> | null = null;
   return (args: any) => {
     if (deb) clearTimeout(deb);
-    deb = setTimeout(() => func(args), 1000);
+    deb = setTimeout(() => func(args), milis);
   };
 };
 
@@ -97,9 +97,9 @@ export const reorderValuesServerUndebounced = async (ids: string[]) => {
   return reorderGeneralServerUndebounced(route, ids);
 };
 
-export const reorderHabitsServer = debounce(reorderHabitsServerUndebounced);
+export const reorderHabitsServer = debounce(reorderHabitsServerUndebounced, 1000);
 
-export const reorderValuesServer = debounce(reorderValuesServerUndebounced);
+export const reorderValuesServer = debounce(reorderValuesServerUndebounced, 1000);
 
 export const deleteValueServer = async (id: string) => {
   try {
