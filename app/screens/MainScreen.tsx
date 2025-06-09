@@ -88,11 +88,13 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
           runOnJS(setStartChecklistScale)(scale);
           return;
         }
+        const { abs, max, min } = Math;
         const originalDistanceScale = startDistance / startChecklistScale;
         const curDistance = arg.changedTouches[0].absoluteY - arg.changedTouches[1].absoluteY;
-        const minScale = height / (dates.length * 20);
-        const candidateScale = Math.abs(curDistance / originalDistanceScale);
-        const scaleY = Math.max(candidateScale, minScale);
+        const minScale = (height - 30) / (dates.length * 20);
+        const maxScale = (height - 30) / (8 * 20);
+        const candidateScale = abs(curDistance / originalDistanceScale);
+        const scaleY = min(max(candidateScale, minScale), maxScale);
         const newTransform = [{ scaleY }];
         runOnJS(setZoomState)({
           scale: scaleY,
