@@ -1,10 +1,12 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { FlatList, ActivityIndicator, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import type { GetDayHabitValue, MainProps } from '../types';
 import Screen from '../components/Screen';
 import { COLORS } from '../constants/theme';
 import DayRow from '../components/DayRow';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 
 interface MainScreenProps {
   data: MainProps | null;
@@ -24,14 +26,14 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   const { height } = useWindowDimensions();
 
   const [{
-    scale, contentHeight, transform
+    scale, transform
   }, setZoomState] = useState({
     scale: 1.0,
-    contentHeight: data ? data.dates.length * 20 : 800,
-    transform: [{ translateY: 0 }, { scaleY: 1.0 }]
+    transform: [{ scaleY: 1.0 }]
   });
   const [startDistance, setStartDistance] = useState<number | null>(null);
   const [startChecklistScale, setStartChecklistScale] = useState(1.0);
+  //const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     if (data !== null) {
@@ -58,89 +60,109 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     return Loading();
   }
 
-  const onTouchStart = (event: { nativeEvent: { touches: { pageY: number }[] } }) => {
-    const { touches } = event.nativeEvent;
-    if (touches.length > 1) {
-      setStartDistance(touches[0].pageY - touches[1].pageY);
-      setStartChecklistScale(scale);
-    }
-  };
+  const topBar = () => (
+    <View style={styles.topBar}>
+      {habits.map(h => (
+        <View
+          key={h.habit.id}
+          style={[styles.columnTitleHolder, { flex: Number(h.habit.weight) || 1 }]}
+        >
+          <Text 
+            style={styles.columnTitle}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {h.habit.name}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
 
-  const onTouchEnd = () => {
-    if (startDistance !== null) {
-      setStartDistance(null);
-    }
-  };
+  const minHeight = Math.min((height - 30) / scale, dates.length * 20);
+  const gesture = Gesture.Pinch()
+    .onTouchesMove(arg => {
+      if (arg.changedTouches.length > 1) {
+        if (startDistance === null) {
+          runOnJS(setStartDistance)(arg.changedTouches[0].absoluteY - arg.changedTouches[1].absoluteY);
+          runOnJS(setStartChecklistScale)(scale);
+          return;
+        }
+        const originalDistanceScale = startDistance / startChecklistScale;
+        const curDistance = arg.changedTouches[0].absoluteY - arg.changedTouches[1].absoluteY;
+        const minScale = height / (dates.length * 20);
+        const candidateScale = Math.abs(curDistance / originalDistanceScale);
+        const scaleY = Math.max(candidateScale, minScale);
+        const newTransform = [{ scaleY }];
+        runOnJS(setZoomState)({
+          scale: scaleY,
+          transform: newTransform
+        });
+      }
 
-  const onTouchMove = (event: { nativeEvent: { touches: { pageY: number }[] } }) => {
-    const { touches } = event.nativeEvent;
-    const { abs } = Math;
-    if (touches.length > 1 && startDistance !== null) {
-      const originalDistanceScale = startDistance / startChecklistScale;
-      const curDistance = touches[0].pageY - touches[1].pageY;
-      const newScale = abs(curDistance / originalDistanceScale);
-      const newContentHeight = dates.length * 20 * newScale;
-      const newTransform = [{ translateY: (newScale - 1) * newContentHeight * 0.5 }, { scaleY: newScale }];
-      setZoomState({
-        scale: newScale,
-        contentHeight: newContentHeight,
-        transform: newTransform
+    })
+    .onTouchesUp(() => {
+      if (startDistance !== null) {
+        runOnJS(setStartDistance)(null);
+      }
+    })
+    .simultaneousWithExternalGesture(Gesture.Native());;
+ 
+    const getItemLayout = (_: any, index: number) => {
+      return ({
+        length: 20 * scale,
+        offset: 20 * index * scale,
+        index
       });
-    }
-  };
+    };
 
-  const list = () => dates.map((_, dayIndex) => (
-    <DayRow
-      key={`${dayIndex}_day`}
-      dayIndex={dayIndex}
-      habits={habits}
-      getDayHabitValue={getDayHabitValue}
-    />
-  ));
+  const list = () => (
+    <View style={{ height: height - 30 }}>
+      <View style={{ transform, transformOrigin: 'top' }}>
+        <GestureDetector gesture={gesture}>
+          <FlatList
+            //ref={flatListRef}
+            getItemLayout={getItemLayout}
+            data={dates}
+            renderItem={({ index }) => (
+              <View
+                key="content"
+                style={styles.content}
+              >
+                <View key="leftBar" style={styles.leftBar}>
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => router.replace(`/day/${index}`)}
+                    style={styles.dayMarker}
+                  />
+                </View>
+                <View key="checklist" style={styles.checklist}>
+                  <DayRow
+                    key={`${index}_day`}
+                    dayIndex={index}
+                    habits={habits}
+                    getDayHabitValue={getDayHabitValue}
+                  />
+                </View>
+              </View>
+            )}
+            keyExtractor={(item) => item.date}
+            showsVerticalScrollIndicator={false}
+            scrollEventThrottle={16}
+            style={{ minHeight }}
+            contentContainerStyle={{ minHeight }}
+            windowSize={7}
+            extraData={scale.toFixed(1)}
+          />
+        </GestureDetector>
+      </View>
+    </View>
+  );
 
   return (
     <Screen>
-      <View style={styles.topBar}>
-        {habits.map(h => (
-          <View
-            key={h.habit.id}
-            style={[styles.columnTitleHolder, { flex: Number(h.habit.weight) || 1 }]}
-          >
-            <Text 
-              style={styles.columnTitle}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {h.habit.name}
-            </Text>
-          </View>
-        ))}
-      </View>
-      <ScrollView
-        style={{ height: height * 0.8 }}
-        scrollEnabled={startDistance === null}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-        onTouchMove={onTouchMove}
-      >
-        <View
-          key="content"
-          style={[styles.content, { height: contentHeight, transform }]}
-        >
-          <View key="leftBar" style={styles.leftBar}>
-            {dates.map((_, dayIndex) => (
-              <TouchableOpacity
-                key={dayIndex}
-                onPress={() => router.replace(`/day/${dayIndex}`)}
-                style={styles.dayMarker}
-              />
-            ))}
-          </View>
-          <View key="checklist" style={styles.checklist}>
-            {list()}
-          </View>
-        </View>
-      </ScrollView>
+      {topBar()}
+      {list()}
     </Screen>
   );
 });
