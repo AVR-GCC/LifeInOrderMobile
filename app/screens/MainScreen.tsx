@@ -80,43 +80,45 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   );
 
   const minHeight = Math.min((height - 30) / scale, dates.length * 20);
-  const gesture = Gesture.Pinch()
-    .onTouchesMove(arg => {
-      if (arg.changedTouches.length > 1) {
-        if (startDistance === null) {
-          runOnJS(setStartDistance)(arg.changedTouches[0].absoluteY - arg.changedTouches[1].absoluteY);
-          runOnJS(setStartChecklistScale)(scale);
-          return;
-        }
-        const { abs, max, min } = Math;
-        const originalDistanceScale = startDistance / startChecklistScale;
-        const curDistance = arg.changedTouches[0].absoluteY - arg.changedTouches[1].absoluteY;
-        const minScale = (height - 30) / (dates.length * 20);
-        const maxScale = (height - 30) / (8 * 20);
-        const candidateScale = abs(curDistance / originalDistanceScale);
-        const scaleY = min(max(candidateScale, minScale), maxScale);
-        const newTransform = [{ scaleY }];
-        runOnJS(setZoomState)({
-          scale: scaleY,
-          transform: newTransform
-        });
-      }
 
-    })
-    .onTouchesUp(() => {
-      if (startDistance !== null) {
-        runOnJS(setStartDistance)(null);
+  const onTouchesMove = (arg: { changedTouches: { absoluteY: number }[] }) => {
+    if (arg.changedTouches.length > 1) {
+      if (startDistance === null) {
+        runOnJS(setStartDistance)(arg.changedTouches[0].absoluteY - arg.changedTouches[1].absoluteY);
+        runOnJS(setStartChecklistScale)(scale);
+        return;
       }
-    })
+      const { abs, max, min } = Math;
+      const originalDistanceScale = startDistance / startChecklistScale;
+      const curDistance = arg.changedTouches[0].absoluteY - arg.changedTouches[1].absoluteY;
+      const minScale = (height - 30) / (dates.length * 20);
+      const maxScale = (height - 30) / (8 * 20);
+      const candidateScale = abs(curDistance / originalDistanceScale);
+      const scaleY = min(max(candidateScale, minScale), maxScale);
+      const newTransform = [{ scaleY }];
+      runOnJS(setZoomState)({
+        scale: scaleY,
+        transform: newTransform
+      });
+    }
+  };
+  const onTouchesUp = () => {
+    if (startDistance !== null) {
+      runOnJS(setStartDistance)(null);
+    }
+  };
+  const gesture = Gesture.Pinch()
+    .onTouchesMove(onTouchesMove)
+    .onTouchesUp(onTouchesUp)
     .simultaneousWithExternalGesture(Gesture.Native());;
  
-    const getItemLayout = (_: any, index: number) => {
-      return ({
-        length: 20 * scale,
-        offset: 20 * index * scale,
-        index
-      });
-    };
+  const getItemLayout = (_: any, index: number) => {
+    return ({
+      length: 20 * scale,
+      offset: 20 * index * scale,
+      index
+    });
+  };
 
   const list = () => (
     <View style={{ height: height - 30 }}>
