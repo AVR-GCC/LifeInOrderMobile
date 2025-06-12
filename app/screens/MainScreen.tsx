@@ -6,7 +6,8 @@ import Screen from '../components/Screen';
 import { COLORS } from '../constants/theme';
 import DayRow from '../components/DayRow';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { runOnJS } from 'react-native-reanimated';
+import Animated, { runOnJS, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
+import { debounce } from '../api/client';
 
 interface MainScreenProps {
   data: MainProps | null;
@@ -25,14 +26,18 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   const router = useRouter();
   const { height } = useWindowDimensions();
 
-  const [{
-    scale, transform
-  }, setZoomState] = useState({
-    scale: 1.0,
-    transform: [{ scaleY: 1.0 }]
-  });
+  const scaleValue = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scaleY: scaleValue.value }],
+  }));
+  const [scale, setScale] = useState(1.0);
+  const debouncedSetScale = debounce((newScale: number) => {
+    setScale(newScale);
+  }, 100);
+
   const [startDistance, setStartDistance] = useState<number | null>(null);
   const [startChecklistScale, setStartChecklistScale] = useState(1.0);
+
   //const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -85,7 +90,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     if (arg.changedTouches.length > 1) {
       if (startDistance === null) {
         runOnJS(setStartDistance)(arg.changedTouches[0].absoluteY - arg.changedTouches[1].absoluteY);
-        runOnJS(setStartChecklistScale)(scale);
+        runOnJS(setStartChecklistScale)(scaleValue.value);
         return;
       }
       const { abs, max, min } = Math;
@@ -95,11 +100,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       const maxScale = (height - 30) / (8 * 20);
       const candidateScale = abs(curDistance / originalDistanceScale);
       const scaleY = min(max(candidateScale, minScale), maxScale);
-      const newTransform = [{ scaleY }];
-      runOnJS(setZoomState)({
-        scale: scaleY,
-        transform: newTransform
-      });
+      scaleValue.value = scaleY;
+      runOnJS(debouncedSetScale)(scaleY);
     }
   };
   const onTouchesUp = () => {
@@ -122,8 +124,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
 
   const list = () => (
     <View style={{ height: height - 30 }}>
-      <View style={{ transform, transformOrigin: 'top' }}>
-        <GestureDetector gesture={gesture}>
+      <GestureDetector gesture={gesture}>
+        <Animated.View style={[animatedStyle, { transformOrigin: 'top' }]}>
           <FlatList
             //ref={flatListRef}
             getItemLayout={getItemLayout}
@@ -155,11 +157,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
             scrollEventThrottle={16}
             style={{ minHeight }}
             contentContainerStyle={{ minHeight }}
-            windowSize={7}
-            extraData={scale.toFixed(1)}
           />
-        </GestureDetector>
-      </View>
+        </Animated.View>
+      </GestureDetector>
     </View>
   );
 
