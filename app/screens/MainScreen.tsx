@@ -53,25 +53,6 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     return <Loading />;
   }
 
-  const topBar = () => (
-    <View style={styles.topBar}>
-      {habits.map(h => (
-        <View
-          key={h.habit.id}
-          style={[styles.columnTitleHolder, { flex: Number(h.habit.weight) || 1 }]}
-        >
-          <Text 
-            style={styles.columnTitle}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {h.habit.name}
-          </Text>
-        </View>
-      ))}
-    </View>
-  );
-
   const minHeight = Math.min((height - 30) / scale, dates.length * 20);
 
   const onTouchesMove = (arg: { changedTouches: { absoluteY: number }[] }) => {
@@ -152,6 +133,25 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
           />
         </Animated.View>
       </GestureDetector>
+    </View>
+  );
+
+  const topBar = () => (
+    <View style={styles.topBar}>
+      {habits.map(h => (
+        <View
+          key={h.habit.id}
+          style={[styles.columnTitleHolder, { flex: Number(h.habit.weight) || 1 }]}
+        >
+          <Text 
+            style={styles.columnTitle}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {h.habit.name}
+          </Text>
+        </View>
+      ))}
     </View>
   );
 
