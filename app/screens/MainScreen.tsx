@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { FlatList, ActivityIndicator, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import type { GetDayHabitValue, MainProps } from '../types';
 import Screen from '../components/Screen';
 import { COLORS } from '../constants/theme';
@@ -14,13 +14,7 @@ interface MainScreenProps {
   getDayHabitValue: GetDayHabitValue;
 }
 
-const Loading = () => (
-  <Screen>
-    <View style={styles.loadingIndicatorHolder}>
-      <ActivityIndicator size="large" color={COLORS.text} />
-    </View>
-  </Screen>
-)
+import Loading from '../components/Loading';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitValue }) => {
   const router = useRouter();
@@ -52,17 +46,17 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   }, [data]);
 
   if (data === null) {
-    return Loading();
+    return <Loading />;
   }
 
   const { dates, habits } = data;
 
   if (!dates) {
-    return Loading();
+    return <Loading />;
   }
 
   if (habits.length === 0) {
-    return Loading();
+    return <Loading />;
   }
 
   const topBar = () => (
@@ -209,12 +203,6 @@ const styles = StyleSheet.create({
   checklist: {
     flex: 1,
   },
-  loadingIndicatorHolder: {
-    ...StyleSheet.absoluteFillObject,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
 });
 
 export default MainScreen; 
