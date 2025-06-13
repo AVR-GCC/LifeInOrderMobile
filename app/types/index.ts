@@ -43,4 +43,9 @@ export type DeleteValue = (habitIndex: number, valueIndex: number) => void;
 export type SwitchValues = (isDown: boolean, habitIndex: number, valueIndex: number) => void;
 export type UpdateValue = (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
 
+export interface MainScreenProps {
+  data: MainProps | null;
+  getDayHabitValue: GetDayHabitValue;
+}
+
 export default {};

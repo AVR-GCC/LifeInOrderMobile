@@ -8,12 +8,7 @@ import DayRow from '../components/DayRow';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { debounce } from '../api/client';
-
-interface MainScreenProps {
-  data: MainProps | null;
-  getDayHabitValue: GetDayHabitValue;
-}
-
+import { MainScreenProps } from '../types';
 import Loading from '../components/Loading';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitValue }) => {
