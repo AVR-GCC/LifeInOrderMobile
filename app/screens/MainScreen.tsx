@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
-import type { GetDayHabitValue, MainProps } from '../types';
 import Screen from '../components/Screen';
 import { COLORS } from '../constants/theme';
 import DayRow from '../components/DayRow';
