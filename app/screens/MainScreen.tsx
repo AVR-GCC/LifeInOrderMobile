@@ -145,6 +145,10 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
             scrollEventThrottle={16}
             style={{ minHeight }}
             contentContainerStyle={{ minHeight }}
+            maintainVisibleContentPosition={{
+              minIndexForVisible: 0,
+              autoscrollToTopThreshold: 10,
+            }}
           />
         </Animated.View>
       </GestureDetector>
