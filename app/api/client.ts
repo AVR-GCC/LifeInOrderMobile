@@ -1,15 +1,28 @@
 import axios from 'axios';
-import type { Habit, MainProps, Value } from '../types';
+import type { Habit, Value } from '../types';
 
-const baseUrl = 'http://10.0.0.8:8080'; // TODO: Make this configurable via environment variables
+const baseUrl = 'http://10.0.0.2:8080'; // TODO: Make this configurable via environment variables
 
-export const getUserList = async () => {
+export const getUserConfig = async () => {
   try {
-    const route = `${baseUrl}/users/1/list`;
-    const res = await axios.get<MainProps>(route);
+    const route = `${baseUrl}/users/1/config`;
+    const res = await axios.get(route);
     if (res.data) {
-      const { dates, habits } = res.data;
-      return { dates, habits };
+      return res.data;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching user config:', error);
+    return null;
+  }
+};
+
+export const getUserList = async (date: string, zoom: string, width: string) => {
+  try {
+    const route = `${baseUrl}/users/1/list?date=${date}&zoom=${zoom}&width=${width}`;
+    const res = await axios.get(route);
+    if (res.data) {
+      return res.data;
     }
     return null;
   } catch (error) {

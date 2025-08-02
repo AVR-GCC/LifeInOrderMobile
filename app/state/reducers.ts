@@ -1,36 +1,7 @@
-import moment from 'moment';
 import type { Habit, MainProps, Value } from '../types';
-const SPARE_DATES = 40;
-const dateFormat = 'YYYY-MM-DD';
 
 export const loadDataReducer = (data: MainProps) => () => {
-  if (data === null) return null;
-  const { dates, habits } = data;
-  const datesEmpty = !dates.length;
-  let datesIndex = 0;
-  const datesFilled = [];
-  const incrementalDate = datesEmpty ? moment() : moment(dates[0].date);
-  let nextDate = incrementalDate.format(dateFormat);
-  while (datesIndex < dates.length) {
-    const currentIncremental = incrementalDate.format(dateFormat);
-    if (currentIncremental === nextDate) {
-      datesFilled.push(dates[datesIndex]);
-      datesIndex++;
-      if (datesIndex === dates.length) break;
-      nextDate = dates[datesIndex].date;
-    } else {
-      datesFilled.push({ date: currentIncremental, values: {} });
-    }
-    incrementalDate.add(1, 'd');
-  }
-  const currentDate = datesEmpty ? moment() : moment(dates[dates.length - 1].date).add(1, 'd');
-  const newDates = new Array(SPARE_DATES);
-  for (let i = 0; i < SPARE_DATES; i++) {
-    newDates[i] = { date: currentDate.format(dateFormat), values: {} };
-    currentDate.add(1, 'd');
-  }
-
-  return { dates: [...datesFilled, ...newDates], habits };
+  return data;
 };
 
 export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, habitIndex: number, valueId: string) => {

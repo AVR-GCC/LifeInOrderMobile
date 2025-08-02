@@ -1,31 +1,32 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
-    deleteHabitServer,
-    getUserList,
-    reorderHabitsServer,
-    reorderValuesServer,
-    setDayValueServer,
-    updateValueServer,
-    updateHabitServer,
-    createValueServer,
-    deleteValueServer,
-    createHabitServer
+  createHabitServer,
+  createValueServer,
+  deleteHabitServer,
+  deleteValueServer,
+  getUserConfig,
+  getUserList,
+  reorderHabitsServer,
+  reorderValuesServer,
+  setDayValueServer,
+  updateHabitServer,
+  updateValueServer
 } from '../api/client';
+import { colorOptions } from '../components/ValueCard';
 import {
-    addHabitReducer,
-    addValueReducer,
-    deleteHabitReducer,
-    deleteValueReducer,
-    loadDataReducer,
-    setDayHabitValueReducer,
-    switchHabitsReducer,
-    switchValuesReducer,
-    updateHabitReducer,
-    updateValueReducer,
+  addHabitReducer,
+  addValueReducer,
+  deleteHabitReducer,
+  deleteValueReducer,
+  loadDataReducer,
+  setDayHabitValueReducer,
+  switchHabitsReducer,
+  switchValuesReducer,
+  updateHabitReducer,
+  updateValueReducer,
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
 import type { DeleteValue, Habit, MainProps, Value } from '../types';
-import { colorOptions } from '../components/ValueCard';
 
 interface AppContextType {
   data: MainProps | null;
@@ -46,15 +47,18 @@ const AppContext = createContext<AppContextType | null>(null);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [data, setData] = useState<MainProps | null>(null);
 
-  const loadData = async () => {
-    const data = await getUserList();
-    if (data) {
-      setData(loadDataReducer(data)());
+  const loadInitialData = async () => {
+    const [dates, habits] = await Promise.all([
+      getUserList(new Date().toISOString().split('T')[0], 'day', '1080'),
+      getUserConfig()
+    ]);
+    if (dates && habits) {
+      setData(loadDataReducer({ dates, habits })());
     }
   };
 
   useEffect(() => {
-    loadData();
+    loadInitialData();
   }, []);
 
   const setDayHabitValue = (dateIndex: number, habitIndex: number, valueId: string) => {
