@@ -158,8 +158,8 @@ export const updateHabitServerUndebounced = async (newHabit: Habit) => {
   }
 };
 
-export const updateValueServer = debounce(updateValueServerUndebounced);
-export const updateHabitServer = debounce(updateHabitServerUndebounced);
+export const updateValueServer = debounce(updateValueServerUndebounced, 1000);
+export const updateHabitServer = debounce(updateHabitServerUndebounced, 1000);
 
 export default {
   getUserList,
