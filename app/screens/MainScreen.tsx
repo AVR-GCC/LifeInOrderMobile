@@ -1,14 +1,14 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { debounce } from '../api/client';
+import DayRow from '../components/DayRow';
+import Loading from '../components/Loading';
 import Screen from '../components/Screen';
 import { COLORS } from '../constants/theme';
-import DayRow from '../components/DayRow';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
-import { debounce } from '../api/client';
 import { MainScreenProps } from '../types';
-import Loading from '../components/Loading';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitValue }) => {
   const router = useRouter();
@@ -83,13 +83,13 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     .onTouchesUp(onTouchesUp)
     .simultaneousWithExternalGesture(Gesture.Native());;
  
-  const getItemLayout = (_: any, index: number) => {
-    return ({
-      length: 20 * scale,
-      offset: 20 * index * scale,
-      index
-    });
-  };
+  // const getItemLayout = (_: any, index: number) => {
+  //   return ({
+  //     length: 20 * scale,
+  //     offset: 20 * index * scale,
+  //     index
+  //   });
+  // };
 
   const list = () => (
     <View style={{ height: height - 30 }}>
@@ -97,7 +97,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
         <Animated.View style={[animatedStyle, { transformOrigin: 'top' }]}>
           <FlatList
             //ref={flatListRef}
-            getItemLayout={getItemLayout}
+            // getItemLayout={getItemLayout}
             data={dates}
             renderItem={({ index }) => (
               <View
@@ -123,13 +123,13 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
             )}
             keyExtractor={(item) => item.date}
             showsVerticalScrollIndicator={false}
-            scrollEventThrottle={16}
-            style={{ minHeight }}
-            contentContainerStyle={{ minHeight }}
-            maintainVisibleContentPosition={{
-              minIndexForVisible: 0,
-              autoscrollToTopThreshold: 10,
-            }}
+            inverted
+            style={{ height: height - 125 }}
+            // contentContainerStyle={{ minHeight }}
+            // maintainVisibleContentPosition={{
+            //   minIndexForVisible: 0,
+            //   autoscrollToTopThreshold: 10,
+            // }}
           />
         </Animated.View>
       </GestureDetector>
