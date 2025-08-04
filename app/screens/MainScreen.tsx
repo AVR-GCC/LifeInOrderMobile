@@ -100,43 +100,44 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   //     index
   //   });
   // };
+  const renderItem = ({ index }: { index: number }) => (
+    <View
+      key="content"
+      style={styles.content}
+    >
+      <View key="leftBar" style={styles.leftBar}>
+        <TouchableOpacity
+          key={index}
+          onPress={() => router.replace(`/day/${index}`)}
+          style={styles.dayMarker}
+        />
+      </View>
+      <View key="checklist" style={styles.checklist}>
+        <DayRow
+          key={`${index}_day`}
+          dayIndex={index}
+          habits={habits}
+          getDayHabitValue={getDayHabitValue}
+        />
+      </View>
+    </View>
+  );
 
   const list = () => (
     <View style={{ height: height - 30 }}>
       <GestureDetector gesture={gesture}>
         <Animated.View style={[animatedStyle, { transformOrigin: 'top' }]}>
           <FlatList
-            //ref={flatListRef}
-            // getItemLayout={getItemLayout}
             data={dates}
-            renderItem={({ index }) => (
-              <View
-                key="content"
-                style={styles.content}
-              >
-                <View key="leftBar" style={styles.leftBar}>
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => router.replace(`/day/${index}`)}
-                    style={styles.dayMarker}
-                  />
-                </View>
-                <View key="checklist" style={styles.checklist}>
-                  <DayRow
-                    key={`${index}_day`}
-                    dayIndex={index}
-                    habits={habits}
-                    getDayHabitValue={getDayHabitValue}
-                  />
-                </View>
-              </View>
-            )}
+            renderItem={renderItem}
             keyExtractor={(item) => item.date}
             showsVerticalScrollIndicator={false}
             inverted
             style={{ height: height - 125 }}
             onEndReached={fetchMoreData}
             onEndReachedThreshold={0.5}
+            //ref={flatListRef}
+            // getItemLayout={getItemLayout}
             // contentContainerStyle={{ minHeight }}
             // maintainVisibleContentPosition={{
             //   minIndexForVisible: 0,
