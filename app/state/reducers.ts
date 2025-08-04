@@ -1,7 +1,11 @@
-import type { Habit, MainProps, Value } from '../types';
+import type { DayData, Habit, MainProps, Value } from '../types';
 
-export const loadDataReducer = (data: MainProps) => () => {
+export const loadInitialDataReducer = (data: MainProps) => () => {
   return data;
+};
+
+export const loadMoreDataReducer = (data: MainProps) => (newDates: DayData[]) => {
+  return { habits: data.habits, dates: [...data.dates, ...newDates] };
 };
 
 export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, habitIndex: number, valueId: string) => {
@@ -11,7 +15,7 @@ export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, 
   const habitId = data.habits[habitIndex].habit.id;
   newDate.values = { ...newDate.values, [habitId]: valueId };
   newDates[dateIndex] = newDate;
-  return { ...newData, dates: newDates };
+  return { habits: newData.habits, dates: newDates };
 };
 
 export const addHabitReducer = (data: MainProps) => (habit: Habit) => {
@@ -92,7 +96,8 @@ export const addValueReducer = (data: MainProps) => (habitIndex: number, value: 
 }
 
 export default {
-  loadDataReducer,
+  loadInitialDataReducer,
+  loadMoreDataReducer,
   setDayHabitValueReducer,
   addHabitReducer,
   updateHabitReducer,

@@ -17,7 +17,7 @@ export const getUserConfig = async () => {
   }
 };
 
-export const getUserList = async (date: string, zoom: string, width: string) => {
+export const getUserList = async (date: string, zoom: string, width: number) => {
   try {
     const route = `${baseUrl}/users/1/list?date=${date}&zoom=${zoom}&width=${width}`;
     const res = await axios.get(route);

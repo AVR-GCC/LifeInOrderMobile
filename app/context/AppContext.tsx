@@ -18,12 +18,13 @@ import {
   addValueReducer,
   deleteHabitReducer,
   deleteValueReducer,
-  loadDataReducer,
+  loadInitialDataReducer,
+  loadMoreDataReducer,
   setDayHabitValueReducer,
   switchHabitsReducer,
   switchValuesReducer,
   updateHabitReducer,
-  updateValueReducer,
+  updateValueReducer
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
 import type { DeleteValue, Habit, MainProps, Value } from '../types';
@@ -40,6 +41,7 @@ interface AppContextType {
   switchValues: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
+  loadMoreData: (date: string) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -49,11 +51,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const loadInitialData = async () => {
     const [dates, habits] = await Promise.all([
-      getUserList(new Date().toISOString().split('T')[0], 'day', '1080'),
+      getUserList(new Date().toISOString().split('T')[0], 'day', 1080),
       getUserConfig()
     ]);
     if (dates && habits) {
-      setData(loadDataReducer({ dates, habits })());
+      setData(loadInitialDataReducer({ dates, habits })());
     }
   };
 
@@ -61,6 +63,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadInitialData();
   }, []);
 
+  const loadMoreData = async (date: string, width: number) => {
+    if (data === null) return;
+    const res = await getUserList(date, 'day', width);
+    if (res) {
+      const newData = loadMoreDataReducer(data)(res);
+      setData(newData);
+    }
+  };
   const setDayHabitValue = (dateIndex: number, habitIndex: number, valueId: string) => {
     if (data === null) return;
     const { dates, habits } = data;
@@ -167,6 +177,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         switchValues,
         updateValue,
         deleteValue,
+        loadMoreData,
       }}
     >
       {children}

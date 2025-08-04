@@ -8,11 +8,13 @@ import DayRow from '../components/DayRow';
 import Loading from '../components/Loading';
 import Screen from '../components/Screen';
 import { COLORS } from '../constants/theme';
+import { useAppContext } from '../context/AppContext';
 import { MainScreenProps } from '../types';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitValue }) => {
+  const { loadMoreData } = useAppContext();
   const router = useRouter();
-  const { height } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
 
   const scaleValue = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -53,7 +55,15 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     return <Loading />;
   }
 
-  const minHeight = Math.min((height - 30) / scale, dates.length * 20);
+  const fetchMoreData = () => {
+    const lastDate = dates[dates.length - 1].date;
+    const dayBeforeLastDate = new Date(lastDate);
+    dayBeforeLastDate.setMonth(dayBeforeLastDate.getMonth() - 1);
+    dayBeforeLastDate.setDate(dayBeforeLastDate.getDate() - 1);
+    const dayBeforeString = dayBeforeLastDate.toISOString().split('T')[0];
+    
+    loadMoreData(dayBeforeString, width);
+  };
 
   const onTouchesMove = (arg: { changedTouches: { absoluteY: number }[] }) => {
     if (arg.changedTouches.length > 1) {
@@ -125,6 +135,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
             showsVerticalScrollIndicator={false}
             inverted
             style={{ height: height - 125 }}
+            onEndReached={fetchMoreData}
+            onEndReachedThreshold={0.5}
             // contentContainerStyle={{ minHeight }}
             // maintainVisibleContentPosition={{
             //   minIndexForVisible: 0,
