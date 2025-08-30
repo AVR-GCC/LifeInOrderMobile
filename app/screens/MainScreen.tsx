@@ -239,8 +239,8 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   content: {
+    flex: 1,
     flexDirection: 'row',
-    height: 20, // Default height, will be scaled by animation
   },
   leftBar: {
     backgroundColor: COLORS.colorOne,
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     width: 30, // leftBarWidth
   },
   dayMarker: {
-    height: 20,
+    flex: 1,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.colorFour,
   },
