@@ -27,6 +27,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
 
   const [startDistance, setStartDistance] = useState<number | null>(null);
   const [startChecklistScale, setStartChecklistScale] = useState(1.0);
+  const [isZooming, setIsZooming] = useState(false);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
 
   //const flatListRef = useRef<FlatList>(null);
 
@@ -65,30 +67,80 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     loadMoreData(dayBeforeString, width);
   };
 
-  const onTouchesMove = (arg: { changedTouches: { absoluteY: number }[] }) => {
-    if (arg.changedTouches.length > 1) {
+  const onTouchesDown = (arg: { allTouches: { absoluteY: number }[] }) => {
+    const touchCount = arg.allTouches.length;
+    
+    if (touchCount >= 2) {
+      // Switch to zoom mode
+      runOnJS(setIsZooming)(true);
+      runOnJS(setScrollEnabled)(false);
+      
       if (startDistance === null) {
-        runOnJS(setStartDistance)(arg.changedTouches[0].absoluteY - arg.changedTouches[1].absoluteY);
+        runOnJS(setStartDistance)(arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY);
+        runOnJS(setStartChecklistScale)(scaleValue.value);
+      }
+    } else {
+      // Switch to scroll mode
+      runOnJS(setIsZooming)(false);
+      runOnJS(setScrollEnabled)(true);
+      
+      if (startDistance !== null) {
+        runOnJS(setStartDistance)(null);
+      }
+    }
+  };
+
+  const onTouchesMove = (arg: { allTouches: { absoluteY: number }[] }) => {
+    const touchCount = arg.allTouches.length;
+    
+    // Dynamic switching based on current touch count
+    if (touchCount >= 2) {
+      if (!isZooming) {
+        runOnJS(setIsZooming)(true);
+        runOnJS(setScrollEnabled)(false);
+      }
+      
+      if (startDistance === null) {
+        runOnJS(setStartDistance)(arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY);
         runOnJS(setStartChecklistScale)(scaleValue.value);
         return;
       }
+      
       const { abs } = Math;
       const originalDistanceScale = startDistance / startChecklistScale;
-      const curDistance = arg.changedTouches[0].absoluteY - arg.changedTouches[1].absoluteY;
+      const curDistance = arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY;
       const scaleY = abs(curDistance / originalDistanceScale);
-      scaleValue.value = scaleY;
+      scaleValue.value = scaleY; // Constrain zoom
+      // scaleValue.value = Math.max(0.5, Math.min(3.0, scaleY)); // Constrain zoom
       runOnJS(debouncedSetScale)(scaleY);
+    } else if (touchCount === 1) {
+      if (isZooming) {
+        runOnJS(setIsZooming)(false);
+        runOnJS(setScrollEnabled)(true);
+        runOnJS(setStartDistance)(null);
+      }
     }
   };
-  const onTouchesUp = () => {
-    if (startDistance !== null) {
-      runOnJS(setStartDistance)(null);
+
+  const onTouchesUp = (arg: { allTouches: { absoluteY: number }[] }) => {
+    const touchCount = arg.allTouches.length;
+    
+    if (touchCount < 2) {
+      // Switch back to scroll mode when less than 2 fingers
+      runOnJS(setIsZooming)(false);
+      runOnJS(setScrollEnabled)(true);
+      
+      if (startDistance !== null) {
+        runOnJS(setStartDistance)(null);
+      }
     }
   };
-  const gesture = Gesture.Pinch()
+
+  const gesture = Gesture.Manual()
+    .onTouchesDown(onTouchesDown)
     .onTouchesMove(onTouchesMove)
     .onTouchesUp(onTouchesUp)
-    .simultaneousWithExternalGesture(Gesture.Native());;
+    .onTouchesCancelled(onTouchesUp);
  
   // const getItemLayout = (_: any, index: number) => {
   //   return ({
@@ -133,6 +185,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
             style={{ height: height - 125 }}
             onEndReached={fetchMoreData}
             onEndReachedThreshold={0.5}
+            scrollEnabled={scrollEnabled}
             //ref={flatListRef}
             // getItemLayout={getItemLayout}
             // contentContainerStyle={{ minHeight }}
