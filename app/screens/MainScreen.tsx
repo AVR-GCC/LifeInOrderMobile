@@ -176,7 +176,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   );
 
   const list = () => (
-    <View style={{ height: height - 30 }}>
+    <View style={{ height: height - 125 }}>
       <GestureDetector gesture={gesture}>
         <View style={{ flex: 1 }}>
           <FlatList
@@ -185,7 +185,6 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
             keyExtractor={(item) => item.date}
             showsVerticalScrollIndicator={false}
             inverted
-            style={{ height: height - 125 }}
             onEndReached={fetchMoreData}
             onEndReachedThreshold={0.5}
             scrollEnabled={scrollEnabled}
