@@ -48,10 +48,11 @@ function DayRow({
 const styles = StyleSheet.create({
   dayRow: {
     display: 'flex',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    height: '100%' // Fill the parent container's height
   },
   square: {
-    height: 20,
+    height: '100%', // Fill the row's height
   },
 });
 

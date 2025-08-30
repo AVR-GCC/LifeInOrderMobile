@@ -17,9 +17,6 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   const { height, width } = useWindowDimensions();
 
   const scaleValue = useSharedValue(1);
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scaleY: scaleValue.value }],
-  }));
   const [scale, setScale] = useState(1.0);
   const debouncedSetScale = debounce((newScale: number) => {
     setScale(newScale);
@@ -30,7 +27,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   const [isZooming, setIsZooming] = useState(false);
   const [scrollEnabled, setScrollEnabled] = useState(true);
 
-  //const flatListRef = useRef<FlatList>(null);
+  const animatedItemStyle = useAnimatedStyle(() => ({
+    height: 20 * scaleValue.value,
+  }));
 
   useEffect(() => {
     if (data !== null) {
@@ -142,17 +141,18 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     .onTouchesUp(onTouchesUp)
     .onTouchesCancelled(onTouchesUp);
  
-  // const getItemLayout = (_: any, index: number) => {
-  //   return ({
-  //     length: 20 * scale,
-  //     offset: 20 * index * scale,
-  //     index
-  //   });
-  // };
+  const getItemLayout = (_: any, index: number) => {
+    return ({
+      length: 20 * scaleValue.value,
+      offset: 20 * index * scaleValue.value,
+      index
+    });
+  };
+
   const renderItem = ({ index }: { index: number }) => (
-    <View
+    <Animated.View
       key="content"
-      style={styles.content}
+      style={[styles.content, animatedItemStyle]}
     >
       <View key="leftBar" style={styles.leftBar}>
         <TouchableOpacity
@@ -169,13 +169,13 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
           getDayHabitValue={getDayHabitValue}
         />
       </View>
-    </View>
+    </Animated.View>
   );
 
   const list = () => (
     <View style={{ height: height - 30 }}>
       <GestureDetector gesture={gesture}>
-        <Animated.View style={[animatedStyle, { transformOrigin: 'top' }]}>
+        <View style={{ flex: 1 }}>
           <FlatList
             data={dates}
             renderItem={renderItem}
@@ -186,15 +186,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
             onEndReached={fetchMoreData}
             onEndReachedThreshold={0.5}
             scrollEnabled={scrollEnabled}
-            //ref={flatListRef}
-            // getItemLayout={getItemLayout}
-            // contentContainerStyle={{ minHeight }}
-            // maintainVisibleContentPosition={{
-            //   minIndexForVisible: 0,
-            //   autoscrollToTopThreshold: 10,
-            // }}
+            getItemLayout={getItemLayout}
           />
-        </Animated.View>
+        </View>
       </GestureDetector>
     </View>
   );
@@ -249,6 +243,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flexDirection: 'row',
+    height: 20, // Default height, will be scaled by animation
   },
   leftBar: {
     backgroundColor: COLORS.colorOne,
