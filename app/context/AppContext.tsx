@@ -41,7 +41,7 @@ interface AppContextType {
   switchValues: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
-  loadMoreData: (date: string) => void;
+  loadMoreData: (date: string, width: number) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
