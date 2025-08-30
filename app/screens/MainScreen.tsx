@@ -132,6 +132,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       if (startDistance !== null) {
         runOnJS(setStartDistance)(null);
       }
+      
+      // Ensure scale state is synchronized with the final animated value
+      runOnJS(setScale)(scaleValue.value);
     }
   };
 
@@ -143,8 +146,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
  
   const getItemLayout = (_: any, index: number) => {
     return ({
-      length: 20 * scaleValue.value,
-      offset: 20 * index * scaleValue.value,
+      length: 20 * scale,
+      offset: 20 * index * scale,
       index
     });
   };
