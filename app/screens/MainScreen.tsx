@@ -72,13 +72,10 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
         runOnJS(setStartChecklistScale)(scaleValue.value);
         return;
       }
-      const { abs, max, min } = Math;
+      const { abs } = Math;
       const originalDistanceScale = startDistance / startChecklistScale;
       const curDistance = arg.changedTouches[0].absoluteY - arg.changedTouches[1].absoluteY;
-      const minScale = (height - 30) / (dates.length * 20);
-      const maxScale = (height - 30) / (8 * 20);
-      const candidateScale = abs(curDistance / originalDistanceScale);
-      const scaleY = min(max(candidateScale, minScale), maxScale);
+      const scaleY = abs(curDistance / originalDistanceScale);
       scaleValue.value = scaleY;
       runOnJS(debouncedSetScale)(scaleY);
     }
