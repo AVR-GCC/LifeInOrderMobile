@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   createHabitServer,
   createValueServer,
+  debounce,
   deleteHabitServer,
   deleteValueServer,
   getUserConfig,
@@ -42,12 +43,19 @@ interface AppContextType {
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
   loadMoreData: (date: string, width: number) => void;
+  debouncedSetScale: (newScale: number) => void;
+  setScale: (newScale: number) => void;
+  scale: number;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [data, setData] = useState<MainProps | null>(null);
+  const [scale, setScale] = useState(1.0);
+  const debouncedSetScale = debounce((newScale: number) => {
+    setScale(newScale);
+  }, 100);
 
   const loadInitialData = async () => {
     const [dates, habits] = await Promise.all([
@@ -178,6 +186,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateValue,
         deleteValue,
         loadMoreData,
+        debouncedSetScale,
+        setScale,
+        scale
       }}
     >
       {children}

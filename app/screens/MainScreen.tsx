@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { debounce } from '../api/client';
 import DayRow from '../components/DayRow';
 import Loading from '../components/Loading';
 import Screen from '../components/Screen';
@@ -12,15 +11,11 @@ import { useAppContext } from '../context/AppContext';
 import { MainScreenProps } from '../types';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitValue }) => {
-  const { loadMoreData } = useAppContext();
+  const { loadMoreData, scale, setScale, debouncedSetScale } = useAppContext();
   const router = useRouter();
   const { height, width } = useWindowDimensions();
 
-  const scaleValue = useSharedValue(1);
-  const [scale, setScale] = useState(1.0);
-  const debouncedSetScale = debounce((newScale: number) => {
-    setScale(newScale);
-  }, 100);
+  const scaleValue = useSharedValue(scale);
 
   const [startDistance, setStartDistance] = useState<number | null>(null);
   const [startChecklistScale, setStartChecklistScale] = useState(1.0);
