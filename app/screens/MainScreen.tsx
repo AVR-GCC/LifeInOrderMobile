@@ -28,8 +28,12 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
 
   const flatListRef = useRef<FlatList>(null);
 
+  const scrollFlatList = (newScroll: number) => {
+    flatListRef.current?.scrollToOffset({ animated: true, offset: newScroll });
+  }
+
   useEffect(() => {
-    flatListRef.current?.scrollToOffset({ animated: true, offset: scroll });
+    scrollFlatList(scroll);
   }, []);
 
   useEffect(() => {
