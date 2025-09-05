@@ -46,6 +46,9 @@ interface AppContextType {
   debouncedSetScale: (newScale: number) => void;
   setScale: (newScale: number) => void;
   scale: number;
+  debouncedSetScroll: (newScroll: number) => void;
+  setScroll: (newScroll: number) => void;
+  scroll: number;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -55,6 +58,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [scale, setScale] = useState(1.0);
   const debouncedSetScale = debounce((newScale: number) => {
     setScale(newScale);
+  }, 100);
+  const [scroll, setScroll] = useState(0);
+  const debouncedSetScroll = debounce((newScroll: number) => {
+    setScroll(newScroll);
   }, 100);
 
   const loadInitialData = async () => {
@@ -188,7 +195,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loadMoreData,
         debouncedSetScale,
         setScale,
-        scale
+        scale,
+        debouncedSetScroll,
+        setScroll,
+        scroll
       }}
     >
       {children}

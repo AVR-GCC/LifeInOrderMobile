@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
@@ -11,7 +11,7 @@ import { useAppContext } from '../context/AppContext';
 import { MainScreenProps } from '../types';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitValue }) => {
-  const { loadMoreData, scale, setScale, debouncedSetScale } = useAppContext();
+  const { loadMoreData, scale, setScale, debouncedSetScale, scroll, debouncedSetScroll } = useAppContext();
   const router = useRouter();
   const { height, width } = useWindowDimensions();
 
@@ -25,6 +25,12 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   const animatedItemStyle = useAnimatedStyle(() => ({
     height: 20 * scaleValue.value,
   }));
+
+  const flatListRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    flatListRef.current?.scrollToOffset({ animated: true, offset: scroll });
+  }, []);
 
   useEffect(() => {
     if (data !== null) {
@@ -50,6 +56,11 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   if (habits.length === 0) {
     return <Loading />;
   }
+
+  const handleScroll = (event: { nativeEvent: { contentOffset: { y: number } } }) => {
+    const { contentOffset: { y } } = event.nativeEvent;
+    debouncedSetScroll(y);
+  };
 
   const fetchMoreData = () => {
     const lastDate = dates[dates.length - 1].date;
@@ -175,6 +186,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       <GestureDetector gesture={gesture}>
         <View style={{ flex: 1 }}>
           <FlatList
+            ref={flatListRef}
+            onScroll={handleScroll}
             data={dates}
             renderItem={renderItem}
             keyExtractor={(item) => item.date}
