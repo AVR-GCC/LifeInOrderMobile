@@ -18,7 +18,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   const scaleValue = useSharedValue(scale);
 
   const [startDistance, setStartDistance] = useState<number | null>(null);
-  const [startChecklistScale, setStartChecklistScale] = useState(1.0);
+  const [startScale, setStartScale] = useState(1.0);
   const [isZooming, setIsZooming] = useState(false);
   const [scrollEnabled, setScrollEnabled] = useState(true);
 
@@ -85,7 +85,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       runOnJS(setScrollEnabled)(false);
       
       runOnJS(setStartDistance)(arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY);
-      runOnJS(setStartChecklistScale)(scaleValue.value);
+      runOnJS(setStartScale)(scaleValue.value);
     } else {
       // Switch to scroll mode
       runOnJS(setIsZooming)(false);
@@ -109,12 +109,12 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       
       if (startDistance === null) {
         runOnJS(setStartDistance)(arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY);
-        runOnJS(setStartChecklistScale)(scaleValue.value);
+        runOnJS(setStartScale)(scaleValue.value);
         return;
       }
       
       const { abs } = Math;
-      const originalDistanceScale = startDistance / startChecklistScale;
+      const originalDistanceScale = startDistance / startScale;
       const curDistance = arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY;
       const scaleY = abs(curDistance / originalDistanceScale);
       scaleValue.value = scaleY; // Constrain zoom
