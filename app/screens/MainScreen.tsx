@@ -11,7 +11,7 @@ import { useAppContext } from '../context/AppContext';
 import { MainScreenProps } from '../types';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitValue }) => {
-  const { loadMoreData, scale, setScale, debouncedSetScale, scroll, debouncedSetScroll } = useAppContext();
+  const { loadMoreData, scale, setScale, debouncedSetScale, getScroll, debouncedSetScroll } = useAppContext();
   const router = useRouter();
   const { height, width } = useWindowDimensions();
 
@@ -29,11 +29,11 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   const flatListRef = useRef<FlatList>(null);
 
   const scrollFlatList = (newScroll: number) => {
-    flatListRef.current?.scrollToOffset({ animated: true, offset: newScroll });
+    flatListRef.current?.scrollToOffset({ animated: false, offset: newScroll });
   }
 
   useEffect(() => {
-    scrollFlatList(scroll);
+    scrollFlatList(getScroll());
   }, []);
 
   useEffect(() => {
