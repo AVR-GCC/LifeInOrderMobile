@@ -84,10 +84,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       runOnJS(setIsZooming)(true);
       runOnJS(setScrollEnabled)(false);
       
-      if (startDistance === null) {
-        runOnJS(setStartDistance)(arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY);
-        runOnJS(setStartChecklistScale)(scaleValue.value);
-      }
+      runOnJS(setStartDistance)(arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY);
+      runOnJS(setStartChecklistScale)(scaleValue.value);
     } else {
       // Switch to scroll mode
       runOnJS(setIsZooming)(false);
