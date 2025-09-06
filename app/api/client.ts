@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { Habit, Value } from '../types';
 
-const baseUrl = 'http://10.0.0.2:8080'; // TODO: Make this configurable via environment variables
+const baseUrl = 'http://10.0.0.4:8080'; // TODO: Make this configurable via environment variables
 
 export const getUserConfig = async () => {
   try {
