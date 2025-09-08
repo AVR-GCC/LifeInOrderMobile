@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import DayRow from '../components/DayRow';
 import Loading from '../components/Loading';
 import Screen from '../components/Screen';
@@ -26,11 +26,32 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     height: 20 * scaleValue.value,
   }));
 
+  const locationValue = useSharedValue(0);
+  const [startLocation, setStartLocation] = useState<number | null>(null);
+  const [startScroll, setStartScrollState] = useState<number | null>(null);
+
+  const setStartScroll = () => {
+    setStartScrollState(getScroll());
+  };
+
   const flatListRef = useRef<FlatList>(null);
 
   const scrollFlatList = (newScroll: number) => {
     flatListRef.current?.scrollToOffset({ animated: false, offset: newScroll });
   }
+
+  useAnimatedReaction(
+    () => ({
+      location: locationValue.value,
+      scale: scaleValue.value,
+    }),
+    ({ location, scale }) => {
+      if (startLocation === null || startScroll === null) return;
+      const newScroll = ((startLocation + startScroll) * startScale) / scale - location;
+      runOnJS(scrollFlatList)(newScroll);
+    },
+    [startLocation, startScale, startScroll]
+  );
 
   useEffect(() => {
     scrollFlatList(getScroll());
@@ -86,6 +107,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       
       runOnJS(setStartDistance)(arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY);
       runOnJS(setStartScale)(scaleValue.value);
+
+      runOnJS(setStartLocation)((arg.allTouches[0].absoluteY + arg.allTouches[1].absoluteY) / 2);
+      runOnJS(setStartScroll)();
     } else {
       // Switch to scroll mode
       runOnJS(setIsZooming)(false);
@@ -93,6 +117,12 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       
       if (startDistance !== null) {
         runOnJS(setStartDistance)(null);
+      }
+      if (startLocation !== null) {
+        runOnJS(setStartLocation)(null);
+      }
+      if (startScroll !== null) {
+        runOnJS(setStartScrollState)(null);
       }
     }
   };
@@ -119,7 +149,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       const scaleY = abs(curDistance / originalDistanceScale);
       scaleValue.value = scaleY; // Constrain zoom
       // scaleValue.value = Math.max(0.5, Math.min(3.0, scaleY)); // Constrain zoom
+      const curLocation = (arg.allTouches[0].absoluteY + arg.allTouches[1].absoluteY) / 2;
       runOnJS(debouncedSetScale)(scaleY);
+      runOnJS(setStartLocation)(curLocation);
     } else if (touchCount === 1) {
       if (isZooming) {
         runOnJS(setIsZooming)(false);
@@ -139,6 +171,12 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       
       if (startDistance !== null) {
         runOnJS(setStartDistance)(null);
+      }
+      if (startLocation !== null) {
+        runOnJS(setStartLocation)(null);
+      }
+      if (startScroll !== null) {
+        runOnJS(setStartScrollState)(null);
       }
       
       // Ensure scale state is synchronized with the final animated value
