@@ -15,18 +15,11 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   const router = useRouter();
   const { height, width } = useWindowDimensions();
 
-  const scaleValue = useSharedValue(scale);
-
   const [startDistance, setStartDistance] = useState<number | null>(null);
   const [startScale, setStartScale] = useState(1.0);
   const [isZooming, setIsZooming] = useState(false);
   const [scrollEnabled, setScrollEnabled] = useState(true);
 
-  const animatedItemStyle = useAnimatedStyle(() => ({
-    height: 20 * scaleValue.value,
-  }));
-
-  const locationValue = useSharedValue(0);
   const [startLocation, setStartLocation] = useState<number | null>(null);
   const [startScroll, setStartScrollState] = useState<number | null>(null);
 
@@ -34,12 +27,12 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     setStartScrollState(getScroll());
   };
 
-  const flatListRef = useRef<FlatList>(null);
+  const scaleValue = useSharedValue(scale);
+  const animatedItemStyle = useAnimatedStyle(() => ({
+    height: 20 * scaleValue.value,
+  }));
 
-  const scrollFlatList = (newScroll: number) => {
-    flatListRef.current?.scrollToOffset({ animated: false, offset: newScroll });
-  }
-
+  const locationValue = useSharedValue(0);
   useAnimatedReaction(
     () => ({
       location: locationValue.value,
@@ -52,6 +45,12 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     },
     [startLocation, startScale, startScroll]
   );
+
+  const flatListRef = useRef<FlatList>(null);
+
+  const scrollFlatList = (newScroll: number) => {
+    flatListRef.current?.scrollToOffset({ animated: false, offset: newScroll });
+  }
 
   useEffect(() => {
     scrollFlatList(getScroll());
