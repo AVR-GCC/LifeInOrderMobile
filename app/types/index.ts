@@ -32,6 +32,19 @@ export interface MainProps {
   dates: DayData[];
 }
 
+export interface NavigationValues {
+  zoom: {
+    scale: number | null;
+    distance: number | null;
+  };
+  scroll: {
+    location: number | null;
+    scroll: number | null;
+  };
+  isZooming: boolean;
+}
+  
+
 export type GetDayHabitValue = (dateIndex: number, habitIndex: number) => string | null;
 export type SetDayValue = (dateIndex: number, habitIndex: number, valueId: string) => void;
 export type CreateHabit = (sequence: number) => Promise<null | undefined>;

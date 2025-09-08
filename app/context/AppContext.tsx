@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import {
   createHabitServer,
   createValueServer,
@@ -47,7 +47,7 @@ interface AppContextType {
   setScale: (newScale: number) => void;
   scale: number;
   debouncedSetScroll: (newScroll: number) => void;
-  getScroll: () => number;
+  scroll: number;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -65,7 +65,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const debouncedSetScroll = debounce((newScroll: number) => {
     setScroll(newScroll);
   }, 1000);
-  const getScroll = () => scrollRef.current;
 
   const loadInitialData = async () => {
     const [dates, habits] = await Promise.all([
@@ -200,7 +199,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setScale,
         scale,
         debouncedSetScroll,
-        getScroll
+        scroll: scrollRef.current,
       }}
     >
       {children}
