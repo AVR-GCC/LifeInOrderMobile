@@ -38,13 +38,14 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     console.log(...args);
   }
 
-  const scrollFlatList = (newScroll: number) => {
-    flatListRef.current?.scrollToOffset({ animated: true, offset: newScroll < 0 ? 0 : newScroll });
+  const scrollFlatList = (newScroll: number, animated: boolean = true) => {
+    flatListRef.current?.scrollToOffset({ animated, offset: newScroll < 0 ? 0 : newScroll });
   }
 
   useAnimatedReaction(
     () => scaleAndLocationValue.value,
     ({ location, scale }) => {
+      'worklet';
       if (
         navigationValues.scroll.location === null ||
         navigationValues.scroll.scroll === null ||
