@@ -221,7 +221,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     </Animated.View>
   );
 
-  const list = () => (
+  const listWindow = () => (
     <View style={{ height: height - 125 }}>
       <GestureDetector gesture={gesture}>
         <View style={{ flex: 1 }}>
@@ -265,7 +265,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   return (
     <Screen>
       {topBar()}
-      {list()}
+      {listWindow()}
     </Screen>
   );
 });
