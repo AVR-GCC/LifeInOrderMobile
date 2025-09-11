@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
     height: 40,
     width: '100%',
     backgroundColor: '#000000',
+    zIndex: 1,
   },
   bottomBuffer: {
     position: 'absolute',
@@ -28,6 +29,7 @@ const styles = StyleSheet.create({
     height: 50,
     width: '100%',
     backgroundColor: '#000000',
+    zIndex: 1,
   },
 });
 

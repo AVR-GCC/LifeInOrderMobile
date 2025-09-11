@@ -304,6 +304,7 @@ const styles = StyleSheet.create({
     paddingLeft: 30, // leftBarWidth
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.133)',
+    zIndex: 1,
   },
   columnTitleHolder: {
     borderWidth: 1,
