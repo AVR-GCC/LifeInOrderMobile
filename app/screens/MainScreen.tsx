@@ -45,10 +45,6 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     ],
   }));
 
-  const print = (...args: any[]) => {
-    console.log(...args);
-  }
-
   useAnimatedReaction(
     () => ({ scroll: navigationValue.value.scroll.current, zoom: navigationValue.value.zoom.current }),
     (newNavigationValue) => {
@@ -185,7 +181,6 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       };
       runOnJS(setScale)(newScale);
     } else if (touchCount === 1) {
-      console.log('crollStart', navigationValue.value.scroll.start);
       if (navigationValue.value.scroll.start.location === null || navigationValue.value.scroll.start.offset === null) {
         setStartValues(arg.allTouches);
         return;
