@@ -46,8 +46,8 @@ interface AppContextType {
   debouncedSetScale: (newScale: number) => void;
   setScale: (newScale: number) => void;
   scale: number;
-  debouncedSetScroll: (newScroll: number) => void;
-  scroll: number;
+  setScroll: (newScroll: number) => void;
+  getScroll: () => number;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -62,9 +62,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setScroll = (newScroll: number) => {
     scrollRef.current = newScroll;
   }
-  const debouncedSetScroll = debounce((newScroll: number) => {
-    setScroll(newScroll);
-  }, 1000);
+  const getScroll = () => scrollRef.current;
 
   const loadInitialData = async () => {
     const [dates, habits] = await Promise.all([
@@ -198,8 +196,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         debouncedSetScale,
         setScale,
         scale,
-        debouncedSetScroll,
-        scroll: scrollRef.current,
+        setScroll,
+        getScroll,
       }}
     >
       {children}

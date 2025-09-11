@@ -34,14 +34,25 @@ export interface MainProps {
 
 export interface NavigationValues {
   zoom: {
-    scale: number | null;
-    distance: number | null;
+    start: {
+      scale: number | null;
+      distance: number | null;
+    }
+    current: {
+      scale: number;
+      distance: number | null;
+    }
   };
   scroll: {
-    location: number | null;
-    scroll: number | null;
+    start: {
+      location: number | null;
+      offset: number | null;
+    },
+    current: {
+      location: number | null;
+      offset: number;
+    }
   };
-  isZooming: boolean;
 }
   
 

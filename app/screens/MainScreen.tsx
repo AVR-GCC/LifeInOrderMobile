@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import DayRow from '../components/DayRow';
@@ -8,63 +8,67 @@ import Loading from '../components/Loading';
 import Screen from '../components/Screen';
 import { COLORS } from '../constants/theme';
 import { useAppContext } from '../context/AppContext';
-import { MainScreenProps, NavigationValues } from '../types';
+import { DayData, MainScreenProps, NavigationValues } from '../types';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitValue }) => {
-  const { loadMoreData, scale, setScale, debouncedSetScale, scroll, debouncedSetScroll } = useAppContext();
+  const { loadMoreData, scale, setScale, setScroll, getScroll } = useAppContext();
   const router = useRouter();
   const { height, width } = useWindowDimensions();
 
-  const [navigationValues, setNavigationValues] = useState<NavigationValues>({
-    zoom: {
-      scale,
-      distance: null,
-    },
+  const navigationValue = useSharedValue<NavigationValues>({
     scroll: {
-      location: null,
-      scroll,
+      start: {
+        location: null,
+        offset: null,
+      },
+      current: {
+        location: null,
+        offset: getScroll(),
+      }
     },
-    isZooming: false,
+    zoom: {
+      start: {
+        scale,
+        distance: null,
+      },
+      current: {
+        scale,
+        distance: null,
+      }
+    },
   });
 
-  const scaleAndLocationValue = useSharedValue({ scale, location: 0 });
-
-  const animatedItemStyle = useAnimatedStyle(() => ({
-    height: 20 * scaleAndLocationValue.value.scale,
+  const animatedListStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: -navigationValue.value.scroll.current.offset },
+      { scaleY: navigationValue.value.zoom.current.scale },
+    ],
   }));
-  const flatListRef = useRef<FlatList>(null);
 
   const print = (...args: any[]) => {
     console.log(...args);
   }
 
-  const scrollFlatList = (newScroll: number, animated: boolean = true) => {
-    flatListRef.current?.scrollToOffset({ animated, offset: newScroll < 0 ? 0 : newScroll });
-  }
-
   useAnimatedReaction(
-    () => scaleAndLocationValue.value,
-    ({ location, scale }) => {
+    () => ({ scroll: navigationValue.value.scroll.current, zoom: navigationValue.value.zoom.current }),
+    (newNavigationValue) => {
       'worklet';
+      const { scroll, zoom } = newNavigationValue;
+      const startScroll = navigationValue.value.scroll.start;
+      const startZoom = navigationValue.value.zoom.start;
       if (
-        navigationValues.scroll.location === null ||
-        navigationValues.scroll.scroll === null ||
-        navigationValues.zoom.scale === null
+        startScroll.location === null
+        || startScroll.offset === null
+        || startZoom.scale === null
+        || scroll.location === null
       ) return;
-      const startDistanceFromCenterToBottomOfThePage = height - 125 - navigationValues.scroll.location;
-      const startDistanceFromCenterToFinalDate = startDistanceFromCenterToBottomOfThePage + navigationValues.scroll.scroll;
-      const startDistanceFromCenterToFinalDateInHours = startDistanceFromCenterToFinalDate / navigationValues.zoom.scale;
-      const curDistanceFromCenterToBottomOfThePage = height - 125 - location;
-      const newScroll = scale * startDistanceFromCenterToFinalDateInHours - curDistanceFromCenterToBottomOfThePage;
-      runOnJS(scrollFlatList)(newScroll);
-      runOnJS(debouncedSetScroll)(newScroll);
+      const newScroll = (startScroll.location + startScroll.offset) * zoom.scale / startZoom.scale - scroll.location;
+      if (newScroll < 0) return;
+      navigationValue.value.scroll.current.offset = newScroll;
+      runOnJS(setScroll)(newScroll);
     },
-    [navigationValues, scrollFlatList, debouncedSetScroll]
+    [navigationValue, setScroll]
   );
-
-  useEffect(() => {
-    scrollFlatList(scroll);
-  }, []);
 
   useEffect(() => {
     if (data !== null) {
@@ -91,11 +95,6 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     return <Loading />;
   }
 
-  const handleScroll = (event: { nativeEvent: { contentOffset: { y: number } } }) => {
-    const { contentOffset: { y } } = event.nativeEvent;
-    debouncedSetScroll(y);
-  };
-
   const fetchMoreData = () => {
     const lastDate = dates[dates.length - 1].date;
     const dayBeforeLastDate = new Date(lastDate);
@@ -107,42 +106,45 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   };
 
   const setStartValues = (touches: { absoluteY: number }[]) => {
+    'worklet';
     const touchCount = touches.length;
+    const offset = navigationValue.value.scroll.current.offset;
     
     if (touchCount >= 2) {
       // Switch to zoom mode
       const distance = touches[0].absoluteY - touches[1].absoluteY;
       const location = (touches[0].absoluteY + touches[1].absoluteY) / 2;
-      const newNavigationValues = {
-        isZooming: true,
+      const newZoomStart = {
+        scale: scale, // Note: you might need to use a shared value for scale here
+        distance,
+      };
+      const newScrollStart = {
+        location,
+        offset,
+      };
+      navigationValue.value = {
         zoom: {
-          scale: scaleAndLocationValue.value.scale,
-          distance,
+          start: newZoomStart,
+          current: navigationValue.value.zoom.current,
         },
         scroll: {
-          location,
-          scroll,
+          start: newScrollStart,
+          current: navigationValue.value.scroll.current,
         },
-      }
-      setNavigationValues(newNavigationValues);
+      };
     } else {
-      const newNavigationValues = {
-        isZooming: false,
-        zoom: {
-          scale: scaleAndLocationValue.value.scale,
-          distance: null,
-        },
-        scroll: {
-          location: null,
-          scroll,
-        },
-      }
-      setNavigationValues(newNavigationValues);
+      const location = touches.length === 1 ? touches[0].absoluteY : null;
+      const newScrollStart = {
+        location,
+        offset,
+      };
+      navigationValue.value.scroll.start = newScrollStart;
+      navigationValue.value.zoom.start.scale = navigationValue.value.zoom.current.scale;
     }
   }
 
   const onTouchesDown = (arg: { allTouches: { absoluteY: number }[] }) => {
-    runOnJS(setStartValues)(arg.allTouches);
+    setStartValues(arg.allTouches);
   };
 
   const onTouchesMove = (arg: { allTouches: { absoluteY: number }[] }) => {
@@ -151,9 +153,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     // Dynamic switching based on current touch count
     if (touchCount >= 2) {
       if (
-        !navigationValues.isZooming ||
-        navigationValues.zoom.distance === null ||
-        navigationValues.zoom.scale === null
+        navigationValue.value.zoom.start.distance === null ||
+        navigationValue.value.zoom.start.scale === null
       ) {
         runOnJS(setStartValues)(arg.allTouches);
         return;
@@ -163,25 +164,49 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       // scroll
       const curLocation = (arg.allTouches[0].absoluteY + arg.allTouches[1].absoluteY) / 2;
       // scale
-      const originalDistanceScale = navigationValues.zoom.distance / navigationValues.zoom.scale;
+      const originalDistanceScale = navigationValue.value.zoom.start.distance / navigationValue.value.zoom.start.scale;
       const curDistance = arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY;
       const newScale = abs(curDistance / originalDistanceScale);
-      runOnJS(debouncedSetScale)(newScale);
-
-      scaleAndLocationValue.value = {
-        scale: newScale,
-        location: curLocation,
+      navigationValue.value = {
+        zoom: {
+          start: navigationValue.value.zoom.start,
+          current: {
+            scale: newScale,
+            distance: curDistance,
+          },
+        },
+        scroll: {
+          start: navigationValue.value.scroll.start,
+          current: {
+            location: curLocation,
+            offset: navigationValue.value.scroll.current.offset,
+          },
+        },
       };
+      runOnJS(setScale)(newScale);
     } else if (touchCount === 1) {
-      if (navigationValues.isZooming) {
-        runOnJS(setStartValues)(arg.allTouches);
+      console.log('crollStart', navigationValue.value.scroll.start);
+      if (navigationValue.value.scroll.start.location === null || navigationValue.value.scroll.start.offset === null) {
+        setStartValues(arg.allTouches);
+        return;
       }
+      navigationValue.value = {
+        zoom: navigationValue.value.zoom,
+        scroll: {
+          start: navigationValue.value.scroll.start,
+          current: {
+            location: arg.allTouches[0].absoluteY,
+            offset: navigationValue.value.scroll.current.offset,
+          },
+        },
+      };
     }
   };
 
   const onTouchesUp = (arg: { allTouches: { absoluteY: number }[] }) => {
-    runOnJS(setScale)(scaleAndLocationValue.value.scale);
-    runOnJS(setStartValues)([]);
+    runOnJS(setScale)(navigationValue.value.zoom.current.scale);
+    runOnJS(setScroll)(navigationValue.value.scroll.current.offset);
+    // runOnJS(setStartValues)([]);
   };
 
   const gesture = Gesture.Manual()
@@ -190,18 +215,10 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     .onTouchesUp(onTouchesUp)
     .onTouchesCancelled(onTouchesUp);
  
-  const getItemLayout = (_: any, index: number) => {
-    return ({
-      length: 20 * scale,
-      offset: 20 * index * scale,
-      index
-    });
-  };
-
   const renderItem = ({ index }: { index: number }) => (
-    <Animated.View
-      key="content"
-      style={[styles.content, animatedItemStyle]}
+    <View
+      key={index}
+      style={styles.content}
     >
       <View key="leftBar" style={styles.leftBar}>
         <TouchableOpacity
@@ -210,7 +227,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
           style={styles.dayMarker}
         />
       </View>
-      <View key="checklist" style={styles.checklist}>
+      <View key="dayContainer" style={styles.dayContainer}>
         <DayRow
           key={`${index}_day`}
           dayIndex={index}
@@ -218,14 +235,21 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
           getDayHabitValue={getDayHabitValue}
         />
       </View>
-    </Animated.View>
+    </View>
+  );
+
+  const list = (dates: DayData[]) => (
+    <View style={{ display: 'flex', flexDirection: 'column-reverse' }}>
+      {dates.map((item, index) => renderItem({ index }))}
+    </View>
   );
 
   const listWindow = () => (
     <View style={{ height: height - 125 }}>
       <GestureDetector gesture={gesture}>
-        <View style={{ flex: 1 }}>
-          <FlatList
+        <Animated.View style={[{ display: 'flex', flexDirection: 'column-reverse' }, animatedListStyle]}>
+          {list(dates)}
+          {/* <FlatList
             ref={flatListRef}
             onScroll={handleScroll}
             data={dates}
@@ -237,8 +261,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
             onEndReachedThreshold={0.5}
             scrollEnabled={!navigationValues.isZooming}
             getItemLayout={getItemLayout}
-          />
-        </View>
+          /> */}
+        </Animated.View>
       </GestureDetector>
     </View>
   );
@@ -292,8 +316,8 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   content: {
-    flex: 1,
     flexDirection: 'row',
+    height: 24
   },
   leftBar: {
     backgroundColor: COLORS.colorOne,
@@ -306,7 +330,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.colorFour,
   },
-  checklist: {
+  dayContainer: {
     flex: 1,
   },
 });
