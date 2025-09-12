@@ -1,14 +1,14 @@
+import { AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import moment from 'moment';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
-import Screen from '../components/Screen';
-import VerticalChevrons from '../components/VerticalChevrons';
-import type { GetDayHabitValue, MainProps, SetDayValue } from '../types';
-import { COLORS } from '../constants/theme';
-import TitleBar from '../components/TitleBar';
 import { UNFILLED_COLOR } from '../components/DayRow';
+import Screen from '../components/Screen';
+import TitleBar from '../components/TitleBar';
+import VerticalChevrons from '../components/VerticalChevrons';
+import { COLORS } from '../constants/theme';
+import type { GetDayHabitValue, MainProps, SetDayValue } from '../types';
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -44,7 +44,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
           style={styles.backArrowContainer}
           onPress={() => router.replace('/')}
         >
-          <AntDesign name="arrowleft" size={30} color={COLORS.text} />
+          <AntDesign name="arrow-left" size={30} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={styles.dayTitle}>
           {dayNames[moment(dates[dateIndex].date).day()]}, {moment(dates[dateIndex].date).format('MMMM DD, YYYY')}

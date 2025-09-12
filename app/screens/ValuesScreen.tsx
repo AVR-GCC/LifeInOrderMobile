@@ -1,13 +1,13 @@
+import { AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput, Platform, Keyboard, Dimensions } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import { Dimensions, Keyboard, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Screen from '../components/Screen';
-import ValueCard from '../components/ValueCard';
-import type { CreateValue, DeleteValue, MainProps, SwitchValues, UpdateHabit, UpdateValue } from '../types';
 import TitleBar from '../components/TitleBar';
-import { COLORS } from '../constants/theme';
+import ValueCard from '../components/ValueCard';
 import VerticalChevrons from '../components/VerticalChevrons';
+import { COLORS } from '../constants/theme';
+import type { CreateValue, DeleteValue, MainProps, SwitchValues, UpdateHabit, UpdateValue } from '../types';
 
 interface ValuesScreenProps {
   data: MainProps | null;
@@ -105,7 +105,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
             style={styles.backArrowContainer}
             onPress={() => router.replace(`/day/${dateIndex}/habits`)}
           >
-            <AntDesign name="arrowleft" size={30} color={COLORS.text} />
+            <AntDesign name="arrow-left" size={30} color={COLORS.text} />
           </TouchableOpacity>
           <TextInput
             ref={inputRef}

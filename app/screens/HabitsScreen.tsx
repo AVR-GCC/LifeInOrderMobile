@@ -1,12 +1,12 @@
+import { AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
-import Screen from '../components/Screen';
 import HabitCard from '../components/HabitCard';
+import Screen from '../components/Screen';
+import TitleBar from '../components/TitleBar';
 import { COLORS } from '../constants/theme';
 import type { CreateHabit, DeleteHabit, MainProps, SwitchHabits } from '../types';
-import TitleBar from '../components/TitleBar';
 
 interface HabitsScreenProps {
   data: MainProps | null;
@@ -40,7 +40,7 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
             if (habits.length !== 0) router.replace(`/day/${dateIndex}`)
           }}
         >
-          <AntDesign name="arrowleft" size={30} color={COLORS.text} />
+          <AntDesign name="arrow-left" size={30} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={styles.title}>Habits</Text>
       </TitleBar>
