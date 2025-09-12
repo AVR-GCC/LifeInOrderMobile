@@ -201,6 +201,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   };
 
   const onTouchesUp = (arg: { allTouches: { absoluteY: number }[] }) => {
+    setStartValues([]);
     runOnJS(setScale)(navigationValue.value.zoom.current.scale);
     runOnJS(setScroll)(navigationValue.value.scroll.current.offset);
   };
