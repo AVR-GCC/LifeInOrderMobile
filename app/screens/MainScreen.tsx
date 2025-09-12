@@ -40,7 +40,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
 
   const animatedListStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateY: -navigationValue.value.scroll.current.offset },
+      { translateY: navigationValue.value.scroll.current.offset },
       { scaleY: navigationValue.value.zoom.current.scale },
     ],
   }));
@@ -58,7 +58,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
         || startZoom.scale === null
         || scroll.location === null
       ) return;
-      const newScroll = (startScroll.location + startScroll.offset) * zoom.scale / startZoom.scale - scroll.location;
+      const startLocation = height - 125 - startScroll.location;
+      const curLocation = height - 125 - scroll.location;
+      const newScroll = (startLocation + startScroll.offset) * zoom.scale / startZoom.scale - curLocation;
       if (newScroll < 0) return;
       navigationValue.value.scroll.current.offset = newScroll;
       runOnJS(setScroll)(newScroll);
@@ -234,15 +236,15 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   );
 
   const list = (dates: DayData[]) => (
-    <View style={{ display: 'flex', flexDirection: 'column-reverse' }}>
+    <View>
       {dates.map((item, index) => renderItem({ index }))}
     </View>
   );
 
   const listWindow = () => (
-    <View style={{ height: height - 125 }}>
+    <View style={{ display: 'flex', flexDirection: 'column-reverse', height: height - 125 }}>
       <GestureDetector gesture={gesture}>
-        <Animated.View style={[{ display: 'flex', flexDirection: 'column-reverse' }, animatedListStyle]}>
+        <Animated.View style={animatedListStyle}>
           {list(dates)}
           {/* <FlatList
             ref={flatListRef}
