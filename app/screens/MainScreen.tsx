@@ -243,7 +243,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   const listWindow = () => (
     <View style={{ display: 'flex', flexDirection: 'column-reverse', height: height - 125 }}>
       <GestureDetector gesture={gesture}>
-        <Animated.View style={animatedListStyle}>
+        <Animated.View style={[animatedListStyle, { transformOrigin: 'bottom center' }]}>
           {list(dates)}
           {/* <FlatList
             ref={flatListRef}
