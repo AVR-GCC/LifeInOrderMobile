@@ -249,7 +249,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   );
 
   const list = (dates: DayData[]) => (
-    <View>
+    <View style={{ display: 'flex', flexDirection: 'column-reverse' }}>
       {dates.map((item, index) => renderItem({ index }))}
     </View>
   );
