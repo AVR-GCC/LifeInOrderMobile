@@ -48,6 +48,27 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     ],
   }));
 
+  const fetchMoreData = () => {
+    if (data === null) return;
+    const lastDate = data.dates[data.dates.length - 1].date;
+    const dayBeforeLastDate = new Date(lastDate);
+    dayBeforeLastDate.setMonth(dayBeforeLastDate.getMonth() - 1);
+    dayBeforeLastDate.setDate(dayBeforeLastDate.getDate() - 1);
+    const dayBeforeString = dayBeforeLastDate.toISOString().split('T')[0];
+
+    loadMoreData(dayBeforeString, width);
+  };
+
+  const checkLoadMoreData = (offset: number, scale: number, days: number) => {
+    'worklet';
+    const topVisiblePixel = offset + height - 125;
+    const dayPixels = BASE_DAY_HEIGHT * scale;
+    const topVisibleDateIndex = Math.floor(topVisiblePixel / dayPixels);
+    if (days - topVisibleDateIndex < 20) {
+      runOnJS(fetchMoreData)();
+    }
+  }
+
   useAnimatedReaction(
     () => ({ scroll: navigationValue.value.scroll.current, zoom: navigationValue.value.zoom.current }),
     (newNavigationValue) => {
@@ -68,6 +89,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       if (newScroll < 0) return;
       navigationValue.value.scroll.current.offset = newScroll;
       runOnJS(setScroll)(newScroll);
+      if (data?.dates) {
+        checkLoadMoreData(newScroll, zoom.scale, data.dates.length);
+      }
     },
     [navigationValue, setScroll]
   );
@@ -96,16 +120,6 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   if (habits.length === 0) {
     return <Loading />;
   }
-
-  const fetchMoreData = () => {
-    const lastDate = dates[dates.length - 1].date;
-    const dayBeforeLastDate = new Date(lastDate);
-    dayBeforeLastDate.setMonth(dayBeforeLastDate.getMonth() - 1);
-    dayBeforeLastDate.setDate(dayBeforeLastDate.getDate() - 1);
-    const dayBeforeString = dayBeforeLastDate.toISOString().split('T')[0];
-    
-    loadMoreData(dayBeforeString, width);
-  };
 
   const setStartValues = (touches: { absoluteY: number }[]) => {
     'worklet';

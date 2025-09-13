@@ -54,6 +54,7 @@ const AppContext = createContext<AppContextType | null>(null);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [data, setData] = useState<MainProps | null>(null);
+  const loadingDataRef = useRef(false);
   const [scale, setScale] = useState(1.0);
   const debouncedSetScale = debounce((newScale: number) => {
     setScale(newScale);
@@ -65,6 +66,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const getScroll = () => scrollRef.current;
 
   const loadInitialData = async () => {
+    if (loadingDataRef.current) return;
+    loadingDataRef.current = true;
     const [dates, habits] = await Promise.all([
       getUserList(new Date().toISOString().split('T')[0], 'day', 1080),
       getUserConfig()
@@ -72,6 +75,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (dates && habits) {
       setData(loadInitialDataReducer({ dates, habits })());
     }
+    loadingDataRef.current = false;
   };
 
   useEffect(() => {
@@ -80,11 +84,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const loadMoreData = async (date: string, width: number) => {
     if (data === null) return;
+    if (loadingDataRef.current) return;
+    loadingDataRef.current = true;
     const res = await getUserList(date, 'day', width);
     if (res) {
       const newData = loadMoreDataReducer(data)(res);
       setData(newData);
     }
+    loadingDataRef.current = false;
   };
   const setDayHabitValue = (dateIndex: number, habitIndex: number, valueId: string) => {
     if (data === null) return;
