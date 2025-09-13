@@ -10,6 +10,8 @@ import { COLORS } from '../constants/theme';
 import { useAppContext } from '../context/AppContext';
 import { DayData, MainScreenProps, NavigationValues } from '../types';
 
+const BASE_DAY_HEIGHT = 24;
+
 const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitValue }) => {
   const { loadMoreData, scale, setScale, setScroll, getScroll } = useAppContext();
   const router = useRouter();
@@ -326,7 +328,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flexDirection: 'row',
-    height: 24
+    height: BASE_DAY_HEIGHT,
   },
   leftBar: {
     backgroundColor: COLORS.colorOne,
