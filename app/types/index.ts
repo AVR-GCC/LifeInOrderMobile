@@ -53,6 +53,7 @@ export interface NavigationValues {
       offset: number;
     }
   };
+  touchCount: number;
 }
   
 

@@ -36,6 +36,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
         distance: null,
       }
     },
+    touchCount: 0,
   });
 
   const animatedListStyle = useAnimatedStyle(() => ({
@@ -61,6 +62,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       const startLocation = height - 125 - startScroll.location;
       const curLocation = height - 125 - scroll.location;
       const newScroll = (startLocation + startScroll.offset) * zoom.scale / startZoom.scale - curLocation;
+      
       if (newScroll < 0) return;
       navigationValue.value.scroll.current.offset = newScroll;
       runOnJS(setScroll)(newScroll);
@@ -112,32 +114,34 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       // Switch to zoom mode
       const distance = touches[0].absoluteY - touches[1].absoluteY;
       const location = (touches[0].absoluteY + touches[1].absoluteY) / 2;
-      const newZoomStart = {
-        scale: scale, // Note: you might need to use a shared value for scale here
-        distance,
-      };
-      const newScrollStart = {
-        location,
-        offset,
-      };
+      const newZoomStart = { scale, distance };
+      const newScrollStart = { location, offset };
       navigationValue.value = {
         zoom: {
           start: newZoomStart,
-          current: navigationValue.value.zoom.current,
+          current: newZoomStart,
         },
         scroll: {
           start: newScrollStart,
-          current: navigationValue.value.scroll.current,
+          current: newScrollStart,
         },
+        touchCount,
       };
     } else {
       const location = touches.length === 1 ? touches[0].absoluteY : null;
-      const newScrollStart = {
-        location,
-        offset,
+      const newScrollStart = { location, offset };
+      const newZoomStart = { scale: navigationValue.value.zoom.current.scale, distance: navigationValue.value.zoom.start.distance };
+      navigationValue.value = {
+        zoom: {
+          start: newZoomStart,
+          current: newZoomStart,
+        },
+        scroll: {
+          start: newScrollStart,
+          current: newScrollStart,
+        },
+        touchCount,
       };
-      navigationValue.value.scroll.start = newScrollStart;
-      navigationValue.value.zoom.start.scale = navigationValue.value.zoom.current.scale;
     }
   }
 
@@ -152,7 +156,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     if (touchCount >= 2) {
       if (
         navigationValue.value.zoom.start.distance === null ||
-        navigationValue.value.zoom.start.scale === null
+        navigationValue.value.zoom.start.scale === null ||
+        navigationValue.value.touchCount !== 2
       ) {
         setStartValues(arg.allTouches);
         return;
@@ -180,10 +185,15 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
             offset: navigationValue.value.scroll.current.offset,
           },
         },
+        touchCount,
       };
       runOnJS(setScale)(newScale);
     } else if (touchCount === 1) {
-      if (navigationValue.value.scroll.start.location === null || navigationValue.value.scroll.start.offset === null) {
+      if (
+        navigationValue.value.scroll.start.location === null
+        || navigationValue.value.scroll.start.offset === null
+        || navigationValue.value.touchCount !== 1
+      ) {
         setStartValues(arg.allTouches);
         return;
       }
@@ -196,6 +206,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
             offset: navigationValue.value.scroll.current.offset,
           },
         },
+        touchCount,
       };
     }
   };
