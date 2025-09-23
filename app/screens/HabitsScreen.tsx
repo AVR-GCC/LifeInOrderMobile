@@ -27,7 +27,6 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
     );
   }
 
-  const dateIndex = parseInt(date.toString(), 10);
   const { habits } = data;
 
   return (
@@ -37,7 +36,7 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
           style={[styles.backArrowContainer, habits.length === 0 && { opacity: 0 }]}
           activeOpacity={habits.length === 0 ? 0 : 1}
           onPress={() => {
-            if (habits.length !== 0) router.replace(`/day/${dateIndex}`)
+            if (habits.length !== 0) router.replace(`/day/${date}`)
           }}
         >
           <AntDesign name="arrow-left" size={30} color={COLORS.text} />
@@ -56,7 +55,7 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
             editHabit={() => {}}
             createHabit={async () => {
               await createHabit(habits[habits.length - 1]?.habit?.sequence || 1);
-              router.replace(`/day/${dateIndex}/habits/${habits.length}`)
+              router.replace(`/day/${date}/habits/${habits.length}`)
             }}
           />
           {habits.map((h, index) => (
@@ -67,7 +66,7 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
               totalHabits={habits.length}
               switchHabits={switchHabits}
               deleteHabit={deleteHabit}
-              editHabit={() => router.replace(`/day/${dateIndex}/habits/${index}`)}
+              editHabit={() => router.replace(`/day/${date}/habits/${index}`)}
               createHabit={() => {}}
             />
           ))}

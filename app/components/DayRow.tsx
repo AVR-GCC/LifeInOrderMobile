@@ -6,22 +6,25 @@ export const UNFILLED_COLOR = '#555555';
 
 interface DayRowProps {
   dayIndex: number; 
+  monthIndex: number; 
   habits: HabitWithValues[];
   getDayHabitValue: GetDayHabitValue;
 }
 
 function DayRow({
   dayIndex,
+  monthIndex,
   habits,
   getDayHabitValue
 }: DayRowProps) {
+  const key = `${dayIndex}-${monthIndex}`;
   return (
     <View
-      key={dayIndex}
+      key={key}
       style={styles.dayRow}
     >
       {habits.map((h, habitIndex) => {
-        const valueId = getDayHabitValue(dayIndex, habitIndex);
+        const valueId = getDayHabitValue(dayIndex, monthIndex, habitIndex);
         let background = UNFILLED_COLOR;
         if (valueId !== null) {
           const valueIndex = h.values_hashmap[valueId];

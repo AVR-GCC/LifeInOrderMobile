@@ -20,7 +20,8 @@ export const getUserConfig = async () => {
 export const getUserList = async (date: string, zoom: string, width: number) => {
   try {
     const route = `${baseUrl}/users/1/list?date=${date}&zoom=${zoom}&width=${width}`;
-    const res = await axios.get(route);
+    const config = zoom !== 'day' ? { responseType: 'arraybuffer' as const } : {};
+    const res = await axios.get(route, config);
     if (res.data) {
       return res.data;
     }

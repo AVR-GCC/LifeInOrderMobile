@@ -76,7 +76,6 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
     };
   }, [targetY, scroll]);
 
-  const dateIndex = parseInt(date.toString(), 10);
   const habitIndex = parseInt(habit.toString(), 10);
   const { habits } = data;
 
@@ -103,7 +102,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
         <View style={styles.titleContainer}>
           <TouchableOpacity
             style={styles.backArrowContainer}
-            onPress={() => router.replace(`/day/${dateIndex}/habits`)}
+            onPress={() => router.replace(`/day/${date}/habits`)}
           >
             <AntDesign name="arrow-left" size={30} color={COLORS.text} />
           </TouchableOpacity>

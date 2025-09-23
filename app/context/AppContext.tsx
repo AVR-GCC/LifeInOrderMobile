@@ -32,8 +32,8 @@ import type { DeleteValue, Habit, MainProps, Value } from '../types';
 
 interface AppContextType {
   data: MainProps | null;
-  setDayHabitValue: (dateIndex: number, habitIndex: number, valueId: string) => void;
-  getDayHabitValue: (dateIndex: number, habitIndex: number) => string | null;
+  setDayHabitValue: (dateIndex: number, monthIndex: number, habitIndex: number, valueId: string) => void;
+  getDayHabitValue: (dateIndex: number, monthIndex: number, habitIndex: number) => string | null;
   createHabit: (sequence: number) => Promise<null | undefined>;
   updateHabit: (habitIndex: number, newHabitValues: Partial<Habit>) => void;
   deleteHabit: (index: number) => void;
@@ -68,12 +68,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const loadInitialData = async () => {
     if (loadingDataRef.current) return;
     loadingDataRef.current = true;
+    const today = new Date().toISOString().split('T')[0];
+
     const [dates, habits] = await Promise.all([
-      getUserList(new Date().toISOString().split('T')[0], 'day', 1080),
+      getUserList(today, 'day', 1080),
       getUserConfig()
     ]);
     if (dates && habits) {
-      setData(loadInitialDataReducer({ dates, habits })());
+      setData(loadInitialDataReducer()(dates, habits));
     }
     loadingDataRef.current = false;
   };
@@ -88,21 +90,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadingDataRef.current = true;
     const res = await getUserList(date, 'day', width);
     if (res) {
-      const newData = loadMoreDataReducer(data)(res);
+      const newData = loadMoreDataReducer(data)(date, 'day', res);
       setData(newData);
     }
     loadingDataRef.current = false;
   };
-  const setDayHabitValue = (dateIndex: number, habitIndex: number, valueId: string) => {
+  const setDayHabitValue = (dateIndex: number, monthIndex: number, habitIndex: number, valueId: string) => {
     if (data === null) return;
     const { dates, habits } = data;
-    setDayValueServer(dates[dateIndex].date, habits[habitIndex].habit.id, valueId);
-    setData(setDayHabitValueReducer(data)(dateIndex, habitIndex, valueId));
+    const month = dates.day[monthIndex];
+    if ('value' in month) return;
+    setDayValueServer(month.days[dateIndex].date, habits[habitIndex].habit.id, valueId);
+    setData(setDayHabitValueReducer(data)(dateIndex, monthIndex, habitIndex, valueId));
   };
 
-  const getDayHabitValue = (dateIndex: number, habitIndex: number) => {
+  const getDayHabitValue = (dateIndex: number, monthIndex: number, habitIndex: number) => {
     if (data === null) return null;
-    return getDayHabitValueSelector(data)(dateIndex, habitIndex);
+    return getDayHabitValueSelector(data)(dateIndex, monthIndex, habitIndex);
   };
 
   const createHabit = async (sequence: number) => {

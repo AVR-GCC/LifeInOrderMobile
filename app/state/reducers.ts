@@ -1,21 +1,42 @@
-import type { DayData, Habit, MainProps, Value } from '../types';
+import { dateAndZoomToLowestDate } from '../constants/zoom';
+import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, zoomLevelData, ZoomScrollPosition } from '../types';
 
-export const loadInitialDataReducer = (data: MainProps) => () => {
-  return data;
+export const loadInitialDataReducer = () => (dayLevelData: MonthData[], habits: HabitWithValues[]) => {
+  const today = new Date().toISOString().split('T')[0];
+  const zoomScrollPosition: ZoomScrollPosition = {
+    mode: 0,
+    dayPixel: 24,
+    earliestDate: dateAndZoomToLowestDate(today, 'day')
+  };
+  const dates: DatesData = {
+    day: dayLevelData,
+    quarter: [],
+    half: [],
+    year: [],
+    two_year: []
+  };
+  return { dates, habits, zoomScrollPosition };
 };
 
-export const loadMoreDataReducer = (data: MainProps) => (newDates: DayData[]) => {
-  return { habits: data.habits, dates: [...data.dates, ...newDates] };
+export const loadMoreDataReducer = (data: MainProps) => (date: string, zoom: string, newData: zoomLevelData[]) => {
+  const existingZoomLevelData = data.dates[zoom];
+  const newZoomLevelData = existingZoomLevelData[0].date > date ? [...newData, ...existingZoomLevelData] : [...existingZoomLevelData, ...newData];
+  const dates = { ...data.dates, [zoom]: newZoomLevelData };
+  return { ...data, dates };
 };
 
-export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, habitIndex: number, valueId: string) => {
-  const newData = { ...data };
-  const newDates = [...newData.dates];
-  const newDate = { ...newDates[dateIndex] };
+export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, monthIndex: number, habitIndex: number, valueId: string) => {
+  const dates = { ...data.dates };
+  const newDayZoomData = [...dates.day];
+  const newMonth = { ...newDayZoomData[monthIndex] };
+  if ('value' in newMonth) return data;
+  const newDate = { ...newMonth.days[dateIndex] };
   const habitId = data.habits[habitIndex].habit.id;
   newDate.values = { ...newDate.values, [habitId]: valueId };
-  newDates[dateIndex] = newDate;
-  return { habits: newData.habits, dates: newDates };
+  newMonth.days[dateIndex] = newDate;
+  newDayZoomData[monthIndex] = newMonth;
+  dates.day = newDayZoomData;
+  return { ...data, dates };
 };
 
 export const addHabitReducer = (data: MainProps) => (habit: Habit) => {

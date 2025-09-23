@@ -20,6 +20,9 @@ interface DayScreenProps {
 
 const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue, setDayHabitValue }) => {
   const { date } = useLocalSearchParams();
+  const [dayIndexString, monthIndexString] = Array.isArray(date) ? date : date.split('-');
+  const dayIndex = parseInt(dayIndexString, 10);
+  const monthIndex = parseInt(monthIndexString, 10);
   const router = useRouter();
 
   if (data === null || date === undefined) {
@@ -33,8 +36,34 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
   const dateIndex = parseInt(date.toString(), 10);
   const { dates, habits } = data;
 
+  if ('value' in dates.day[monthIndex]) {
+    return <Screen />;
+  }
+
   const handleChevronPress = (isDown: boolean) => {
-    router.replace(`/day/${dateIndex + (isDown ? 1 : -1)}`);
+    let newDateIndex = dateIndex + (isDown ? 1 : -1);
+    let newMonthIndex = monthIndex;
+    let newMonth = dates.day[newMonthIndex];
+    if ('value' in newMonth) {
+      return;
+    }
+    if (newDateIndex < 0) {
+      newMonthIndex -= 1;
+      newMonth = dates.day[newMonthIndex];
+      if ('value' in newMonth) {
+        return;
+      }
+      newDateIndex = newMonth.days.length - 1;
+    }
+    if (newDateIndex === newMonth.days.length) {
+      newMonthIndex += 1;
+      newMonth = dates.day[newMonthIndex];
+      if ('value' in newMonth) {
+        return;
+      }
+      newDateIndex = 0;
+    }
+    router.replace(`/day/${newDateIndex}-${newMonthIndex}`);
   };
 
   return (
@@ -47,20 +76,20 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
           <AntDesign name="arrow-left" size={30} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={styles.dayTitle}>
-          {dayNames[moment(dates[dateIndex].date).day()]}, {moment(dates[dateIndex].date).format('MMMM DD, YYYY')}
+          {dayNames[moment(dates.day[monthIndex].days[dayIndex].date).day()]}, {moment(dates.day[monthIndex].days[dayIndex].date).format('MMMM DD, YYYY')}
         </Text>
         <View style={styles.rightIcons}>
           <TouchableOpacity
             style={styles.settingsButtonContainer}
-            onPress={() => router.replace(`/day/${dateIndex}/habits`)}
+            onPress={() => router.replace(`/day/${date}/habits`)}
           >
             <AntDesign name="setting" size={30} color={COLORS.text} />
           </TouchableOpacity>
           <View style={styles.verticalChevronsContainer}>
             <VerticalChevrons
               onPress={handleChevronPress}
-              upDisabled={dateIndex === 0}
-              downDisabled={dateIndex === dates.length - 1}
+              upDisabled={dateIndex === 0 && monthIndex === 0}
+              downDisabled={dateIndex === dates.day[monthIndex].days.length - 1 && monthIndex === dates.day.length - 1}
             />
           </View>
         </View>
@@ -68,7 +97,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
       <View style={styles.dayContainer}>
         <ScrollView style={styles.scrollContainer}>
           {habits.map((h, habitIndex) => {
-            const valueId = getDayHabitValue(dateIndex, habitIndex);
+            const valueId = getDayHabitValue(dateIndex, monthIndex, habitIndex);
             const valueIndex = valueId === null ? null : h.values_hashmap[valueId];
             const value = valueIndex === null ? null : h.values[valueIndex];
             
@@ -80,7 +109,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
                 onPress={() => {
                   const nextIndex = valueIndex === null ? 0 : (valueIndex + 1) % h.values.length;
                   const nextValue = h.values[nextIndex];
-                  if (nextValue) setDayHabitValue(dateIndex, habitIndex, nextValue.id);
+                  if (nextValue) setDayHabitValue(dateIndex, monthIndex, habitIndex, nextValue.id);
                 }}
               >
                 <Text style={styles.habitTitle}>{h.habit.name}</Text>

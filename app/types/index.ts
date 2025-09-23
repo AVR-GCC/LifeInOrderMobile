@@ -27,9 +27,30 @@ export interface DayData {
   values: { [habitId: string]: string };
 }
 
+export interface MonthData {
+  date: string;
+  days: DayData[];
+}
+
+export interface TimePeriodData {
+  date: string;
+  value: string;
+}
+
+export type zoomLevelData = MonthData | TimePeriodData;
+
+export type DatesData = { [key: string]: zoomLevelData[] };
+
+export interface ZoomScrollPosition {
+  mode: number;
+  dayPixel: number;
+  earliestDate: string;
+}
+
 export interface MainProps {
   habits: HabitWithValues[];
-  dates: DayData[];
+  dates: DatesData;
+  zoomScrollPosition: ZoomScrollPosition;
 }
 
 export interface NavigationValues {
@@ -57,8 +78,8 @@ export interface NavigationValues {
 }
   
 
-export type GetDayHabitValue = (dateIndex: number, habitIndex: number) => string | null;
-export type SetDayValue = (dateIndex: number, habitIndex: number, valueId: string) => void;
+export type GetDayHabitValue = (dateIndex: number, monthIndex: number, habitIndex: number) => string | null;
+export type SetDayValue = (dateIndex: number, monthIndex: number, habitIndex: number, valueId: string) => void;
 export type CreateHabit = (sequence: number) => Promise<null | undefined>;
 export type UpdateHabit = (habitIndex: number, newValueValues: Partial<Habit>) => void;
 export type DeleteHabit = (index: number) => void;

@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
@@ -7,8 +7,9 @@ import DayRow from '../components/DayRow';
 import Loading from '../components/Loading';
 import Screen from '../components/Screen';
 import { COLORS } from '../constants/theme';
+import { modes } from '../constants/zoom';
 import { useAppContext } from '../context/AppContext';
-import { DayData, MainScreenProps, NavigationValues } from '../types';
+import { MainScreenProps, NavigationValues, zoomLevelData } from '../types';
 
 const BASE_DAY_HEIGHT = 24;
 
@@ -50,7 +51,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
 
   const fetchMoreData = () => {
     if (data === null) return;
-    const lastDate = data.dates[data.dates.length - 1].date;
+    const lastDate = data.dates.day[0].date;
     const dayBeforeLastDate = new Date(lastDate);
     dayBeforeLastDate.setMonth(dayBeforeLastDate.getMonth() - 1);
     dayBeforeLastDate.setDate(dayBeforeLastDate.getDate() - 1);
@@ -60,14 +61,23 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   };
 
   const checkLoadMoreData = (offset: number, scale: number, days: number) => {
-    'worklet';
     const topVisiblePixel = offset + height - 125;
     const dayPixels = BASE_DAY_HEIGHT * scale;
     const topVisibleDateIndex = Math.floor(topVisiblePixel / dayPixels);
     if (days - topVisibleDateIndex < 20) {
-      runOnJS(fetchMoreData)();
+      fetchMoreData();
     }
   }
+
+  const totalDays = useMemo(() => {
+    if (!data?.dates) return 0;
+    let total = 0;
+    for (const month of data.dates.day) {
+      if ('value' in month) continue;
+      total += month.days.length;
+    }
+    return total;
+  }, [data?.dates]);
 
   useAnimatedReaction(
     () => ({ scroll: navigationValue.value.scroll.current, zoom: navigationValue.value.zoom.current }),
@@ -89,11 +99,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       if (newScroll < 0) return;
       navigationValue.value.scroll.current.offset = newScroll;
       runOnJS(setScroll)(newScroll);
-      if (data?.dates) {
-        checkLoadMoreData(newScroll, zoom.scale, data.dates.length);
-      }
+      runOnJS(checkLoadMoreData)(newScroll, zoom.scale, totalDays);
     },
-    [navigationValue, setScroll]
+    [navigationValue, setScroll, totalDays]
   );
 
   useEffect(() => {
@@ -111,7 +119,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     return <Loading />;
   }
 
-  const { dates, habits } = data;
+  const { dates, habits, zoomScrollPosition } = data;
 
   if (!dates) {
     return <Loading />;
@@ -239,32 +247,41 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     .onTouchesUp(onTouchesUp)
     .onTouchesCancelled(onTouchesUp);
  
-  const renderItem = ({ index }: { index: number }) => (
-    <View
-      key={index}
-      style={styles.content}
-    >
-      <View key="leftBar" style={styles.leftBar}>
-        <TouchableOpacity
-          key={index}
-          onPress={() => router.replace(`/day/${index}`)}
-          style={styles.dayMarker}
-        />
+  const renderItem = ({ dayIndex, monthIndex }: { dayIndex: number, monthIndex: number }) => {
+    const key = `${dayIndex}-${monthIndex}`;
+    return (
+      <View
+        key={key}
+        style={styles.content}
+      >
+        <View key="leftBar" style={styles.leftBar}>
+          <TouchableOpacity
+            key={key}
+            onPress={() => router.replace(`/day/${key}`)}
+            style={styles.dayMarker}
+          />
+        </View>
+        <View key="dayContainer" style={styles.dayContainer}>
+          <DayRow
+            key={`${key}_day`}
+            dayIndex={dayIndex}
+            monthIndex={monthIndex}
+            habits={habits}
+            getDayHabitValue={getDayHabitValue}
+          />
+        </View>
       </View>
-      <View key="dayContainer" style={styles.dayContainer}>
-        <DayRow
-          key={`${index}_day`}
-          dayIndex={index}
-          habits={habits}
-          getDayHabitValue={getDayHabitValue}
-        />
-      </View>
-    </View>
-  );
+    );
+  }
 
-  const list = (dates: DayData[]) => (
-    <View style={{ display: 'flex', flexDirection: 'column-reverse' }}>
-      {dates.map((item, index) => renderItem({ index }))}
+  const list = (dates: zoomLevelData[]) => (
+    <View style={{ display: 'flex', flexDirection: 'column' }}>
+      {dates.map((item, index) => {
+        if ('days' in item) {
+          return item.days.map((_day, dayIndex) => renderItem({ dayIndex, monthIndex: index }));
+        }
+        return null;
+      })}
     </View>
   );
 
@@ -272,7 +289,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     <View style={{ display: 'flex', flexDirection: 'column-reverse', height: height - 125 }}>
       <GestureDetector gesture={gesture}>
         <Animated.View style={[animatedListStyle, { transformOrigin: 'bottom center' }]}>
-          {list(dates)}
+          {list(dates[modes[zoomScrollPosition.mode].id])}
           {/* <FlatList
             ref={flatListRef}
             onScroll={handleScroll}
