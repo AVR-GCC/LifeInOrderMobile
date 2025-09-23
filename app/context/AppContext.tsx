@@ -95,6 +95,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     loadingDataRef.current = false;
   };
+
   const setDayHabitValue = (dateIndex: number, monthIndex: number, habitIndex: number, valueId: string) => {
     if (data === null) return;
     const { dates, habits } = data;
