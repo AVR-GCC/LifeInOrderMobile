@@ -70,6 +70,7 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
               createHabit={() => {}}
             />
           ))}
+          <View style={styles.bottomBuffer} />
         </ScrollView>
       </View>
     </Screen>
@@ -104,6 +105,9 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     padding: 20,
+  },
+  bottomBuffer: {
+    height: 70,
   },
 });
 

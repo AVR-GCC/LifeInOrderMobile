@@ -117,6 +117,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
               </TouchableOpacity>
             );
           })}
+          <View style={styles.bottomBuffer} />
         </ScrollView>
       </View>
     </Screen>
@@ -198,6 +199,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '400',
     color: '#444',
+  },
+  bottomBuffer: {
+    height: 50,
   },
 });
 

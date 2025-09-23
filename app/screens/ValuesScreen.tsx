@@ -197,6 +197,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
             />
           ))}
           <View style={{ height: keyboardHeight }} />
+          <View style={styles.bottomBuffer} />
         </ScrollView>
       </View>
     </Screen>
@@ -277,6 +278,9 @@ const styles = StyleSheet.create({
     color: COLORS.colorOne,
     borderColor: 'black',
     borderWidth: 1,
+  },
+  bottomBuffer: {
+    height: 50,
   },
 });
 
