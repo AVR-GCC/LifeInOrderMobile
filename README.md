@@ -1,50 +1,80 @@
-# Welcome to your Expo app 👋
+# LifeInOrderMobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native habit tracking app with a visual grid interface for tracking daily habits and their states.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **Visual Grid View** - Calendar-style grid with habits as columns and days as rows
+- **Custom Habits** - Create, edit, reorder, and delete habits with configurable weights
+- **Color-Coded Values** - Each habit supports multiple values/states with customizable colors and labels
+- **Pinch-to-Zoom** - Scale the grid view with gesture controls
+- **Day Detail View** - View and edit all habit values for a specific day
+- **Infinite Scroll** - Lazy loading of historical data
 
-   ```bash
-   npm install
-   ```
+## Tech Stack
 
-2. Start the app
+| Category | Technology |
+|----------|------------|
+| Framework | React Native 0.81 |
+| Platform | Expo SDK 54 |
+| Language | TypeScript |
+| Navigation | Expo Router |
+| State | React Context API |
+| HTTP | Axios |
+| Animations | React Native Reanimated |
 
-   ```bash
-   npx expo start
-   ```
+## Getting Started
 
-In the output, you'll find options to open the app in a
+### Prerequisites
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- Node.js
+- npm or yarn
+- Expo CLI
+- iOS Simulator / Android Emulator / Physical device with Expo Go
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### Installation
 
 ```bash
-npm run reset-project
+# Install dependencies
+npm install
+
+# Start the development server
+npm start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Running the App
 
-## Learn more
+```bash
+npm run android    # Run on Android
+npm run ios        # Run on iOS
+npm run web        # Run on web
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## Project Structure
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```
+app/
+├── api/           # API client
+├── components/    # Reusable UI components
+├── constants/     # Theme and zoom configurations
+├── context/       # Global state (AppContext)
+├── day/           # Day-related routes
+├── screens/       # Main screen components
+├── state/         # Reducers and selectors
+└── types/         # TypeScript definitions
+```
 
-## Join the community
+## Backend
 
-Join our community of developers creating universal apps.
+The app requires a REST API server. Configure the server URL in `app/api/client.ts`.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### API Endpoints
+
+- `GET /users/:id/config` - User habits configuration
+- `GET /users/:id/list` - Habit data for date range
+- `POST /day_values` - Set habit value for a date
+- CRUD endpoints for habits and values
+
+## License
+
+MIT
