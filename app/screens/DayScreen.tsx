@@ -36,6 +36,10 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
   const dateIndex = parseInt(date.toString(), 10);
   const { dates, habits } = data;
 
+  if (!dates.day[monthIndex]) {
+    return <Screen />;
+  }
+
   if ('value' in dates.day[monthIndex]) {
     return <Screen />;
   }
