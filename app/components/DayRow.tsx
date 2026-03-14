@@ -52,10 +52,12 @@ const styles = StyleSheet.create({
   dayRow: {
     display: 'flex',
     flexDirection: 'row',
-    height: '100%' // Fill the parent container's height
+    height: '100%'
   },
   square: {
-    height: '100%', // Fill the row's height
+    borderRadius: 2,
+    height: 'calc(100 - 1px)%',
+    margin: 1
   },
 });
 
