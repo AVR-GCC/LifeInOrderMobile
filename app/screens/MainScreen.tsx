@@ -294,19 +294,6 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       <GestureDetector gesture={gesture}>
         <Animated.View style={[animatedListStyle, { transformOrigin: 'bottom center' }]}>
           {list(dates[modes[zoomScrollPosition.mode].id])}
-          {/* <FlatList
-            ref={flatListRef}
-            onScroll={handleScroll}
-            data={dates}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.date}
-            showsVerticalScrollIndicator={false}
-            inverted
-            onEndReached={fetchMoreData}
-            onEndReachedThreshold={0.5}
-            scrollEnabled={!navigationValues.isZooming}
-            getItemLayout={getItemLayout}
-          /> */}
         </Animated.View>
       </GestureDetector>
     </View>
