@@ -13,6 +13,7 @@ import { useAppContext } from '../context/AppContext';
 import { MainScreenProps, NavigationValues, zoomLevelData } from '../types';
 
 const BASE_DAY_HEIGHT = 24;
+const LEFT_BAR_WIDTH = 40;
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitValue }) => {
   const { loadMoreData, scale, setScale, setScroll, getScroll } = useAppContext();
@@ -345,7 +346,7 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row',
     backgroundColor: COLORS.colorOne,
-    paddingLeft: 30, // leftBarWidth
+    paddingLeft: LEFT_BAR_WIDTH,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.133)',
     zIndex: 1,
@@ -368,7 +369,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.colorOne,
     paddingLeft: 10,
     paddingRight: 5,
-    width: 40, // leftBarWidth
+    width: LEFT_BAR_WIDTH,
   },
   dayMarker: {
     flex: 1,
