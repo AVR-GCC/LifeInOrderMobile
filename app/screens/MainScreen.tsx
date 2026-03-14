@@ -3,6 +3,7 @@ import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Octicons from '@expo/vector-icons/Octicons';
 import DayRow from '../components/DayRow';
 import Loading from '../components/Loading';
 import Screen from '../components/Screen';
@@ -260,7 +261,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
             onPress={() => router.replace(`/day/${key}`)}
             style={styles.dayMarker}
           >
-            <Text style={styles.dash}>-</Text>
+            <Octicons name="dash" size={24} color={COLORS.text} />
           </TouchableOpacity>
         </View>
         <View key="dayContainer" style={styles.dayContainer}>
@@ -367,17 +368,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.colorOne,
     paddingLeft: 10,
     paddingRight: 5,
-    width: 30, // leftBarWidth
+    width: 40, // leftBarWidth
   },
   dayMarker: {
     flex: 1,
-  },
-  dash: {
-    marginTop: -3,
-    marginRight: 10,
-    color: COLORS.text,
-    fontSize: 20,
-    transform: [{ scaleX: 2 }]
   },
   dayContainer: {
     flex: 1,
