@@ -259,7 +259,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
             key={key}
             onPress={() => router.replace(`/day/${key}`)}
             style={styles.dayMarker}
-          />
+          >
+            <Text style={styles.dash}>-</Text>
+          </TouchableOpacity>
         </View>
         <View key="dayContainer" style={styles.dayContainer}>
           <DayRow
@@ -369,8 +371,13 @@ const styles = StyleSheet.create({
   },
   dayMarker: {
     flex: 1,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.colorFour,
+  },
+  dash: {
+    marginTop: -3,
+    marginRight: 10,
+    color: COLORS.text,
+    fontSize: 20,
+    transform: [{ scaleX: 2 }]
   },
   dayContainer: {
     flex: 1,
