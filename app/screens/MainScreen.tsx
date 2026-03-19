@@ -170,7 +170,10 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     } else {
       const location = touches.length === 1 ? touches[0].absoluteY : null;
       const newScrollStart = { location, offset };
-      const newZoomStart = { scale: navigationValue.value.zoom.current.scale, distance: navigationValue.value.zoom.start.distance };
+      const newZoomStart = {
+        scale: navigationValue.value.zoom.current.scale,
+        distance: navigationValue.value.zoom.start.distance
+      };
       navigationValue.value = {
         zoom: {
           start: newZoomStart,
@@ -306,7 +309,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   const listWindow = () => (
     <View style={{ display: 'flex', flexDirection: 'column-reverse', height: height - 125 }}>
       <GestureDetector gesture={gesture}>
-        <Animated.View style={animatedListStyle}>
+        <Animated.View style={[animatedListStyle, { transformOrigin: 'bottom center' }]}>
           {list(dates[modes[zoomScrollPosition.mode].id])}
         </Animated.View>
       </GestureDetector>
