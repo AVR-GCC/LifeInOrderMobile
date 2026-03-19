@@ -16,7 +16,7 @@ import { MainScreenProps, NavigationValues, zoomLevelData } from '../types';
 const BASE_DAY_HEIGHT = 24;
 const LEFT_BAR_WIDTH = 40;
 
-const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitValue }) => {
+const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ data, getDayHabitValue }) {
   const { loadMoreData, scale, setScale, setScroll, getScroll } = useAppContext();
   const router = useRouter();
   const { height, width } = useWindowDimensions();
@@ -115,6 +115,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
           router.replace('/day/0/habits');
         }
       });
+      if (!zoomScrollPosition.dayPixel || !daysToLast || !height) return;
       const newScroll = (zoomScrollPosition.dayPixel + 2) * daysToLast - (height / 2);
       setScroll(newScroll);
       navigationValue.value = {
@@ -129,6 +130,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
         touchCount: navigationValue.value.touchCount,
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   if (data === null) {
@@ -254,7 +256,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
     }
   };
 
-  const onTouchesUp = (arg: { allTouches: { absoluteY: number }[] }) => {
+  // const onTouchesUp = (arg: { allTouches: { absoluteY: number }[] }) => {
+  const onTouchesUp = () => {
     setStartValues([]);
     scheduleOnRN(setScale, navigationValue.value.zoom.current.scale);
     scheduleOnRN(setScroll, navigationValue.value.scroll.current.offset);

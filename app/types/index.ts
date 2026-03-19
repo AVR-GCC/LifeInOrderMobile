@@ -51,7 +51,7 @@ export interface MainProps {
   habits: HabitWithValues[];
   dates: DatesData;
   zoomScrollPosition: ZoomScrollPosition;
-  daysToLast: string;
+  daysToLast: number;
 }
 
 export interface NavigationValues {
