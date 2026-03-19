@@ -1,12 +1,17 @@
 import { dateAndZoomToLowestDate } from '../constants/zoom';
 import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, zoomLevelData, ZoomScrollPosition } from '../types';
+import { last } from '../utils/general';
 
 export const loadInitialDataReducer = () => (dayLevelData: MonthData[], habits: HabitWithValues[]) => {
-  const today = new Date().toISOString().split('T')[0];
+  const todate = new Date();
+  const today = todate.toISOString().split('T')[0];
+  const earliestDate = dateAndZoomToLowestDate(today, 'day');
+  const lastDate = last(last(dayLevelData).days).date
+  const daysToLast = Math.ceil((new Date(lastDate) - todate) / (1000 * 60 * 60 * 24));
   const zoomScrollPosition: ZoomScrollPosition = {
     mode: 0,
     dayPixel: 24,
-    earliestDate: dateAndZoomToLowestDate(today, 'day')
+    earliestDate
   };
   const dates: DatesData = {
     day: dayLevelData,
@@ -15,7 +20,7 @@ export const loadInitialDataReducer = () => (dayLevelData: MonthData[], habits: 
     year: [],
     two_year: []
   };
-  return { dates, habits, zoomScrollPosition };
+  return { dates, habits, zoomScrollPosition, daysToLast };
 };
 
 export const loadMoreDataReducer = (data: MainProps) => (date: string, zoom: string, newData: zoomLevelData[]) => {

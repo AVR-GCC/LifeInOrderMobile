@@ -108,12 +108,25 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
 
   useEffect(() => {
     if (data !== null) {
-      const { habits } = data;
+      const { habits, daysToLast, zoomScrollPosition } = data;
       setTimeout(() => {
         if (habits.length === 0) {
           router.replace('/day/0/habits');
         }
       });
+      const newScroll = (zoomScrollPosition.dayPixel + 2) * daysToLast - (height / 2);
+      setScroll(newScroll);
+      navigationValue.value = {
+        zoom: navigationValue.value.zoom,
+        scroll: {
+          start: navigationValue.value.scroll.start,
+          current: {
+            location: navigationValue.value.scroll.current.location,
+            offset: newScroll,
+          },
+        },
+        touchCount: navigationValue.value.touchCount,
+      };
     }
   }, [data]);
 
@@ -292,7 +305,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
   const listWindow = () => (
     <View style={{ display: 'flex', flexDirection: 'column-reverse', height: height - 125 }}>
       <GestureDetector gesture={gesture}>
-        <Animated.View style={[animatedListStyle, { transformOrigin: 'bottom center' }]}>
+        <Animated.View style={animatedListStyle}>
           {list(dates[modes[zoomScrollPosition.mode].id])}
         </Animated.View>
       </GestureDetector>
