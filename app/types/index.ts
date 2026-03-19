@@ -90,6 +90,14 @@ export type DeleteValue = (habitIndex: number, valueIndex: number) => void;
 export type SwitchValues = (isDown: boolean, habitIndex: number, valueIndex: number) => void;
 export type UpdateValue = (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
 
+export type SeparatorType = 'today' | 'month' | 'year';
+
+export interface SeparatorData {
+  dayOffset: number;
+  type: SeparatorType;
+  label: string;
+}
+
 export interface MainScreenProps {
   data: MainProps | null;
   getDayHabitValue: GetDayHabitValue;

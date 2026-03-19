@@ -8,13 +8,15 @@ import Octicons from '@expo/vector-icons/Octicons';
 import DayRow from '../components/DayRow';
 import Loading from '../components/Loading';
 import Screen from '../components/Screen';
+import Separators from '../components/Separators';
 import { COLORS } from '../constants/theme';
 import { modes } from '../constants/zoom';
 import { useAppContext } from '../context/AppContext';
-import { MainScreenProps, NavigationValues, zoomLevelData } from '../types';
+import { MainScreenProps, NavigationValues, SeparatorData, zoomLevelData } from '../types';
 
 const BASE_DAY_HEIGHT = 24;
 const LEFT_BAR_WIDTH = 40;
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ data, getDayHabitValue }) {
   const { loadMoreData, scale, setScale, setScroll, getScroll } = useAppContext();
@@ -80,6 +82,56 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
       total += month.days.length;
     }
     return total;
+  }, [data?.dates]);
+
+  const separators = useMemo((): SeparatorData[] => {
+    if (!data?.dates?.day) return [];
+    const result: SeparatorData[] = [];
+    const today = new Date().toISOString().split('T')[0];
+    let dayOffset = 0;
+    let prevYear: number | null = null;
+
+    for (const month of data.dates.day) {
+      if ('value' in month) continue;
+      if (month.days.length === 0) continue;
+
+      // Month separator at the start of each month block
+      const firstDayDate = new Date(month.days[0].date + 'T00:00:00');
+      const monthNum = firstDayDate.getMonth();
+      const year = firstDayDate.getFullYear();
+
+      // Year separator when the year changes
+      if (prevYear !== null && year !== prevYear) {
+        result.push({
+          dayOffset,
+          type: 'year',
+          label: `${year}`,
+        });
+      }
+      prevYear = year;
+
+      // Month separator
+      result.push({
+        dayOffset,
+        type: 'month',
+        label: `${MONTH_NAMES[monthNum]} ${year}`,
+      });
+
+      // Check for today within this month's days
+      for (let i = 0; i < month.days.length; i++) {
+        if (month.days[i].date === today) {
+          result.push({
+            dayOffset: dayOffset + i,
+            type: 'today',
+            label: 'Today',
+          });
+        }
+      }
+
+      dayOffset += month.days.length;
+    }
+
+    return result;
   }, [data?.dates]);
 
   useAnimatedReaction(
@@ -309,10 +361,11 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   );
 
   const listWindow = () => (
-    <View style={{ display: 'flex', flexDirection: 'column-reverse', height: height - 125 }}>
+    <View style={{ display: 'flex', flexDirection: 'column-reverse', height: height - 125, overflow: 'hidden' }}>
       <GestureDetector gesture={gesture}>
         <Animated.View style={[animatedListStyle, { transformOrigin: 'bottom center' }]}>
           {list(dates[modes[zoomScrollPosition.mode].id])}
+          <Separators separators={separators} navigationValue={navigationValue} />
         </Animated.View>
       </GestureDetector>
     </View>
