@@ -115,7 +115,6 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
           router.replace('/day/0/habits');
         }
       });
-      if (!zoomScrollPosition.dayPixel || !daysToLast || !height) return;
       const newScroll = (zoomScrollPosition.dayPixel + 2) * daysToLast - (height / 2);
       setScroll(newScroll);
       navigationValue.value = {
