@@ -322,12 +322,16 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
  
   const renderItem = ({ dayIndex, monthIndex }: { dayIndex: number, monthIndex: number }) => {
     const key = `${dayIndex}-${monthIndex}`;
+    const monthData = dates.day[monthIndex];
+    const dayDate = 'days' in monthData ? monthData.days[dayIndex]?.date : null;
+    const dayOfWeek = dayDate ? new Date(dayDate + 'T00:00:00').getDay() : null;
+    const isWeekend = dayOfWeek === 5 || dayOfWeek === 6;
     return (
       <View
         key={key}
         style={styles.content}
       >
-        <View key="leftBar" style={styles.leftBar}>
+        <View key="leftBar" style={[styles.leftBar, isWeekend && styles.weekendRow]}>
           <TouchableOpacity
             key={key}
             onPress={() => router.replace(`/day/${key}`)}
@@ -425,7 +429,6 @@ const styles = StyleSheet.create({
     height: BASE_DAY_HEIGHT,
   },
   leftBar: {
-    backgroundColor: COLORS.colorOne,
     paddingLeft: 10,
     paddingRight: 5,
     width: LEFT_BAR_WIDTH,
@@ -435,6 +438,9 @@ const styles = StyleSheet.create({
   },
   dayContainer: {
     flex: 1,
+  },
+  weekendRow: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
 });
 
