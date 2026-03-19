@@ -2,7 +2,8 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedReaction, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import Octicons from '@expo/vector-icons/Octicons';
 import DayRow from '../components/DayRow';
 import Loading from '../components/Loading';
@@ -100,8 +101,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
       
       if (newScroll < 0) return;
       navigationValue.value.scroll.current.offset = newScroll;
-      runOnJS(setScroll)(newScroll);
-      runOnJS(checkLoadMoreData)(newScroll, zoom.scale, totalDays);
+      scheduleOnRN(setScroll, newScroll);
+      scheduleOnRN(checkLoadMoreData, newScroll, zoom.scale, totalDays);
     },
     [navigationValue, setScroll, totalDays]
   );
@@ -226,7 +227,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
         },
         touchCount,
       };
-      runOnJS(setScale)(newScale);
+      scheduleOnRN(setScale, newScale);
     } else if (touchCount === 1) {
       if (
         navigationValue.value.scroll.start.location === null
@@ -252,8 +253,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(({ data, getDayHabitVal
 
   const onTouchesUp = (arg: { allTouches: { absoluteY: number }[] }) => {
     setStartValues([]);
-    runOnJS(setScale)(navigationValue.value.zoom.current.scale);
-    runOnJS(setScroll)(navigationValue.value.scroll.current.offset);
+    scheduleOnRN(setScale, navigationValue.value.zoom.current.scale);
+    scheduleOnRN(setScroll, navigationValue.value.scroll.current.offset);
   };
 
   const gesture = Gesture.Manual()
