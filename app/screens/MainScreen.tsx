@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedReaction, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
@@ -22,6 +22,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   const { loadMoreData, scale, setScale, setScroll, getScroll } = useAppContext();
   const router = useRouter();
   const { height, width } = useWindowDimensions();
+  const loaded = useRef(false);
 
   const navigationValue = useSharedValue<NavigationValues>({
     scroll: {
@@ -160,7 +161,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   );
 
   useEffect(() => {
-    if (data !== null) {
+    if (!loaded.current && data !== null) {
+      loaded.current = true;
       const { habits, daysToLast, zoomScrollPosition } = data;
       setTimeout(() => {
         if (habits.length === 0) {
