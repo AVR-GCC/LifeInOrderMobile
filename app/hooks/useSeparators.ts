@@ -49,3 +49,5 @@ export const useSeparators = (data: MainProps | null): SeparatorData[] => {
     return result;
   }, [data?.dates]);
 };
+
+export default { useSeparators };
