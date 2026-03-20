@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { useAnimatedReaction, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedReaction, useAnimatedStyle, useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import Octicons from '@expo/vector-icons/Octicons';
 import DayRow from '../components/DayRow';
@@ -47,6 +47,15 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
     },
     touchCount: 0,
   });
+
+  // Momentum scrolling state
+  const scrollVelocity = useSharedValue(0); // pixels per millisecond
+  const lastTouchY = useSharedValue<number | null>(null);
+  const lastTouchTime = useSharedValue<number | null>(null);
+  const isMomentumActive = useSharedValue(false);
+
+  const DECELERATION = 0.998; // per-millisecond decay factor (closer to 1 = longer coast)
+  const MIN_VELOCITY = 0.01; // px/ms threshold to stop
 
   const animatedListStyle = useAnimatedStyle(() => ({
     transform: [
@@ -160,6 +169,56 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
     [navigationValue, setScroll, totalDays]
   );
 
+  // Momentum decay loop - runs every frame on UI thread
+  useFrameCallback((frameInfo) => {
+    'worklet';
+    if (!isMomentumActive.value) return;
+
+
+    // Guard against negative or zero dt from unreliable frame timestamps
+    const rawDt = frameInfo.timeSincePreviousFrame ?? 16;
+    const dt = rawDt > 0 ? rawDt : 16;
+
+    // Apply exponential decay: velocity *= DECELERATION^dt
+    const decayFactor = Math.pow(DECELERATION, dt);
+    scrollVelocity.value *= decayFactor;
+
+    // Stop when velocity is negligible
+    if (Math.abs(scrollVelocity.value) < MIN_VELOCITY) {
+      isMomentumActive.value = false;
+      scrollVelocity.value = 0;
+      return;
+    }
+
+    // scrollVelocity is in touch-space: positive = finger moved down
+    // In useAnimatedReaction, finger down => curLocation decreases => offset increases
+    // So positive velocity should increase the offset
+    const delta = scrollVelocity.value * dt;
+    const currentOffset = navigationValue.value.scroll.current.offset;
+    const newOffset = currentOffset + delta;
+
+    // Clamp: don't scroll past the top
+    if (newOffset < 0) {
+      isMomentumActive.value = false;
+      scrollVelocity.value = 0;
+      return;
+    }
+
+    navigationValue.value = {
+      zoom: navigationValue.value.zoom,
+      scroll: {
+        start: navigationValue.value.scroll.start,
+        current: {
+          location: navigationValue.value.scroll.current.location,
+          offset: newOffset,
+        },
+      },
+      touchCount: navigationValue.value.touchCount,
+    };
+    scheduleOnRN(setScroll, newOffset);
+    scheduleOnRN(checkLoadMoreData, newOffset, navigationValue.value.zoom.current.scale, totalDays);
+  });
+
   useEffect(() => {
     if (!loaded.current && data !== null) {
       loaded.current = true;
@@ -244,6 +303,12 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   }
 
   const onTouchesDown = (arg: { allTouches: { absoluteY: number }[] }) => {
+    // Cancel any active momentum scrolling
+    isMomentumActive.value = false;
+    scrollVelocity.value = 0;
+    lastTouchY.value = null;
+    lastTouchTime.value = null;
+
     setStartValues(arg.allTouches);
   };
 
@@ -297,6 +362,23 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
         setStartValues(arg.allTouches);
         return;
       }
+
+      // Track velocity for momentum
+      const now = Date.now();
+      const currentY = arg.allTouches[0].absoluteY;
+      if (lastTouchY.value !== null && lastTouchTime.value !== null) {
+        const dt = now - lastTouchTime.value;
+        if (dt > 0) {
+          // Positive dy = finger moving down => positive velocity
+          // In the momentum loop, positive velocity increases offset (matching useAnimatedReaction)
+          const dy = currentY - lastTouchY.value;
+          // Smooth velocity with exponential moving average
+          scrollVelocity.value = 0.5 * (dy / dt) + 0.5 * scrollVelocity.value;
+        }
+      }
+      lastTouchY.value = currentY;
+      lastTouchTime.value = now;
+
       navigationValue.value = {
         zoom: navigationValue.value.zoom,
         scroll: {
@@ -313,9 +395,21 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
 
   // const onTouchesUp = (arg: { allTouches: { absoluteY: number }[] }) => {
   const onTouchesUp = () => {
+    const wasSingleTouch = navigationValue.value.touchCount === 1;
     setStartValues([]);
     scheduleOnRN(setScale, navigationValue.value.zoom.current.scale);
     scheduleOnRN(setScroll, navigationValue.value.scroll.current.offset);
+
+    // Start momentum scrolling if we had a single-finger scroll with meaningful velocity
+    if (wasSingleTouch && Math.abs(scrollVelocity.value) > MIN_VELOCITY) {
+      isMomentumActive.value = true;
+    } else {
+      scrollVelocity.value = 0;
+    }
+
+    // Reset touch tracking
+    lastTouchY.value = null;
+    lastTouchTime.value = null;
   };
 
   const gesture = Gesture.Manual()
