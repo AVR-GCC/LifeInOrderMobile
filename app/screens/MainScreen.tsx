@@ -268,11 +268,13 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
       const originalDistanceScale = navigationValue.value.zoom.start.distance / navigationValue.value.zoom.start.scale;
       const curDistance = arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY;
       const newScale = abs(curDistance / originalDistanceScale);
+      const limitedScale = newScale * zoomScrollPosition.dayPixel > ((height - 125) / 7) ? navigationValue.value.zoom.current.scale : newScale;
+
       navigationValue.value = {
         zoom: {
           start: navigationValue.value.zoom.start,
           current: {
-            scale: newScale,
+            scale: limitedScale,
             distance: curDistance,
           },
         },
