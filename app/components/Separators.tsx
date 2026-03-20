@@ -1,9 +1,8 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
+import { BASE_DAY_HEIGHT } from '../constants/mainScreen';
 import { NavigationValues, SeparatorData } from '../types';
-
-const BASE_DAY_HEIGHT = 24;
 
 const SEPARATOR_COLORS: Record<string, string> = {
   today: '#00e5ff',
