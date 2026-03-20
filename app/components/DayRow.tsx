@@ -50,14 +50,13 @@ function DayRow({
 
 const styles = StyleSheet.create({
   dayRow: {
-    display: 'flex',
     flexDirection: 'row',
-    height: '100%'
+    flex: 1,
   },
   square: {
     borderRadius: 2,
-    height: 'calc(100 - 1px)%',
-    margin: 1
+    flex: 1,
+    margin: 1,
   },
 });
 
