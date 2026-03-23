@@ -34,7 +34,7 @@ export const zoomMonths: { [key: string]: number } = {
 export const dateAndZoomToLowestDate = (date: string, zoom: string) => {
     const earliestDate = new Date(date);
     earliestDate.setDate(1);
-    earliestDate.setMonth(earliestDate.getMonth() - zoomMonths[zoom]);
+    earliestDate.setMonth(earliestDate.getMonth() - zoomMonths[zoom] + 1);
     return earliestDate.toISOString().split('T')[0]
 };
 
