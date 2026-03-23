@@ -15,7 +15,7 @@ import { useSeparators } from '../hooks/useSeparators';
 import { MainScreenProps, zoomLevelData } from '../types';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ data, getDayHabitValue }) {
-  const { setScroll } = useAppContext();
+  const { getScale } = useAppContext();
   const router = useRouter();
   const { height } = useWindowDimensions();
   const loaded = useRef(false);
@@ -31,7 +31,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   }, [data?.dates]);
 
   const separators = useSeparators(data);
-  const { gesture, animatedListStyle, navigationValue } = useNavigationGesture(data, totalDays);
+  const { gesture, animatedListStyle, navigationValue, setNavigationValues } = useNavigationGesture(data, totalDays);
 
   useEffect(() => {
     if (!loaded.current && data !== null) {
@@ -43,18 +43,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
         }
       });
       const newScroll = (zoomScrollPosition.dayPixel + 2) * daysToLast - (height / 2);
-      setScroll(newScroll);
-      navigationValue.value = {
-        zoom: navigationValue.value.zoom,
-        scroll: {
-          start: navigationValue.value.scroll.start,
-          current: {
-            location: navigationValue.value.scroll.current.location,
-            offset: newScroll,
-          },
-        },
-        touchCount: navigationValue.value.touchCount,
-      };
+      setNavigationValues(newScroll, getScale());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);

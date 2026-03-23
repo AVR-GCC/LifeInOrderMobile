@@ -9,10 +9,13 @@ import { MainProps, NavigationValues } from '../types';
 const DECELERATION = 0.998;
 const MIN_VELOCITY = 0.01;
 
+type SetNavigationValues = (newScroll: number, newScale: number) => void;
+
 interface UseNavigationGestureResult {
   gesture: GestureType;
   animatedListStyle: ViewStyle;
   navigationValue: SharedValue<NavigationValues>;
+  setNavigationValues: SetNavigationValues;
 }
 
 export const useNavigationGesture = (
@@ -33,6 +36,22 @@ export const useNavigationGesture = (
     },
     touchCount: 0,
   });
+
+  const setNavigationValues: SetNavigationValues = (newScroll, newScale) => {
+    navigationValue.value = {
+      scroll: {
+        start: { location: null, offset: null },
+        current: { location: null, offset: newScroll },
+      },
+      zoom: {
+        start: { scale: null, distance: null },
+        current: { scale: newScale, distance: null },
+      },
+      touchCount: 0,
+    };
+    if (newScroll !== getScroll()) setScroll(newScroll);
+    if (newScale !== getScale()) setScale(newScale);
+  }
 
   const scrollVelocity = useSharedValue(0);
   const lastTouchY = useSharedValue<number | null>(null);
@@ -259,7 +278,7 @@ export const useNavigationGesture = (
     .onTouchesUp(onTouchesUp)
     .onTouchesCancelled(onTouchesUp);
 
-  return { gesture, animatedListStyle, navigationValue };
+  return { gesture, animatedListStyle, navigationValue, setNavigationValues };
 };
 
 export default { useNavigationGesture };
