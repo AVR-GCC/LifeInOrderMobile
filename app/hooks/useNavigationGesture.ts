@@ -5,6 +5,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { BASE_DAY_HEIGHT } from '../constants/mainScreen';
 import { useAppContext } from '../context/AppContext';
 import { MainProps, NavigationValues } from '../types';
+import { dateAndZoomToLowestDate, getMode, modes } from '../constants/zoom';
 
 const DECELERATION = 0.998;
 const MIN_VELOCITY = 0.01;
@@ -65,22 +66,25 @@ export const useNavigationGesture = (
     ],
   }));
 
-  const fetchMoreData = () => {
+  const fetchMoreData = (dayPixels: number) => {
     if (data === null) return;
     const lastDate = data.dates.day[0].date;
     const dayBeforeLastDate = new Date(lastDate);
     dayBeforeLastDate.setMonth(dayBeforeLastDate.getMonth() - 1);
     dayBeforeLastDate.setDate(dayBeforeLastDate.getDate() - 1);
     const dayBeforeString = dayBeforeLastDate.toISOString().split('T')[0];
-    loadMoreData(dayBeforeString, width);
+    const mode = getMode(dayPixels);
+    const zoom = modes[mode].id;
+    const useDate = dateAndZoomToLowestDate(dayBeforeString, zoom);
+    loadMoreData(useDate, width);
   };
 
   const checkLoadMoreData = (offset: number, currentScale: number, days: number) => {
     const topVisiblePixel = offset + height - 125;
-    const dayPixels = BASE_DAY_HEIGHT * currentScale;
+    const dayPixels = (data?.zoomScrollPosition?.dayPixel || BASE_DAY_HEIGHT) * currentScale;
     const topVisibleDateIndex = Math.floor(topVisiblePixel / dayPixels);
     if (days - topVisibleDateIndex < 20) {
-      fetchMoreData();
+      fetchMoreData(dayPixels);
     }
   };
 
