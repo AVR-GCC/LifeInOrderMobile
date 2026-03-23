@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 import {
   createHabitServer,
   createValueServer,
-  debounce,
   deleteHabitServer,
   deleteValueServer,
   getUserConfig,
@@ -43,9 +42,8 @@ interface AppContextType {
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
   loadMoreData: (date: string, width: number) => void;
-  debouncedSetScale: (newScale: number) => void;
   setScale: (newScale: number) => void;
-  scale: number;
+  getScale: () => number;
   setScroll: (newScroll: number) => void;
   getScroll: () => number;
 }
@@ -55,15 +53,16 @@ const AppContext = createContext<AppContextType | null>(null);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [data, setData] = useState<MainProps | null>(null);
   const loadingDataRef = useRef(false);
-  const [scale, setScale] = useState(1.0);
-  const debouncedSetScale = debounce((newScale: number) => {
-    setScale(newScale);
-  }, 100);
+  const scaleRef = useRef(1);
+  const getScale = () => scaleRef.current;
+  const setScale = (newScale: number) => {
+    scaleRef.current = newScale;
+  }
   const scrollRef = useRef(0);
+  const getScroll = () => scrollRef.current;
   const setScroll = (newScroll: number) => {
     scrollRef.current = newScroll;
   }
-  const getScroll = () => scrollRef.current;
 
   const loadInitialData = async () => {
     if (loadingDataRef.current) return;
@@ -205,9 +204,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateValue,
         deleteValue,
         loadMoreData,
-        debouncedSetScale,
         setScale,
-        scale,
+        getScale,
         setScroll,
         getScroll,
       }}

@@ -19,7 +19,7 @@ export const useNavigationGesture = (
   data: MainProps | null,
   totalDays: number,
 ): UseNavigationGestureResult => {
-  const { loadMoreData, scale, setScale, setScroll, getScroll } = useAppContext();
+  const { loadMoreData, getScale, setScale, setScroll, getScroll } = useAppContext();
   const { height, width } = useWindowDimensions();
 
   const navigationValue = useSharedValue<NavigationValues>({
@@ -28,8 +28,8 @@ export const useNavigationGesture = (
       current: { location: null, offset: getScroll() },
     },
     zoom: {
-      start: { scale, distance: null },
-      current: { scale, distance: null },
+      start: { scale: null, distance: null },
+      current: { scale: getScale(), distance: null },
     },
     touchCount: 0,
   });
@@ -139,7 +139,7 @@ export const useNavigationGesture = (
     if (touchCount >= 2) {
       const distance = touches[0].absoluteY - touches[1].absoluteY;
       const location = (touches[0].absoluteY + touches[1].absoluteY) / 2;
-      const newZoomStart = { scale, distance };
+      const newZoomStart = { scale: navigationValue.value.zoom.current.scale, distance };
       const newScrollStart = { location, offset };
       navigationValue.value = {
         zoom: { start: newZoomStart, current: newZoomStart },
