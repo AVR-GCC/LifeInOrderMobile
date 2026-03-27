@@ -1,9 +1,11 @@
-export const modes = [
-    {id: 'day', name: 'Day', basePixels: 24, minPixels: 13.856},
-    {id: 'quarter', name: 'Week', basePixels: 8, minPixels: 5.657, maxPixels: 13.856},
-    {id: 'half', name: 'Month', basePixels: 4, minPixels: 2.828, maxPixels: 5.657},
-    {id: 'year', name: 'Year', basePixels: 2, minPixels: 1.414, maxPixels: 2.828},
-    {id: 'two_year', name: 'Two Years', basePixels: 1, maxPixels: 1.414}
+import { ModeInfo, ZoomLevel } from "../types";
+
+export const modes: ModeInfo[] = [
+    {id: 'day', name: 'Day', dayPixels: 24, minPixels: 13.856},
+    {id: 'quarter', name: 'Week', dayPixels: 8, minPixels: 5.657, maxPixels: 13.856},
+    {id: 'half', name: 'Month', dayPixels: 4, minPixels: 2.828, maxPixels: 5.657},
+    {id: 'year', name: 'Year', dayPixels: 2, minPixels: 1.414, maxPixels: 2.828},
+    {id: 'two_year', name: 'Two Years', dayPixels: 1, maxPixels: 1.414}
 ];
 
 export const getMode = (pixels: number) => {
@@ -15,7 +17,7 @@ export const getMode = (pixels: number) => {
     return 0;
 };
 
-export const zoomIndeces: { [key: string]: number } = {
+export const zoomIndeces: Record<ZoomLevel, number> = {
     day: 0,
     quarter: 1,
     half: 2,
@@ -23,7 +25,7 @@ export const zoomIndeces: { [key: string]: number } = {
     two_year: 4
 };
 
-export const zoomMonths: { [key: string]: number } = {
+export const zoomMonths: Record<ZoomLevel, number> = {
     day: 1,
     quarter: 3,
     half: 6,
@@ -31,14 +33,14 @@ export const zoomMonths: { [key: string]: number } = {
     two_year: 24
 };
 
-export const dateAndZoomToLowestDate = (date: string, zoom: string) => {
+export const dateAndZoomToLowestDate = (date: string, zoom: ZoomLevel) => {
     const earliestDate = new Date(date);
     earliestDate.setDate(1);
     earliestDate.setMonth(earliestDate.getMonth() - zoomMonths[zoom] + 1);
     return earliestDate.toISOString().split('T')[0]
 };
 
-export const dateAndZoomToHighestDate = (date: string, zoom: string) => {
+export const dateAndZoomToHighestDate = (date: string, zoom: ZoomLevel) => {
     const latestDate = new Date(date);
     latestDate.setDate(1);
     latestDate.setMonth(latestDate.getMonth() + zoomMonths[zoom] + 1);
