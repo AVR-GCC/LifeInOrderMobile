@@ -22,6 +22,16 @@ export interface HabitWithValues {
   freshly_created?: boolean;
 }
 
+export type ZoomLevel = 'day' | 'quarter' | 'half' | 'year' | 'two_year';
+
+export type ModeInfo = {
+  id: ZoomLevel,
+  name: string,
+  dayPixels: number,
+  minPixels?: number,
+  maxPixels?: number
+};
+
 export interface DayData {
   date: string;
   values: { [habitId: string]: string };
@@ -37,15 +47,7 @@ export interface TimePeriodData {
   value: string;
 }
 
-export type ZoomLevel = 'day' | 'quarter' | 'half' | 'year' | 'two_year';
 
-export type ModeInfo = {
-  id: ZoomLevel,
-  name: string,
-  dayPixels: number,
-  minPixels?: number,
-  maxPixels?: number
-};
 
 export type zoomLevelData = MonthData | TimePeriodData;
 
