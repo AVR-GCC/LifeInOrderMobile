@@ -12,7 +12,7 @@ import { modes } from '../constants/zoom';
 import { useAppContext } from '../context/AppContext';
 import { useNavigationGesture } from '../hooks/useNavigationGesture';
 import { useSeparators } from '../hooks/useSeparators';
-import { MainScreenProps, zoomLevelData } from '../types';
+import { MainScreenProps, ZoomLevelData } from '../types';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ data, getDayHabitValue }) {
   const { getScale } = useAppContext();
@@ -64,7 +64,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
     return <Loading />;
   }
 
-  const list = (dateItems: zoomLevelData[]) => (
+  const list = (dateItems: ZoomLevelData[]) => (
     <View style={{ display: 'flex', flexDirection: 'column' }}>
       {dateItems.map((item, index) => {
         if ('days' in item) {
@@ -79,9 +79,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
             />
           ));
         } else {
-          console.log('item.value', item.value);
-          const key = `image-${item.date}`;
-          return <Image style={{ width:'100%', height: 8 * 90 }} key={key} source={{ uri: item.value }} />
+          console.log('item.image', item.image);
+          const key = `image-${item.firstDate}-${item.lastDate}`;
+          return <Image style={{ width:'100%', height: 8 * 90 }} key={key} source={{ uri: item.image }} />
         }
       })}
     </View>

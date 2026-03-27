@@ -1,5 +1,5 @@
 import { dateAndZoomToHighestDate, dateAndZoomToLowestDate, modes, zoomIndeces } from '../constants/zoom';
-import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, zoomLevelData, ZoomScrollPosition } from '../types';
+import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, ZoomLevelData, ZoomScrollPosition } from '../types';
 import { last } from '../utils/general';
 
 export const loadInitialDataReducer = () => (dayLevelData: MonthData[], habits: HabitWithValues[]) => {
@@ -23,7 +23,7 @@ export const loadInitialDataReducer = () => (dayLevelData: MonthData[], habits: 
   return { dates, habits, zoomScrollPosition };
 };
 
-export const loadMoreDataReducer = (data: MainProps) => (date: string, zoom: string, newData: zoomLevelData[]) => {
+export const loadMoreDataReducer = (data: MainProps) => (date: string, zoom: string, newData: ZoomLevelData[]) => {
   const existingZoomLevelData = data.dates[zoom];
   let newZoomLevelData = newData;
   if (zoom !== 'day') console.log('res', JSON.stringify(newData, null, 2));

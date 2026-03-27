@@ -47,17 +47,15 @@ export interface TimePeriodData {
   value: string;
 }
 
+export type ZoomLevelData = MonthData | TimePeriodData;
 
+export type DatesData = Record<ZoomLevel, ZoomLevelData[]>;
 
-export type zoomLevelData = MonthData | TimePeriodData;
-
-export type DatesData = { [key: string]: zoomLevelData[] };
+export type DateRange = { start: string; end: string };
 
 export interface ZoomScrollPosition {
   mode: number;
-  dayPixel: number;
-  earliestDate: string;
-  latestDate: string;
+  ranges: Record<ZoomLevel, DateRange>;
 }
 
 export interface MainProps {
