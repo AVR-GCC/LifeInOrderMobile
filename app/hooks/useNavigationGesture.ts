@@ -6,6 +6,7 @@ import { BASE_DAY_HEIGHT } from '../constants/mainScreen';
 import { useAppContext } from '../context/AppContext';
 import { MainProps, NavigationValues } from '../types';
 import { dateAndZoomToLowestDate, getMode, modes } from '../constants/zoom';
+import { useEffect, useRef } from 'react';
 
 const DECELERATION = 0.998;
 const MIN_VELOCITY = 0.01;
