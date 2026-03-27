@@ -1,4 +1,4 @@
-import { dateAndZoomToLowestDate } from '../constants/zoom';
+import { dateAndZoomToHighestDate, dateAndZoomToLowestDate, modes, zoomIndeces } from '../constants/zoom';
 import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, zoomLevelData, ZoomScrollPosition } from '../types';
 import { last } from '../utils/general';
 
@@ -6,12 +6,12 @@ export const loadInitialDataReducer = () => (dayLevelData: MonthData[], habits: 
   const todate = new Date();
   const today = todate.toISOString().split('T')[0];
   const earliestDate = dateAndZoomToLowestDate(today, 'day');
-  const lastDate = last(last(dayLevelData).days).date
-  const daysToLast = Math.ceil((new Date(lastDate) - todate) / (1000 * 60 * 60 * 24));
+  const latestDate = dateAndZoomToHighestDate(today, 'day');
   const zoomScrollPosition: ZoomScrollPosition = {
     mode: 0,
     dayPixel: 24,
-    earliestDate
+    earliestDate,
+    latestDate
   };
   const dates: DatesData = {
     day: dayLevelData,
@@ -20,14 +20,29 @@ export const loadInitialDataReducer = () => (dayLevelData: MonthData[], habits: 
     year: [],
     two_year: []
   };
-  return { dates, habits, zoomScrollPosition, daysToLast };
+  return { dates, habits, zoomScrollPosition };
 };
 
 export const loadMoreDataReducer = (data: MainProps) => (date: string, zoom: string, newData: zoomLevelData[]) => {
   const existingZoomLevelData = data.dates[zoom];
-  const newZoomLevelData = existingZoomLevelData[0].date > date ? [...newData, ...existingZoomLevelData] : [...existingZoomLevelData, ...newData];
+  let newZoomLevelData = newData;
+  if (zoom !== 'day') console.log('res', JSON.stringify(newData, null, 2));
+  let earliestDate = dateAndZoomToLowestDate(date, zoom);
+  let latestDate = dateAndZoomToHighestDate(date, zoom);
+  if (existingZoomLevelData.length > 0) {
+    newZoomLevelData = existingZoomLevelData[0].date > date ? [...newData, ...existingZoomLevelData] : [...existingZoomLevelData, ...newData];
+    earliestDate = newZoomLevelData[0].date;
+    latestDate = dateAndZoomToHighestDate(last(newZoomLevelData).date, zoom);
+  }
   const dates = { ...data.dates, [zoom]: newZoomLevelData };
-  return { ...data, dates };
+  const mode = zoomIndeces[zoom];
+  const zoomScrollPosition: ZoomScrollPosition = {
+    mode,
+    dayPixel: modes[mode].basePixels,
+    earliestDate,
+    latestDate
+  };
+  return { ...data, dates, zoomScrollPosition };
 };
 
 export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, monthIndex: number, habitIndex: number, valueId: string) => {

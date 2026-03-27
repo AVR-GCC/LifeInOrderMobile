@@ -41,7 +41,7 @@ interface AppContextType {
   switchValues: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
-  loadMoreData: (date: string, width: number) => void;
+  loadMoreData: (date: string, zoom: string, width: number) => void;
   setScale: (newScale: number) => void;
   getScale: () => number;
   setScroll: (newScroll: number) => void;
@@ -83,13 +83,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadInitialData();
   }, []);
 
-  const loadMoreData = async (date: string, width: number) => {
+  const loadMoreData = async (date: string, zoom: string, width: number) => {
     if (data === null) return;
     if (loadingDataRef.current) return;
     loadingDataRef.current = true;
-    const res = await getUserList(date, 'day', width);
+    const res = await getUserList(date, zoom, width);
     if (res) {
-      const newData = loadMoreDataReducer(data)(date, 'day', res);
+      const newData = loadMoreDataReducer(data)(date, zoom, res);
       setData(newData);
     }
     loadingDataRef.current = false;

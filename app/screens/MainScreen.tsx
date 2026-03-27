@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { useWindowDimensions, View } from 'react-native';
+import { useWindowDimensions, View, Image } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 import DayRowItem from '../components/DayRowItem';
@@ -36,12 +36,14 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   useEffect(() => {
     if (!loaded.current && data !== null) {
       loaded.current = true;
-      const { habits, daysToLast, zoomScrollPosition } = data;
+      const { habits, zoomScrollPosition } = data;
       setTimeout(() => {
         if (habits.length === 0) {
           router.replace('/day/0/habits');
         }
       });
+      const todate = new Date();
+      const daysToLast = Math.ceil((new Date(zoomScrollPosition.latestDate) - todate) / (1000 * 60 * 60 * 24));
       const newScroll = (zoomScrollPosition.dayPixel + 2) * daysToLast - (height / 2);
       setNavigationValues(newScroll, getScale());
     }
@@ -76,8 +78,11 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
               getDayHabitValue={getDayHabitValue}
             />
           ));
+        } else {
+          console.log('item.value', item.value);
+          const key = `image-${item.date}`;
+          return <Image style={{ width:'100%', height: 8 * 90 }} key={key} source={{ uri: item.value }} />
         }
-        return null;
       })}
     </View>
   );

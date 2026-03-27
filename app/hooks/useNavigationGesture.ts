@@ -26,6 +26,8 @@ export const useNavigationGesture = (
   const { loadMoreData, getScale, setScale, setScroll, getScroll } = useAppContext();
   const { height, width } = useWindowDimensions();
 
+  const prevMode = useRef<number | null>(null)
+
   const navigationValue = useSharedValue<NavigationValues>({
     scroll: {
       start: { location: null, offset: null },
@@ -52,7 +54,20 @@ export const useNavigationGesture = (
     };
     if (newScroll !== getScroll()) setScroll(newScroll);
     if (newScale !== getScale()) setScale(newScale);
-  }
+  };
+
+  useEffect(() => {
+    const mode = data?.zoomScrollPosition?.mode;
+    if (prevMode.current !== null && data !== null && mode !== undefined) {
+      const curPixelsPerDay = modes[prevMode.current].basePixels;
+      const newPixelsPerDay = modes[mode].basePixels;
+      const ratio = curPixelsPerDay / newPixelsPerDay;
+      const newScale = navigationValue.value.zoom.current.scale * ratio;
+      const daysToLast = Math.ceil((new Date(zoomScrollPosition.latestDate) - todate) / (1000 * 60 * 60 * 24));
+      setNavigationValues(navigationValue.value.scroll.current.offset, newScale);
+      prevMode.current = mode;
+    }
+  }, [data?.zoomScrollPosition?.mode])
 
   const scrollVelocity = useSharedValue(0);
   const lastTouchY = useSharedValue<number | null>(null);
@@ -76,7 +91,7 @@ export const useNavigationGesture = (
     const mode = getMode(dayPixels);
     const zoom = modes[mode].id;
     const useDate = dateAndZoomToLowestDate(dayBeforeString, zoom);
-    loadMoreData(useDate, width);
+    loadMoreData(useDate, zoom, width);
   };
 
   const checkLoadMoreData = (offset: number, currentScale: number, days: number) => {

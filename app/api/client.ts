@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { Habit, Value } from '../types';
 
+// const baseUrl = 'http://10.0.0.6:8080'; // TODO: Make this configurable via environment variables
 const baseUrl = 'http://192.168.1.174:8080'; // TODO: Make this configurable via environment variables
 
 export const getUserConfig = async () => {
@@ -22,10 +23,13 @@ export const getUserList = async (date: string, zoom: string, width: number) => 
     const route = `${baseUrl}/users/1/list?date=${date}&zoom=${zoom}&width=${width}`;
     const config = zoom !== 'day' ? { responseType: 'arraybuffer' as const } : {};
     const res = await axios.get(route, config);
-    if (res.data) {
+    if (res.data?.length) {
       return res.data;
+    } else {
+      const base64String = res.request._response;
+      const value = `data:image/webp;base64,${base64String}`;
+      return [{ date, value }];
     }
-    return null;
   } catch (error) {
     console.error('Error fetching user list:', error);
     return null;

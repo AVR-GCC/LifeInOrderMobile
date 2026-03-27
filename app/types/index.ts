@@ -45,6 +45,7 @@ export interface ZoomScrollPosition {
   mode: number;
   dayPixel: number;
   earliestDate: string;
+  latestDate: string;
 }
 
 export interface MainProps {

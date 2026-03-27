@@ -38,6 +38,13 @@ export const dateAndZoomToLowestDate = (date: string, zoom: string) => {
     return earliestDate.toISOString().split('T')[0]
 };
 
+export const dateAndZoomToHighestDate = (date: string, zoom: string) => {
+    const latestDate = new Date(date);
+    latestDate.setDate(1);
+    latestDate.setMonth(latestDate.getMonth() + zoomMonths[zoom] + 1);
+    return latestDate.toISOString().split('T')[0]
+};
+
 export default {
     modes,
     getMode,
