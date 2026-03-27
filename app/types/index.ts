@@ -44,7 +44,7 @@ export interface MonthData {
 
 export interface TimePeriodData {
   date: string;
-  value: string;
+  image: string;
 }
 
 export type ZoomLevelData = MonthData | TimePeriodData;
