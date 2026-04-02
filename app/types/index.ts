@@ -37,13 +37,15 @@ export interface DayData {
   values: { [habitId: string]: string };
 }
 
+export type DateRange = { start: string | null; end: string | null };
+
 export interface MonthData {
-  date: string;
+  range: DateRange;
   days: DayData[];
 }
 
 export interface TimePeriodData {
-  date: string;
+  range: DateRange;
   image: string;
 }
 
@@ -51,18 +53,13 @@ export type ZoomLevelData = MonthData | TimePeriodData;
 
 export type DatesData = Record<ZoomLevel, ZoomLevelData[]>;
 
-export type DateRange = { start: string; end: string };
-
-export interface ZoomScrollPosition {
-  mode: number;
-  ranges: Record<ZoomLevel, DateRange>;
-}
+export type MacroMap = Record<ZoomLevel, DateRange>;
 
 export interface MainProps {
   habits: HabitWithValues[];
   dates: DatesData;
-  zoomScrollPosition: ZoomScrollPosition;
-  daysToLast: number;
+  macroMap: MacroMap;
+  mode: number;
 }
 
 export interface NavigationValues {
@@ -87,6 +84,7 @@ export interface NavigationValues {
     }
   };
   touchCount: number;
+  mode: number;
 }
   
 

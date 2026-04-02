@@ -2,32 +2,30 @@ import { useWindowDimensions, ViewStyle } from 'react-native';
 import { Gesture, GestureType } from 'react-native-gesture-handler';
 import { SharedValue, useAnimatedReaction, useAnimatedStyle, useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import { BASE_DAY_HEIGHT } from '../constants/mainScreen';
 import { useAppContext } from '../context/AppContext';
-import { MainProps, NavigationValues } from '../types';
-import { dateAndZoomToLowestDate, getMode, modes } from '../constants/zoom';
+import { MainProps, NavigationValues, ZoomLevel } from '../types';
+import { getMode, getZoomModeRange, modes, nextDate, zoomIndeces } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
+import { getDateLocation, getDayPixels, getFinalDayPixels, getLocationDate } from '../utils/dataStructures';
+import { dateDiffStr } from '../utils/general';
 
 const DECELERATION = 0.998;
 const MIN_VELOCITY = 0.01;
 
-type SetNavigationValues = (newScroll: number, newScale: number) => void;
+type SetNavigationValues = (newMode: number, newScroll: number, newScale: number) => void;
 
 interface UseNavigationGestureResult {
   gesture: GestureType;
   animatedListStyle: ViewStyle;
   navigationValue: SharedValue<NavigationValues>;
   setNavigationValues: SetNavigationValues;
+  zoomStyles: Record<ZoomLevel, ViewStyle>;
 }
 
-export const useNavigationGesture = (
-  data: MainProps | null,
-  totalDays: number,
-): UseNavigationGestureResult => {
+export const useNavigationGesture = (data: MainProps | null): UseNavigationGestureResult => {
   const { loadMoreData, getScale, setScale, setScroll, getScroll } = useAppContext();
   const { height, width } = useWindowDimensions();
-
-  const prevMode = useRef<number | null>(null)
+  const dataRef = useRef(data);
 
   const navigationValue = useSharedValue<NavigationValues>({
     scroll: {
@@ -39,9 +37,21 @@ export const useNavigationGesture = (
       current: { scale: getScale(), distance: null },
     },
     touchCount: 0,
+    mode: 0,
   });
 
-  const setNavigationValues: SetNavigationValues = (newScroll, newScale) => {
+  const zoomStyles = {
+    day: useAnimatedStyle<ViewStyle>(() => ({ opacity: navigationValue.value.mode === zoomIndeces.day ? 1 : 0 })),
+    quarter: useAnimatedStyle<ViewStyle>(() => ({ opacity: navigationValue.value.mode === zoomIndeces.quarter ? 1 : 0 })),
+    half: useAnimatedStyle<ViewStyle>(() => ({ opacity: navigationValue.value.mode === zoomIndeces.half ? 1 : 0 })),
+    year: useAnimatedStyle<ViewStyle>(() => ({ opacity: navigationValue.value.mode === zoomIndeces.year ? 1 : 0 })),
+    two_year: useAnimatedStyle<ViewStyle>(() => ({ opacity: navigationValue.value.mode === zoomIndeces.two_year ? 1 : 0 })),
+  };
+
+  const setNavigationValues: SetNavigationValues = (newMode, newScroll, newScale) => {
+    // if (newMode === 1) {
+    //   console.log(navigationValue.value.scroll.current.offset, '=>', newScroll);
+    // }
     navigationValue.value = {
       scroll: {
         start: { location: null, offset: null },
@@ -52,23 +62,40 @@ export const useNavigationGesture = (
         current: { scale: newScale, distance: null },
       },
       touchCount: 0,
+      mode: newMode,
     };
     if (newScroll !== getScroll()) setScroll(newScroll);
     if (newScale !== getScale()) setScale(newScale);
   };
 
   useEffect(() => {
-    const mode = data?.zoomScrollPosition?.mode;
-    if (prevMode.current !== null && data !== null && mode !== undefined) {
-      const curPixelsPerDay = modes[prevMode.current].basePixels;
-      const newPixelsPerDay = modes[mode].basePixels;
-      const ratio = curPixelsPerDay / newPixelsPerDay;
-      const newScale = navigationValue.value.zoom.current.scale * ratio;
-      const daysToLast = Math.ceil((new Date(zoomScrollPosition.latestDate) - todate) / (1000 * 60 * 60 * 24));
-      setNavigationValues(navigationValue.value.scroll.current.offset, newScale);
-      prevMode.current = mode;
-    }
-  }, [data?.zoomScrollPosition?.mode])
+    dataRef.current = data;
+  }, [data])
+
+  useEffect(() => {
+    if (!data) return;
+    const { macroMap, mode } = data;
+    if (!mode) return;
+    if (mode === navigationValue.value.mode) return;
+    const scale = navigationValue.value.zoom.current.scale;
+    const curPixelsPerDay = getDayPixels(navigationValue.value);
+    const newPixelsPerDay = modes[mode].dayPixels;
+    const ratio = newPixelsPerDay / curPixelsPerDay;
+    // console.log('useNavigationGesture useEffect ratio', ratio);
+    const newScale = scale / ratio;
+    // console.log('useNavigationGesture useEffect newScale', newScale);
+    const date = getLocationDate(macroMap, navigationValue.value);
+    // console.log('useNavigationGesture useEffect date', date);
+    // const range = macroMap[modes[mode].id];
+    // console.log('useNavigationGesture useEffect range', modes[mode].id, range);
+    const newDistance = getDateLocation(macroMap, navigationValue.value, modes[mode].id, date);
+    // console.log('useNavigationGesture useEffect newDistance', newDistance);
+    const newScroll = newDistance - (navigationValue.value.scroll.current.location ?? (height / 2));
+    // console.log('useNavigationGesture useEffect newScroll', newScroll);
+    // setNavigationValues(mode, 0, 1);
+    setNavigationValues(mode, newScroll < 0 ? 0 : newScroll, newScale);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, height, setNavigationValues])
 
   const scrollVelocity = useSharedValue(0);
   const lastTouchY = useSharedValue<number | null>(null);
@@ -82,25 +109,32 @@ export const useNavigationGesture = (
     ],
   }));
 
-  const fetchMoreData = (dayPixels: number) => {
-    if (data === null) return;
-    const lastDate = data.dates.day[0].date;
-    const dayBeforeLastDate = new Date(lastDate);
-    dayBeforeLastDate.setMonth(dayBeforeLastDate.getMonth() - 1);
-    dayBeforeLastDate.setDate(dayBeforeLastDate.getDate() - 1);
-    const dayBeforeString = dayBeforeLastDate.toISOString().split('T')[0];
-    const mode = getMode(dayPixels);
-    const zoom = modes[mode].id;
-    const useDate = dateAndZoomToLowestDate(dayBeforeString, zoom);
-    loadMoreData(useDate, zoom, width);
-  };
-
-  const checkLoadMoreData = (offset: number, currentScale: number, days: number) => {
-    const topVisiblePixel = offset + height - 125;
-    const dayPixels = (data?.zoomScrollPosition?.dayPixel || BASE_DAY_HEIGHT) * currentScale;
-    const topVisibleDateIndex = Math.floor(topVisiblePixel / dayPixels);
-    if (days - topVisibleDateIndex < 20) {
-      fetchMoreData(dayPixels);
+  const checkLoadMoreData = () => {
+    if (dataRef.current === null) return;
+    const { macroMap } = dataRef.current;
+    const locationDate = getLocationDate(macroMap, navigationValue.value);
+    const { start, end } = macroMap[modes[navigationValue.value.mode].id];
+    if (!start || !end) return;
+    const startDistDays = dateDiffStr(locationDate, start);
+    const endDistDays = dateDiffStr(end, locationDate);
+    const dayPixels = getFinalDayPixels(navigationValue.value);
+    const startDist = startDistDays * dayPixels;
+    const endDist = endDistDays * dayPixels;
+    const newMode = getMode(dayPixels);
+    const zoom = modes[newMode].id;
+    if (newMode !== navigationValue.value.mode) {
+      // console.log('checkLoadMoreData', locationDate);
+      const { start } = getZoomModeRange(locationDate, zoom);
+      loadMoreData(start, zoom, width);
+      return;
+    }
+    const nextDateFuture = nextDate(end, zoom, true);
+    const nextDatePast = nextDate(start, zoom, false);
+    if (end < '2026-04-30' && endDist < height) {
+      loadMoreData(nextDateFuture, zoom, width);
+    }
+    if (startDist < height) {
+      loadMoreData(nextDatePast, zoom, width);
     }
   };
 
@@ -121,12 +155,13 @@ export const useNavigationGesture = (
       const curLocation = height - 125 - scroll.location;
       const newScroll = (startLocation + startScroll.offset) * zoom.scale / startZoom.scale - curLocation;
 
-      if (newScroll < 0) return;
-      navigationValue.value.scroll.current.offset = newScroll;
-      scheduleOnRN(setScroll, newScroll);
-      scheduleOnRN(checkLoadMoreData, newScroll, zoom.scale, totalDays);
+      if (newScroll >= 0) {
+        navigationValue.value.scroll.current.offset = newScroll;
+        scheduleOnRN(setScroll, newScroll);
+      }
+      scheduleOnRN(checkLoadMoreData);
     },
-    [navigationValue, setScroll, totalDays]
+    [navigationValue]
   );
 
   useFrameCallback((frameInfo) => {
@@ -165,15 +200,17 @@ export const useNavigationGesture = (
         },
       },
       touchCount: navigationValue.value.touchCount,
+      mode: navigationValue.value.mode,
     };
     scheduleOnRN(setScroll, newOffset);
-    scheduleOnRN(checkLoadMoreData, newOffset, navigationValue.value.zoom.current.scale, totalDays);
+    scheduleOnRN(checkLoadMoreData);
   });
 
   const setStartValues = (touches: { absoluteY: number }[]) => {
     'worklet';
     const touchCount = touches.length;
     const offset = navigationValue.value.scroll.current.offset;
+    const mode = navigationValue.value.mode;
 
     if (touchCount >= 2) {
       const distance = touches[0].absoluteY - touches[1].absoluteY;
@@ -184,6 +221,7 @@ export const useNavigationGesture = (
         zoom: { start: newZoomStart, current: newZoomStart },
         scroll: { start: newScrollStart, current: newScrollStart },
         touchCount,
+        mode,
       };
     } else {
       const location = touches.length === 1 ? touches[0].absoluteY : null;
@@ -196,6 +234,7 @@ export const useNavigationGesture = (
         zoom: { start: newZoomStart, current: newZoomStart },
         scroll: { start: newScrollStart, current: newScrollStart },
         touchCount,
+        mode,
       };
     }
   };
@@ -226,8 +265,8 @@ export const useNavigationGesture = (
       const originalDistanceScale = navigationValue.value.zoom.start.distance / navigationValue.value.zoom.start.scale;
       const curDistance = arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY;
       const newScale = abs(curDistance / originalDistanceScale);
-      const zoomScrollPosition = data?.zoomScrollPosition;
-      const limitedScale = zoomScrollPosition && newScale * zoomScrollPosition.dayPixel > ((height - 125) / 7)
+      const newDayPixels = newScale * modes[navigationValue.value.mode].dayPixels;
+      const limitedScale = newDayPixels > ((height - 125) / 7)
         ? navigationValue.value.zoom.current.scale
         : newScale;
 
@@ -241,6 +280,7 @@ export const useNavigationGesture = (
           current: { location: curLocation, offset: navigationValue.value.scroll.current.offset },
         },
         touchCount,
+        mode: navigationValue.value.mode
       };
       scheduleOnRN(setScale, newScale);
     } else if (touchCount === 1) {
@@ -272,6 +312,7 @@ export const useNavigationGesture = (
           current: { location: arg.allTouches[0].absoluteY, offset: navigationValue.value.scroll.current.offset },
         },
         touchCount,
+        mode: navigationValue.value.mode
       };
     }
   };
@@ -298,7 +339,7 @@ export const useNavigationGesture = (
     .onTouchesUp(onTouchesUp)
     .onTouchesCancelled(onTouchesUp);
 
-  return { gesture, animatedListStyle, navigationValue, setNavigationValues };
+  return { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles };
 };
 
 export default { useNavigationGesture };

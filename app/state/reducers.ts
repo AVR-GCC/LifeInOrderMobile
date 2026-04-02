@@ -1,17 +1,21 @@
-import { dateAndZoomToHighestDate, dateAndZoomToLowestDate, modes, zoomIndeces } from '../constants/zoom';
-import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, ZoomLevel, ZoomLevelData, ZoomScrollPosition } from '../types';
+import { zoomIndeces } from '../constants/zoom';
+import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, ZoomLevel, ZoomLevelData, MacroMap } from '../types';
 import { last } from '../utils/general';
 
+const getZoomLevelDataRange = (zld: ZoomLevelData[]) => {
+  const start = zld[0].range.start;
+  const end = last(zld).range.end;
+  return { start, end };
+}
+
 export const loadInitialDataReducer = () => (dayLevelData: MonthData[], habits: HabitWithValues[]) => {
-  const todate = new Date();
-  const today = todate.toISOString().split('T')[0];
-  const earliestDate = dateAndZoomToLowestDate(today, 'day');
-  const latestDate = dateAndZoomToHighestDate(today, 'day');
-  const zoomScrollPosition: ZoomScrollPosition = {
-    mode: 0,
-    dayPixel: 24,
-    earliestDate,
-    latestDate
+  const { start, end } = getZoomLevelDataRange(dayLevelData);
+  const macroMap: MacroMap = {
+    day: { start, end },
+    quarter: { start: null, end: null },
+    half: { start: null, end: null },
+    year: { start: null, end: null },
+    two_year: { start: null, end: null }
   };
   const dates: DatesData = {
     day: dayLevelData,
@@ -20,36 +24,43 @@ export const loadInitialDataReducer = () => (dayLevelData: MonthData[], habits: 
     year: [],
     two_year: []
   };
-  return { dates, habits, zoomScrollPosition };
+  return { dates, habits, macroMap, mode: 0 };
 };
 
-export const loadMoreDataReducer = (data: MainProps) => (date: string, zoom: ZoomLevel, newData: ZoomLevelData[]) => {
-  const existingZoomLevelData = data.dates[zoom];
-  let newZoomLevelData = newData;
-  if (zoom !== 'day') console.log('res', JSON.stringify(newData, null, 2));
-  let earliestDate = dateAndZoomToLowestDate(date, zoom);
-  let latestDate = dateAndZoomToHighestDate(date, zoom);
-  if (existingZoomLevelData.length > 0) {
-    newZoomLevelData = existingZoomLevelData[0].date > date ? [...newData, ...existingZoomLevelData] : [...existingZoomLevelData, ...newData];
-    earliestDate = newZoomLevelData[0].date;
-    latestDate = dateAndZoomToHighestDate(last(newZoomLevelData).date, zoom);
+export const loadMoreDataReducer = (data: MainProps) => (zoom: ZoomLevel, newData: ZoomLevelData[]) => {
+  const { dates, macroMap } = data;
+  // console.log('loadMoreDataReducer zoom', zoom);
+  // console.log('loadMoreDataReducer newData', newData);
+  const existingData = dates[zoom];
+  let nextData = newData;
+  let { start, end } = getZoomLevelDataRange(newData)
+  // console.log('loadMoreDataReducer start, end', start, end);
+  // console.log('new data range', start, end);
+  if (!start || !end) return data;
+  if (existingData.length > 0) {
+    const { start: existingStart, end: existingEnd } = getZoomLevelDataRange(existingData)
+    const future = start >= existingEnd;
+    end = future ? end : existingEnd;
+    start = future ? existingStart : start;
+    nextData = future ? [...existingData, ...newData] : [...newData, ...existingData];
   }
-  const dates = { ...data.dates, [zoom]: newZoomLevelData };
+  // console.log('nextData', nextData.map(d => d.range));
+  const nextDates = { ...dates, [zoom]: nextData };
   const mode = zoomIndeces[zoom];
-  const zoomScrollPosition: ZoomScrollPosition = {
-    mode,
-    dayPixel: modes[mode].basePixels,
-    earliestDate,
-    latestDate
-  };
-  return { ...data, dates, zoomScrollPosition };
+  const range = { start, end };
+  // console.log('total data range', start, end);
+  const nextMacroMap: MacroMap = { ...macroMap, [zoom]: range };
+  console.log('loadMoreDataReducer zoom', zoom);
+  console.log('loadMoreDataReducer nextMacroMap', nextMacroMap);
+  // console.log('nextDates', nextDates);
+  return { ...data, dates: nextDates, macroMap: nextMacroMap, mode };
 };
 
 export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, monthIndex: number, habitIndex: number, valueId: string) => {
   const dates = { ...data.dates };
   const newDayZoomData = [...dates.day];
   const newMonth = { ...newDayZoomData[monthIndex] };
-  if ('value' in newMonth) return data;
+  if ('image' in newMonth) return data;
   const newDate = { ...newMonth.days[dateIndex] };
   const habitId = data.habits[habitIndex].habit.id;
   newDate.values = { ...newDate.values, [habitId]: valueId };

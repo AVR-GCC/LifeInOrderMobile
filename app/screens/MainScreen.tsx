@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useWindowDimensions, View, Image } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
@@ -13,6 +13,8 @@ import { useAppContext } from '../context/AppContext';
 import { useNavigationGesture } from '../hooks/useNavigationGesture';
 import { useSeparators } from '../hooks/useSeparators';
 import { MainScreenProps, ZoomLevelData } from '../types';
+import { getDayPixels, getModeInfo } from '../utils/dataStructures';
+import { dateDiff } from '../utils/general';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ data, getDayHabitValue }) {
   const { getScale } = useAppContext();
@@ -20,32 +22,25 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   const { height } = useWindowDimensions();
   const loaded = useRef(false);
 
-  const totalDays = useMemo(() => {
-    if (!data?.dates) return 0;
-    let total = 0;
-    for (const month of data.dates.day) {
-      if ('value' in month) continue;
-      total += month.days.length;
-    }
-    return total;
-  }, [data?.dates]);
-
   const separators = useSeparators(data);
-  const { gesture, animatedListStyle, navigationValue, setNavigationValues } = useNavigationGesture(data, totalDays);
+  const { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles } = useNavigationGesture(data);
 
   useEffect(() => {
     if (!loaded.current && data !== null) {
       loaded.current = true;
-      const { habits, zoomScrollPosition } = data;
+      const { habits, macroMap } = data;
       setTimeout(() => {
         if (habits.length === 0) {
           router.replace('/day/0/habits');
         }
       });
       const todate = new Date();
-      const daysToLast = Math.ceil((new Date(zoomScrollPosition.latestDate) - todate) / (1000 * 60 * 60 * 24));
-      const newScroll = (zoomScrollPosition.dayPixel + 2) * daysToLast - (height / 2);
-      setNavigationValues(newScroll, getScale());
+      const mode = getModeInfo(navigationValue.value);
+      const { end } = macroMap[mode.id];
+      if (!end) return;
+      const daysToLast = dateDiff(new Date(end), todate);
+      const newScroll = (getDayPixels(navigationValue.value) + 2) * daysToLast - (height / 2);
+      setNavigationValues(0, newScroll, getScale());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
@@ -54,7 +49,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
     return <Loading />;
   }
 
-  const { dates, habits, zoomScrollPosition } = data;
+  const { dates, habits } = data;
 
   if (!dates) {
     return <Loading />;
@@ -79,9 +74,16 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
             />
           ));
         } else {
-          console.log('item.image', item.image);
-          const key = `image-${item.firstDate}-${item.lastDate}`;
-          return <Image style={{ width:'100%', height: 8 * 90 }} key={key} source={{ uri: item.image }} />
+          const key = `image-${item.range.start}-${item.range.end}`;
+          console.log('item', item);
+          return <Image
+            resizeMode="contain"
+            style={{ width:'100%', height: 8 * 90 }}
+            key={key}
+            source={{ uri: item.image }}
+            onError={(e) => console.log('Image error:', e.nativeEvent.error)}
+            onLoad={() => console.log('Image loaded!')}
+          />
         }
       })}
     </View>
@@ -93,7 +95,13 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
       <View style={{ display: 'flex', flexDirection: 'column-reverse', height: height - 125, overflow: 'hidden' }}>
         <GestureDetector gesture={gesture}>
           <Animated.View style={[animatedListStyle, { transformOrigin: 'bottom center' }]}>
-            {list(dates[modes[zoomScrollPosition.mode].id])}
+            {modes.map(m => (
+              <Animated.View key={`zoom-style-${m.id}`} style={zoomStyles[m.id]}>
+                <View id={m.id}>
+                  {list(dates[m.id])}
+                </View>
+              </Animated.View>
+            ))}
             <Separators separators={separators} navigationValue={navigationValue} />
           </Animated.View>
         </GestureDetector>

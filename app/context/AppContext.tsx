@@ -27,7 +27,7 @@ import {
   updateValueReducer
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
-import type { DeleteValue, Habit, MainProps, Value } from '../types';
+import type { DeleteValue, Habit, MainProps, Value, ZoomLevel } from '../types';
 
 interface AppContextType {
   data: MainProps | null;
@@ -41,7 +41,7 @@ interface AppContextType {
   switchValues: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
-  loadMoreData: (date: string, zoom: string, width: number) => void;
+  loadMoreData: (date: string, zoom: ZoomLevel, width: number) => Promise<void>;
   setScale: (newScale: number) => void;
   getScale: () => number;
   setScroll: (newScroll: number) => void;
@@ -52,6 +52,11 @@ const AppContext = createContext<AppContextType | null>(null);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [data, setData] = useState<MainProps | null>(null);
+  const dataRef = useRef(data);
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
+
   const loadingDataRef = useRef(false);
   const scaleRef = useRef(1);
   const getScale = () => scaleRef.current;
@@ -83,13 +88,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadInitialData();
   }, []);
 
-  const loadMoreData = async (date: string, zoom: string, width: number) => {
-    if (data === null) return;
+  const loadMoreData = async (date: string, zoom: ZoomLevel, width: number) => {
+    if (dataRef.current === null) return;
     if (loadingDataRef.current) return;
     loadingDataRef.current = true;
+    // console.log('loadMoreData date', date);
+    // console.log('loadMoreData zoom', zoom);
     const res = await getUserList(date, zoom, width);
     if (res) {
-      const newData = loadMoreDataReducer(data)(date, zoom, res);
+      const newData = loadMoreDataReducer(dataRef.current)(zoom, res);
       setData(newData);
     }
     loadingDataRef.current = false;
@@ -99,7 +106,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (data === null) return;
     const { dates, habits } = data;
     const month = dates.day[monthIndex];
-    if ('value' in month) return;
+    if ('image' in month) return;
     setDayValueServer(month.days[dateIndex].date, habits[habitIndex].habit.id, valueId);
     setData(setDayHabitValueReducer(data)(dateIndex, monthIndex, habitIndex, valueId));
   };

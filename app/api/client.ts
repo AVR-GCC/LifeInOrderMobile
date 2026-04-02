@@ -1,5 +1,6 @@
 import axios from 'axios';
-import type { Habit, Value } from '../types';
+import type { Habit, Value, ZoomLevel } from '../types';
+import { getZoomModeRange } from '../constants/zoom';
 
 // const baseUrl = 'http://10.0.0.6:8080'; // TODO: Make this configurable via environment variables
 const baseUrl = 'http://192.168.1.174:8080'; // TODO: Make this configurable via environment variables
@@ -18,7 +19,7 @@ export const getUserConfig = async () => {
   }
 };
 
-export const getUserList = async (date: string, zoom: string, width: number) => {
+const getUserListPure = async (date: string, zoom: ZoomLevel, width: number) => {
   try {
     const route = `${baseUrl}/users/1/list?date=${date}&zoom=${zoom}&width=${width}`;
     const config = zoom !== 'day' ? { responseType: 'arraybuffer' as const } : {};
@@ -27,8 +28,11 @@ export const getUserList = async (date: string, zoom: string, width: number) => 
       return res.data;
     } else {
       const base64String = res.request._response;
-      const value = `data:image/webp;base64,${base64String}`;
-      return [{ date, value }];
+      const image = `data:image/webp;base64,${base64String}`;
+      // console.log('getUserListPure', date);
+      const range = getZoomModeRange(date, zoom);
+      // console.log('getUserListPure range', range);
+      return [{ range, image }];
     }
   } catch (error) {
     console.error('Error fetching user list:', error);
