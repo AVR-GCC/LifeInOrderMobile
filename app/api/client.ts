@@ -36,12 +36,12 @@ export const getUserList = async (date: string, zoom: string, width: number) => 
   }
 };
 
-export const debounce = (func: (args: any) => any, milis: number) => {
+export const debounce = (func: (...args: any) => any, milis: number) => {
   let deb: ReturnType<typeof setTimeout> | null = null;
-  return (args: any) => {
+  return (...args: any) => new Promise(resolve => {
     if (deb) clearTimeout(deb);
-    deb = setTimeout(() => func(args), milis);
-  };
+    deb = setTimeout(() => resolve(func(...args)), milis);
+  });
 };
 
 type SetDayValueServer = (date: string, habitId: string, valueId: string) => void;
