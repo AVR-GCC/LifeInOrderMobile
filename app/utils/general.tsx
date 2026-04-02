@@ -19,13 +19,4 @@ export const dateDiffStr = (fromStr: string, toStr: string) => {
 
 export const dateString = (date: Date) => date.toISOString().split('T')[0]
 
-type FindIndexType = <T>(collection: T[], predicate: (elem: T) => boolean) => number;
-
-export const findIndex: FindIndexType = (collection, predicate) => {
-  for (let i = 0; i < collection.length; i++) {
-    if (predicate(collection[i])) return i;
-  }
-  return -1;
-}
-
 export default { sleep, last };

@@ -1,5 +1,5 @@
-import { ModeInfo, ZoomLevel } from "../types";
-import { dateString, findIndex } from "../utils/general";
+import { DateRange, ModeInfo, ZoomLevel } from "../types";
+import { dateString } from "../utils/general";
 
 export const modes: ModeInfo[] = [
   {id: 'day', name: 'Day', dayPixels: 24, minPixels: 13.856},
@@ -19,11 +19,11 @@ export const getMode = (pixels: number) => {
 };
 
 export const zoomIndeces: Record<ZoomLevel, number> = {
-  day: findIndex(modes, m => m.id === 'day'),
-  quarter: findIndex(modes, m => m.id === 'quarter'),
-  half: findIndex(modes, m => m.id === 'half'),
-  year: findIndex(modes, m => m.id === 'year'),
-  two_year: findIndex(modes, m => m.id === 'two_year')
+  day: modes.findIndex(m => m.id === 'day'),
+  quarter: modes.findIndex(m => m.id === 'quarter'),
+  half: modes.findIndex(m => m.id === 'half'),
+  year: modes.findIndex(m => m.id === 'year'),
+  two_year: modes.findIndex(m => m.id === 'two_year')
 };
 
 export const zoomMonths: Record<ZoomLevel, number> = {
