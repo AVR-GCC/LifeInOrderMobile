@@ -44,6 +44,21 @@ export const debounce = (func: (...args: any) => any, milis: number) => {
   });
 };
 
+export const throttleGetUserList = () => {
+  const recent: Record<string, number> = {};
+  const fun = async(date: string, zoom: ZoomLevel, width: number) => {
+    const now = Date.now();
+    const key = `${zoom}-${date}`;
+    const expiration = (recent[key] || 0) + 2000;
+    if (expiration > now) return;
+    recent[key] = now;
+    return getUserListPure(date, zoom, width);
+  };
+  return fun;
+}
+
+export const getUserList = throttleGetUserList();
+
 type SetDayValueServer = (date: string, habitId: string, valueId: string) => void;
 
 export const setDayValueServer: SetDayValueServer = (() => {
