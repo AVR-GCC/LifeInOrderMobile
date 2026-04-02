@@ -56,7 +56,6 @@ export const getZoomModeRange = (date: string, zoom: ZoomLevel) => {
     case 'day':
       start = dateString(dateObj);
       dateObj.setUTCMonth(dateObj.getMonth() + 1);
-      dateObj.setUTCDate(0);
       end = dateString(dateObj);
       return { start, end };
     case 'quarter':
@@ -71,7 +70,6 @@ export const getZoomModeRange = (date: string, zoom: ZoomLevel) => {
       // console.log('getZoomModeRange start', start);
       dateObj.setUTCMonth(qstartMonth + 3);
       // console.log('getZoomModeRange dateString(dateObj)', dateString(dateObj));
-      dateObj.setUTCDate(0);
       end = dateString(dateObj);
       // console.log('getZoomModeRange end', end);
       return { start, end };
@@ -80,14 +78,12 @@ export const getZoomModeRange = (date: string, zoom: ZoomLevel) => {
       dateObj.setUTCMonth(hstartMonth);
       start = dateString(dateObj);
       dateObj.setUTCMonth(hstartMonth + 6);
-      dateObj.setUTCDate(0);
       end = dateString(dateObj);
       return { start, end };
     case 'year':
       dateObj.setUTCMonth(0);
       start = dateString(dateObj);
       dateObj.setUTCFullYear(dateObj.getFullYear() + 1);
-      dateObj.setUTCDate(0);
       end = dateString(dateObj);
       return { start, end };
     case 'two_year':
@@ -97,7 +93,6 @@ export const getZoomModeRange = (date: string, zoom: ZoomLevel) => {
       dateObj.setUTCFullYear(startYear);
       start = dateString(dateObj);
       dateObj.setUTCFullYear(startYear + 2);
-      dateObj.setUTCDate(0);
       end = dateString(dateObj);
       return { start, end };
     default:
