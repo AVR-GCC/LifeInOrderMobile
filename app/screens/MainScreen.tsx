@@ -39,7 +39,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
       const { end } = macroMap[mode.id];
       if (!end) return;
       const daysToLast = dateDiff(new Date(end), todate);
-      const newScroll = (getDayPixels(navigationValue.value) + 2) * daysToLast - (height / 2);
+      const newScroll = getDayPixels(navigationValue.value) * daysToLast - (height / 2);
       setNavigationValues(0, newScroll, getScale());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

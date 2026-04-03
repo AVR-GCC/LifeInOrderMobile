@@ -35,7 +35,7 @@ const DayRowItem: React.FC<DayRowItemProps> = React.memo(function DayRowItem({
           onPress={() => router.replace(`/day/${key}`)}
           style={styles.dayMarker}
         >
-          <Octicons name="dash" size={24} color={COLORS.text} />
+          <Octicons name="dash" size={22} color={COLORS.text} />
         </TouchableOpacity>
       </View>
       <View style={styles.dayContainer}>
@@ -53,7 +53,7 @@ const DayRowItem: React.FC<DayRowItemProps> = React.memo(function DayRowItem({
 const styles = StyleSheet.create({
   content: {
     flexDirection: 'row',
-    height: BASE_DAY_HEIGHT,
+    height: BASE_DAY_HEIGHT - 2,
   },
   leftBar: {
     paddingLeft: 10,

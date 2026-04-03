@@ -11,7 +11,7 @@ export const useSeparators = (data: MainProps | null): SeparatorData[] => {
     let prevYear: number | null = null;
 
     for (const month of data.dates.day) {
-      if ('value' in month) continue;
+      if ('image' in month) continue;
       if (month.days.length === 0) continue;
 
       const firstDayDate = new Date(month.days[0].date + 'T00:00:00');
