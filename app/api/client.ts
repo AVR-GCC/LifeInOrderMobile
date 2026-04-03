@@ -31,7 +31,7 @@ const getUserListPure = async (date: string, zoom: ZoomLevel, count: number, wid
     } else {
       const base64String = res.request._response;
       const image = `data:image/webp;base64,${base64String}`;
-      const range = getZoomModeRange(date, zoom);
+      const range = getZoomModeRange(date, zoom, count);
       // console.log('getUserListPure range', range);
       return [{ range, image }];
     }

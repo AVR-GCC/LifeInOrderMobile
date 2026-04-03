@@ -38,13 +38,14 @@ export const nextDate = (date: string, zoom: ZoomLevel, future: boolean) => {
   const nDate = new Date(date);
   nDate.setDate(1);
   const currentMonth = nDate.getMonth();
-  const offset = (future ? 1 : -1) * zoomMonths[zoom] + (future ? 1 : 0);
+  const sign = future ? 1 : -1;
+  const offset = sign * (zoomMonths[zoom] + 1);
   nDate.setUTCMonth(currentMonth + offset);
   const res = dateString(nDate);
   return res;
 };
 
-export const getZoomModeRange = (date: string, zoom: ZoomLevel) => {
+export const getZoomModeRange = (date: string, zoom: ZoomLevel, count = 1) => {
   const { floor } = Math;
   const todate = new Date();
   let start = dateString(todate);
@@ -68,7 +69,7 @@ export const getZoomModeRange = (date: string, zoom: ZoomLevel) => {
       dateObj.setUTCMonth(qstartMonth);
       start = dateString(dateObj);
       // console.log('getZoomModeRange start', start);
-      dateObj.setUTCMonth(qstartMonth + 3);
+      dateObj.setUTCMonth(qstartMonth + 3 * count);
       // console.log('getZoomModeRange dateString(dateObj)', dateString(dateObj));
       end = dateString(dateObj);
       // console.log('getZoomModeRange end', end);
@@ -77,13 +78,13 @@ export const getZoomModeRange = (date: string, zoom: ZoomLevel) => {
       const hstartMonth = month <= 6 ? 0 : 7;
       dateObj.setUTCMonth(hstartMonth);
       start = dateString(dateObj);
-      dateObj.setUTCMonth(hstartMonth + 6);
+      dateObj.setUTCMonth(hstartMonth + 6 * count);
       end = dateString(dateObj);
       return { start, end };
     case 'year':
       dateObj.setUTCMonth(0);
       start = dateString(dateObj);
-      dateObj.setUTCFullYear(dateObj.getFullYear() + 1);
+      dateObj.setUTCFullYear(dateObj.getFullYear() + count);
       end = dateString(dateObj);
       return { start, end };
     case 'two_year':
@@ -92,7 +93,7 @@ export const getZoomModeRange = (date: string, zoom: ZoomLevel) => {
       const startYear = year % 2 === 0 ? year : year + 1;
       dateObj.setUTCFullYear(startYear);
       start = dateString(dateObj);
-      dateObj.setUTCFullYear(startYear + 2);
+      dateObj.setUTCFullYear(startYear + 2 * count);
       end = dateString(dateObj);
       return { start, end };
     default:

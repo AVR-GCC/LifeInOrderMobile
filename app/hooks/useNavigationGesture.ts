@@ -129,8 +129,19 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const zoom = modes[newMode].id;
     if (newMode !== navigationValue.value.mode) {
       // console.log('checkLoadMoreData', locationDate);
-      const { start } = getZoomModeRange(locationDate, zoom);
-      loadMoreData(start, zoom, 1, width);
+      const { start, end } = getZoomModeRange(locationDate, zoom);
+      const newDayPixels = modes[newMode].dayPixels;
+      const newStartDistDays = dateDiffStr(locationDate, start);
+      const newEndDistDays = dateDiffStr(end, locationDate);
+      const newStartDist = newStartDistDays * newDayPixels;
+      const newEndDist = newEndDistDays * newDayPixels;
+      if (newStartDist < height) {
+        loadMoreData(nextDate(start, zoom, false), zoom, 2, width);
+      } else if (newEndDist < height) {
+        loadMoreData(start, zoom, 2, width);
+      } else {
+        loadMoreData(start, zoom, 1, width);
+      }
       return;
     }
     const nextDateFuture = nextDate(end, zoom, true);
