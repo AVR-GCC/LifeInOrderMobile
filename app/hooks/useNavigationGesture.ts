@@ -129,6 +129,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     // console.log('useNavigationGesture checkLoadMoreData startDistDays', startDistDays);
     const endDistDays = dateDiffStr(end, locationDate);
     const dayPixels = getFinalDayPixels(navigationValue.value);
+    // console.log('useNavigationGesture checkLoadMoreData dayPixels', dayPixels);
     const startDist = startDistDays * dayPixels;
     // console.log('useNavigationGesture checkLoadMoreData startDist', startDist);
     // console.log('useNavigationGesture checkLoadMoreData height', height);
@@ -136,16 +137,20 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const newMode = getMode(dayPixels);
     const zoom = modes[newMode].id;
     if (newMode !== navigationValue.value.mode) {
-      // console.log('checkLoadMoreData', locationDate);
-      const { start, end } = getZoomModeRange(locationDate, zoom);
-      const newDayPixels = modes[newMode].dayPixels;
       loading.current = true;
+      // console.log('useNavigationGesture checkLoadMoreData', locationDate);
+      const { start, end } = getZoomModeRange(locationDate, zoom, 1);
+      // console.log('useNavigationGesture checkLoadMoreData zoom, start, end', zoom, start, end);
       const newStartDistDays = dateDiffStr(locationDate, start);
+      // console.log('useNavigationGesture checkLoadMoreData newStartDistDays', newStartDistDays);
       const newEndDistDays = dateDiffStr(end, locationDate);
-      const newStartDist = newStartDistDays * newDayPixels;
-      const newEndDist = newEndDistDays * newDayPixels;
+      const newStartDist = newStartDistDays * dayPixels;
+      // console.log('useNavigationGesture checkLoadMoreData newStartDist', newStartDist);
+      const newEndDist = newEndDistDays * dayPixels;
       if (newStartDist < height) {
-        loadMoreData(nextDate(start, zoom, false), zoom, 2, width);
+        const useDate = nextDate(start, zoom, false);
+        // console.log('useNavigationGesture checkLoadMoreData useDate', useDate);
+        loadMoreData(useDate, zoom, 2, width);
       } else if (newEndDist < height) {
         loadMoreData(start, zoom, 2, width);
       } else {
