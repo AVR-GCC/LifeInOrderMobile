@@ -39,7 +39,8 @@ export const nextDate = (date: string, zoom: ZoomLevel, future: boolean) => {
   nDate.setDate(1);
   const currentMonth = nDate.getMonth();
   const sign = future ? 1 : -1;
-  const offset = sign * (zoomMonths[zoom] + 1);
+  const delta = future ? 1 : 0;
+  const offset = sign * zoomMonths[zoom] + delta;
   nDate.setUTCMonth(currentMonth + offset);
   const res = dateString(nDate);
   return res;
