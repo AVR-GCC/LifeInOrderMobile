@@ -14,7 +14,7 @@ import { useNavigationGesture } from '../hooks/useNavigationGesture';
 import { useSeparators } from '../hooks/useSeparators';
 import { MainScreenProps, ZoomLevelData } from '../types';
 import { getDayPixels, getModeInfo } from '../utils/dataStructures';
-import { dateDiff } from '../utils/general';
+import { dateDiff, dateDiffStr } from '../utils/general';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ data, getDayHabitValue }) {
   const { getScale } = useAppContext();
@@ -49,7 +49,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
     return <Loading />;
   }
 
-  const { dates, habits } = data;
+  const { dates, habits, mode } = data;
 
   if (!dates) {
     return <Loading />;
@@ -74,16 +74,23 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
             />
           ));
         } else {
+          if (!item.range.start || !item.range.end) return null;
           const key = `image-${item.range.start}-${item.range.end}`;
-          console.log('item', item);
-          return <Image
-            resizeMode="contain"
-            style={{ width:'100%', height: 8 * 90 }}
-            key={key}
-            source={{ uri: item.image }}
-            onError={(e) => console.log('Image error:', e.nativeEvent.error)}
-            onLoad={() => console.log('Image loaded!')}
-          />
+          const daysCount = dateDiffStr(item.range.end, item.range.start);
+          const dayPixels = modes[mode].dayPixels;
+          // console.log('mode', mode);
+          // console.log('daysCount', daysCount);
+          // console.log('dayPixels', dayPixels);
+          return (
+            <Image
+              resizeMode="contain"
+              style={{ width:'100%', height: daysCount * dayPixels }}
+              key={key}
+              source={{ uri: item.image }}
+              // onError={(e) => console.log('Image error:', e.nativeEvent.error)}
+              // onLoad={() => console.log('Image loaded!')}
+            />
+          );
         }
       })}
     </View>
