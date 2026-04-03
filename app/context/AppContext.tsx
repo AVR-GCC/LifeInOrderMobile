@@ -28,6 +28,7 @@ import {
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
 import type { DeleteValue, Habit, MainProps, Value, ZoomLevel } from '../types';
+import { nextDate } from '../constants/zoom';
 
 interface AppContextType {
   data: MainProps | null;
@@ -41,7 +42,7 @@ interface AppContextType {
   switchValues: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
-  loadMoreData: (date: string, zoom: ZoomLevel, width: number) => Promise<void>;
+  loadMoreData: (date: string, zoom: ZoomLevel, count: number, width: number) => Promise<void>;
   setScale: (newScale: number) => void;
   getScale: () => number;
   setScroll: (newScroll: number) => void;
@@ -73,9 +74,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (loadingDataRef.current) return;
     loadingDataRef.current = true;
     const today = new Date().toISOString().split('T')[0];
+    const lastMonth = nextDate(nextDate(today, 'day', false), 'day', false);
 
     const [dates, habits] = await Promise.all([
-      getUserList(today, 'day', 1080),
+      getUserList(lastMonth, 'day', 3, 1080),
       getUserConfig()
     ]);
     if (dates && habits) {
@@ -88,13 +90,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadInitialData();
   }, []);
 
-  const loadMoreData = async (date: string, zoom: ZoomLevel, width: number) => {
+  const loadMoreData = async (date: string, zoom: ZoomLevel, count: number, width: number) => {
     if (dataRef.current === null) return;
     if (loadingDataRef.current) return;
     loadingDataRef.current = true;
     // console.log('loadMoreData date', date);
     // console.log('loadMoreData zoom', zoom);
-    const res = await getUserList(date, zoom, width);
+    const res = await getUserList(date, zoom, count, width);
     if (res) {
       const newData = loadMoreDataReducer(dataRef.current)(zoom, res);
       setData(newData);

@@ -1,4 +1,4 @@
-import { DateRange, ModeInfo, ZoomLevel } from "../types";
+import { ModeInfo, ZoomLevel } from "../types";
 import { dateString } from "../utils/general";
 
 export const modes: ModeInfo[] = [
@@ -27,7 +27,7 @@ export const zoomIndeces: Record<ZoomLevel, number> = {
 };
 
 export const zoomMonths: Record<ZoomLevel, number> = {
-  day: 3,
+  day: 1,
   quarter: 3,
   half: 6,
   year: 12,
@@ -38,7 +38,7 @@ export const nextDate = (date: string, zoom: ZoomLevel, future: boolean) => {
   const nDate = new Date(date);
   nDate.setDate(1);
   const currentMonth = nDate.getMonth();
-  const offset = (future ? 1 : -1) * zoomMonths[zoom] + 1;
+  const offset = (future ? 1 : -1) * zoomMonths[zoom] + (future ? 1 : 0);
   nDate.setUTCMonth(currentMonth + offset);
   const res = dateString(nDate);
   return res;

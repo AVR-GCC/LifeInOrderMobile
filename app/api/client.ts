@@ -19,17 +19,18 @@ export const getUserConfig = async () => {
   }
 };
 
-const getUserListPure = async (date: string, zoom: ZoomLevel, width: number) => {
+const getUserListPure = async (date: string, zoom: ZoomLevel, count: number, width: number) => {
   try {
-    const route = `${baseUrl}/users/1/list?date=${date}&zoom=${zoom}&width=${width}`;
+    const route = `${baseUrl}/users/1/list?date=${date}&zoom=${zoom}&count=${count}&width=${width}`;
     const config = zoom !== 'day' ? { responseType: 'arraybuffer' as const } : {};
     const res = await axios.get(route, config);
+    // console.log('getUserListPure', date);
     if (res.data?.length) {
+      // console.log('getUserListPure res.data', JSON.stringify(res.data, null, 2));
       return res.data;
     } else {
       const base64String = res.request._response;
       const image = `data:image/webp;base64,${base64String}`;
-      // console.log('getUserListPure', date);
       const range = getZoomModeRange(date, zoom);
       // console.log('getUserListPure range', range);
       return [{ range, image }];
@@ -50,13 +51,13 @@ export const debounce = (func: (...args: any) => any, milis: number) => {
 
 export const throttleGetUserList = () => {
   const recent: Record<string, number> = {};
-  const fun = async(date: string, zoom: ZoomLevel, width: number) => {
+  const fun = async(date: string, zoom: ZoomLevel, count: number, width: number) => {
     const now = Date.now();
     const key = `${zoom}-${date}`;
     const expiration = (recent[key] || 0) + 2000;
     if (expiration > now) return;
     recent[key] = now;
-    return getUserListPure(date, zoom, width);
+    return getUserListPure(date, zoom, count, width);
   };
   return fun;
 }

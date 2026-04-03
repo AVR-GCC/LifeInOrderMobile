@@ -112,29 +112,35 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   const checkLoadMoreData = () => {
     if (dataRef.current === null) return;
     const { macroMap } = dataRef.current;
-    const locationDate = getLocationDate(macroMap, navigationValue.value);
     const { start, end } = macroMap[modes[navigationValue.value.mode].id];
     if (!start || !end) return;
+    // console.log('useNavigationGesture checkLoadMoreData start, end', start, end);
+    const locationDate = getLocationDate(macroMap, navigationValue.value);
+    // console.log('useNavigationGesture checkLoadMoreData locationDate', locationDate);
     const startDistDays = dateDiffStr(locationDate, start);
+    // console.log('useNavigationGesture checkLoadMoreData startDistDays', startDistDays);
     const endDistDays = dateDiffStr(end, locationDate);
     const dayPixels = getFinalDayPixels(navigationValue.value);
     const startDist = startDistDays * dayPixels;
+    // console.log('useNavigationGesture checkLoadMoreData startDist', startDist);
+    // console.log('useNavigationGesture checkLoadMoreData height', height);
     const endDist = endDistDays * dayPixels;
     const newMode = getMode(dayPixels);
     const zoom = modes[newMode].id;
     if (newMode !== navigationValue.value.mode) {
       // console.log('checkLoadMoreData', locationDate);
       const { start } = getZoomModeRange(locationDate, zoom);
-      loadMoreData(start, zoom, width);
+      loadMoreData(start, zoom, 1, width);
       return;
     }
     const nextDateFuture = nextDate(end, zoom, true);
     const nextDatePast = nextDate(start, zoom, false);
     if (end < '2026-04-30' && endDist < height) {
-      loadMoreData(nextDateFuture, zoom, width);
+      loadMoreData(nextDateFuture, zoom, 1, width);
     }
     if (startDist < height) {
-      loadMoreData(nextDatePast, zoom, width);
+      // console.log('nextDatePast', nextDatePast);
+      loadMoreData(nextDatePast, zoom, 1, width);
     }
   };
 
