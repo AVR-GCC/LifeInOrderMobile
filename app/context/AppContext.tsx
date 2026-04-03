@@ -77,7 +77,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const lastMonth = nextDate(today, 'day', false);
 
     const [dates, habits] = await Promise.all([
-      getUserList(lastMonth, 'day', 3, 1080),
+      getUserList(lastMonth, 'day', 4, 1080),
       getUserConfig()
     ]);
     if (dates && habits) {

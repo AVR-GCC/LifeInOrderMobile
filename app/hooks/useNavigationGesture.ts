@@ -26,6 +26,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   const { loadMoreData, getScale, setScale, setScroll, getScroll } = useAppContext();
   const { height, width } = useWindowDimensions();
   const dataRef = useRef(data);
+  const loading = useRef(false);
 
   const navigationValue = useSharedValue<NavigationValues>({
     scroll: {
@@ -69,9 +70,13 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   };
 
   useEffect(() => {
+    if (JSON.stringify(data?.macroMap) !== JSON.stringify(dataRef.current?.macroMap)) {
+      loading.current = false;
+    }
     dataRef.current = data;
   }, [data])
 
+  // finalize mode change
   useEffect(() => {
     if (!data) return;
     const { macroMap, mode } = data;
@@ -94,6 +99,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     // console.log('useNavigationGesture useEffect newScroll', newScroll);
     // setNavigationValues(mode, 0, 1);
     setNavigationValues(mode, newScroll < 0 ? 0 : newScroll, newScale);
+    loading.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, height, setNavigationValues])
 
@@ -110,7 +116,9 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   }));
 
   const checkLoadMoreData = () => {
-    if (dataRef.current === null) return;
+    if (loading.current || dataRef.current === null) {
+      return;
+    }
     const { macroMap } = dataRef.current;
     const { start, end } = macroMap[modes[navigationValue.value.mode].id];
     if (!start || !end) return;
