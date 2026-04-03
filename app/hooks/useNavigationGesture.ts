@@ -139,6 +139,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       // console.log('checkLoadMoreData', locationDate);
       const { start, end } = getZoomModeRange(locationDate, zoom);
       const newDayPixels = modes[newMode].dayPixels;
+      loading.current = true;
       const newStartDistDays = dateDiffStr(locationDate, start);
       const newEndDistDays = dateDiffStr(end, locationDate);
       const newStartDist = newStartDistDays * newDayPixels;
@@ -155,9 +156,11 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const nextDateFuture = nextDate(end, zoom, true);
     const nextDatePast = nextDate(start, zoom, false);
     if (end < '2026-04-30' && endDist < height) {
+      loading.current = true;
       loadMoreData(nextDateFuture, zoom, 1, width);
     }
     if (startDist < height) {
+      loading.current = true;
       // console.log('nextDatePast', nextDatePast);
       loadMoreData(nextDatePast, zoom, 1, width);
     }
