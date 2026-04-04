@@ -27,7 +27,6 @@ export const useSeparators = (data: MainProps | null): SeparatorData[] => {
       const month = current.getMonth();
       const year = current.getFullYear();
       const isYear = month === 0;
-      if (!isYear && mode > 2) continue;
       let type: SeparatorType = isYear ? 'year' : 'month';
       let label = isYear ? `${year}` : `${MONTH_NAMES[month]} ${year}`;
       if (dayOffset === diff) {
@@ -35,11 +34,13 @@ export const useSeparators = (data: MainProps | null): SeparatorData[] => {
         label = `Today - ${label}`;
         addedToday = true;
       }
-      result.push({
-        dayOffset,
-        type,
-        label,
-      });
+      if (isYear || mode < 3) {
+        result.push({
+          dayOffset,
+          type,
+          label,
+        });
+      }
       const monthDays = new Date(year, month, 0).getDate();
       dayOffset += monthDays;
       current.setMonth(current.getMonth() - 1);
