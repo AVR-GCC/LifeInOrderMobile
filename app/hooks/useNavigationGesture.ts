@@ -148,17 +148,17 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       // console.log('useNavigationGesture checkLoadMoreData newStartDist', newStartDist);
       // console.log('useNavigationGesture checkLoadMoreData newEndDistDays', newEndDistDays);
       // console.log('useNavigationGesture checkLoadMoreData newEndDist', newEndDist);
+      let useDate = start;
+      let useCount = 1;
       if (newStartDist < height) {
-        const useDate = nextDate(start, zoom, false);
+        useDate = nextDate(start, zoom, false);
+        useCount = newEndDist < height ? 3 : 2;
         // console.log('useNavigationGesture checkLoadMoreData useDate', useDate);
-        loadMoreData(useDate, zoom, newEndDist < height ? 3 : 2, width);
       } else if (newEndDist < height) {
         // console.log('loading double');
-        loadMoreData(start, zoom, 2, width);
-      } else {
-        // console.log('loading single');
-        loadMoreData(start, zoom, 1, width);
+        useCount = 2;
       }
+      loadMoreData(useDate, zoom, useCount, width);
       return;
     }
     const nextDateFuture = nextDate(end, zoom, true);

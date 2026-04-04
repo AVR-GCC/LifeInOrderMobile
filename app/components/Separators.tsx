@@ -1,7 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
-import { BASE_DAY_HEIGHT } from '../constants/mainScreen';
 import { NavigationValues, SeparatorData } from '../types';
 import { modes } from '../constants/zoom';
 
