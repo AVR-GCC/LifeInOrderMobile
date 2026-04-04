@@ -1,53 +1,58 @@
 import { useMemo } from 'react';
 import { MONTH_NAMES } from '../constants/mainScreen';
-import { MainProps, SeparatorData } from '../types';
+import { MainProps, SeparatorData, SeparatorType } from '../types';
+import { modes } from '../constants/zoom';
+import { dateDiff } from '../utils/general';
 
 export const useSeparators = (data: MainProps | null): SeparatorData[] => {
   return useMemo((): SeparatorData[] => {
-    if (!data?.dates?.day) return [];
+    if (!data) return [];
+    const { macroMap, mode } = data;
+    const { start, end } = macroMap[modes[mode].id];
+    // console.log('start, end', start, end);
+    if (!start || !end) return [];
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const current = new Date(end);
     const result: SeparatorData[] = [];
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date();
+    let diff = -1;
+    let addedToday = false;
+    if (today.getTime() > startDate.getTime() && today.getTime() < endDate.getTime()) {
+      diff = dateDiff(endDate, today);
+    }
     let dayOffset = 0;
-    let prevYear: number | null = null;
-
-    for (const month of data.dates.day) {
-      if ('image' in month) continue;
-      if (month.days.length === 0) continue;
-
-      const firstDayDate = new Date(month.days[0].date + 'T00:00:00');
-      const monthNum = firstDayDate.getMonth();
-      const year = firstDayDate.getFullYear();
-
-      if (prevYear !== null && year !== prevYear) {
-        result.push({
-          dayOffset,
-          type: 'year',
-          label: `${year}`,
-        });
+    while (current.getMonth() !== startDate.getMonth() || current.getFullYear() !== startDate.getFullYear()) {
+      // console.log('current', current, dayOffset);
+      const month = current.getMonth();
+      const year = current.getFullYear();
+      const isYear = month === 0;
+      let type: SeparatorType = isYear ? 'year' : 'month';
+      let label = isYear ? `${year}` : `${MONTH_NAMES[month]} ${year}`;
+      if (dayOffset === diff) {
+        type = 'today';
+        label = `Today - ${label}`;
+        addedToday = true;
       }
-      prevYear = year;
-
       result.push({
         dayOffset,
-        type: 'month',
-        label: `${MONTH_NAMES[monthNum]} ${year}`,
+        type,
+        label,
       });
-
-      for (let i = 0; i < month.days.length; i++) {
-        if (month.days[i].date === today) {
-          result.push({
-            dayOffset: dayOffset + i,
-            type: 'today',
-            label: 'Today',
-          });
-        }
-      }
-
-      dayOffset += month.days.length;
+      const monthDays = new Date(year, month, 0).getDate();
+      dayOffset += monthDays;
+      current.setMonth(current.getMonth() - 1);
     }
-
+    if (diff !== -1 && !addedToday) {
+      result.push({
+        dayOffset: diff,
+        type: 'today',
+        label: 'Today',
+      });
+    }
+    // console.log('result', JSON.stringify(result, null, 2));
     return result;
-  }, [data?.dates]);
+  }, [data]);
 };
 
 export default { useSeparators };

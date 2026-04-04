@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { BASE_DAY_HEIGHT } from '../constants/mainScreen';
 import { NavigationValues, SeparatorData } from '../types';
+import { modes } from '../constants/zoom';
 
 const SEPARATOR_COLORS: Record<string, string> = {
   today: '#00e5ff',
@@ -23,11 +24,12 @@ const LABEL_COLORS: Record<string, string> = {
 };
 
 interface SeparatorLineProps {
+  dayHeight: number,
   separator: SeparatorData;
   navigationValue: SharedValue<NavigationValues>;
 }
 
-const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function SeparatorLine({ separator, navigationValue }) {
+const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function SeparatorLine({ separator, navigationValue, dayHeight }) {
   const { dayOffset, type, label } = separator;
 
   const labelStyle = useAnimatedStyle(() => {
@@ -42,7 +44,7 @@ const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function Separato
     <View
       style={[
         styles.separatorContainer,
-        { top: dayOffset * (BASE_DAY_HEIGHT - 2) - 1 },
+        { bottom: dayOffset * dayHeight - 1 },
       ]}
       pointerEvents="none"
     >
@@ -70,11 +72,13 @@ const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function Separato
 });
 
 interface SeparatorsProps {
+  mode: number;
   separators: SeparatorData[];
   navigationValue: SharedValue<NavigationValues>;
 }
 
-const Separators: React.FC<SeparatorsProps> = React.memo(function Separators({ separators, navigationValue }) {
+const Separators: React.FC<SeparatorsProps> = React.memo(function Separators({ separators, navigationValue, mode }) {
+  const dayHeight = mode === 0 ? BASE_DAY_HEIGHT - 2 : modes[mode].dayPixels;
   return (
     <>
       {separators.map((s) => (
@@ -82,6 +86,7 @@ const Separators: React.FC<SeparatorsProps> = React.memo(function Separators({ s
           key={`${s.type}-${s.dayOffset}`}
           separator={s}
           navigationValue={navigationValue}
+          dayHeight={dayHeight}
         />
       ))}
     </>

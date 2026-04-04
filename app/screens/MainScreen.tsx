@@ -109,7 +109,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
                 </View>
               </Animated.View>
             ))}
-            <Separators separators={separators} navigationValue={navigationValue} />
+            <Separators separators={separators} navigationValue={navigationValue} mode={mode} />
           </Animated.View>
         </GestureDetector>
       </View>
