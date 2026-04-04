@@ -47,6 +47,7 @@ interface AppContextType {
   getScale: () => number;
   setScroll: (newScroll: number) => void;
   getScroll: () => number;
+  setMode: (mode: number) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -68,6 +69,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const getScroll = () => scrollRef.current;
   const setScroll = (newScroll: number) => {
     scrollRef.current = newScroll;
+  }
+
+  const setMode = (mode: number) => {
+    if (!dataRef.current) return;
+    setData({ ...dataRef.current, mode });
   }
 
   const loadInitialData = async () => {
@@ -217,6 +223,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         getScale,
         setScroll,
         getScroll,
+        setMode,
       }}
     >
       {children}

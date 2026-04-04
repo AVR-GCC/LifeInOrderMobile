@@ -27,6 +27,7 @@ export const useSeparators = (data: MainProps | null): SeparatorData[] => {
       const month = current.getMonth();
       const year = current.getFullYear();
       const isYear = month === 0;
+      if (!isYear && mode > 2) continue;
       let type: SeparatorType = isYear ? 'year' : 'month';
       let label = isYear ? `${year}` : `${MONTH_NAMES[month]} ${year}`;
       if (dayOffset === diff) {

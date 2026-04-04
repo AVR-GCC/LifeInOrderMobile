@@ -1,4 +1,4 @@
-import { ModeInfo, ZoomLevel } from "../types";
+import { DateRange, ModeInfo, ZoomLevel } from "../types";
 import { dateString } from "../utils/general";
 
 export const modes: ModeInfo[] = [
@@ -101,6 +101,14 @@ export const getZoomModeRange = (date: string, zoom: ZoomLevel, count = 1) => {
       return { start, end };
   }
 };
+
+export const fitsInRange = (date: string, zoom: ZoomLevel, count: number, range: DateRange) => {
+  const { start: tStart, end: tEnd } = range;
+  if (!tStart || !tEnd) return false;
+  if (date < tStart) return false;
+  const { end } = getZoomModeRange(date, zoom, count);
+  return end <= tEnd;
+}
 
 export default {
   modes,
