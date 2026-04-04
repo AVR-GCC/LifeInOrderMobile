@@ -86,19 +86,15 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const curPixelsPerDay = getDayPixels(navigationValue.value);
     const newPixelsPerDay = modes[mode].dayPixels;
     const ratio = newPixelsPerDay / curPixelsPerDay;
-    // console.log('useNavigationGesture useEffect ratio', ratio);
     const newScale = scale / ratio;
-    // console.log('useNavigationGesture useEffect newScale', newScale);
-    const date = getLocationDate(macroMap, navigationValue.value);
-    // console.log('useNavigationGesture useEffect date', date);
-    // const range = macroMap[modes[mode].id];
-    // console.log('useNavigationGesture useEffect range', modes[mode].id, range);
-    const newDistance = getDateLocation(macroMap, navigationValue.value, modes[mode].id, date);
-    // console.log('useNavigationGesture useEffect newDistance', newDistance);
-    const newScroll = newDistance - (navigationValue.value.scroll.current.location ?? (height / 2));
-    // console.log('useNavigationGesture useEffect newScroll', newScroll);
-    // setNavigationValues(mode, 0, 1);
-    setNavigationValues(mode, newScroll < 0 ? 0 : newScroll, newScale);
+    const { end: oldEnd } = macroMap[modes[navigationValue.value.mode].id];
+    const { end: newEnd } = macroMap[modes[mode].id];
+    if (!oldEnd || !newEnd) return;
+    const endsDayDiff = dateDiffStr(oldEnd, newEnd);
+    const sharedFinalDayPixels = scale * curPixelsPerDay;
+    const scrollDiff = endsDayDiff * sharedFinalDayPixels;
+    const newScroll = navigationValue.value.scroll.current.offset - scrollDiff;
+    setNavigationValues(mode, newScroll, newScale);
     loading.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, height, setNavigationValues])
@@ -295,6 +291,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
 
       const { abs } = Math;
       const curLocation = (arg.allTouches[0].absoluteY + arg.allTouches[1].absoluteY) / 2;
+      // const curLocation = height / 2;
       const originalDistanceScale = navigationValue.value.zoom.start.distance / navigationValue.value.zoom.start.scale;
       const curDistance = arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY;
       const newScale = abs(curDistance / originalDistanceScale);
