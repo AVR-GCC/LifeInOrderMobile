@@ -138,18 +138,22 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       const { start, end } = getZoomModeRange(locationDate, zoom, 1);
       // console.log('useNavigationGesture checkLoadMoreData zoom, start, end', zoom, start, end);
       const newStartDistDays = dateDiffStr(locationDate, start);
-      // console.log('useNavigationGesture checkLoadMoreData newStartDistDays', newStartDistDays);
       const newEndDistDays = dateDiffStr(end, locationDate);
       const newStartDist = newStartDistDays * dayPixels;
-      // console.log('useNavigationGesture checkLoadMoreData newStartDist', newStartDist);
       const newEndDist = newEndDistDays * dayPixels;
+      // console.log('useNavigationGesture checkLoadMoreData newStartDistDays', newStartDistDays);
+      // console.log('useNavigationGesture checkLoadMoreData newStartDist', newStartDist);
+      // console.log('useNavigationGesture checkLoadMoreData newEndDistDays', newEndDistDays);
+      // console.log('useNavigationGesture checkLoadMoreData newEndDist', newEndDist);
       if (newStartDist < height) {
         const useDate = nextDate(start, zoom, false);
         // console.log('useNavigationGesture checkLoadMoreData useDate', useDate);
-        loadMoreData(useDate, zoom, 2, width);
+        loadMoreData(useDate, zoom, newEndDist < height ? 3 : 2, width);
       } else if (newEndDist < height) {
+        // console.log('loading double');
         loadMoreData(start, zoom, 2, width);
       } else {
+        // console.log('loading single');
         loadMoreData(start, zoom, 1, width);
       }
       return;
