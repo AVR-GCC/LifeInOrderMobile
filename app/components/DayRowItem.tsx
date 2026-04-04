@@ -53,7 +53,7 @@ const DayRowItem: React.FC<DayRowItemProps> = React.memo(function DayRowItem({
 const styles = StyleSheet.create({
   content: {
     flexDirection: 'row',
-    height: BASE_DAY_HEIGHT - 2,
+    height: BASE_DAY_HEIGHT,
   },
   leftBar: {
     paddingLeft: 10,

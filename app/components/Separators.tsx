@@ -78,7 +78,7 @@ interface SeparatorsProps {
 }
 
 const Separators: React.FC<SeparatorsProps> = React.memo(function Separators({ separators, navigationValue, mode }) {
-  const dayHeight = mode === 0 ? BASE_DAY_HEIGHT - 2 : modes[mode].dayPixels;
+  const dayHeight = modes[mode].dayPixels;
   return (
     <>
       {separators.map((s) => (
