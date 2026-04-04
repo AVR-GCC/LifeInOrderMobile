@@ -163,13 +163,15 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     }
     const nextDateFuture = nextDate(end, zoom, true);
     const nextDatePast = nextDate(start, zoom, false);
+    let useDate;
     if (end < '2026-04-30' && endDist < height) {
-      loading.current = true;
-      loadMoreData(nextDateFuture, zoom, 1, width);
+      useDate = nextDateFuture;
     }
     if (startDist < height) {
+      useDate = nextDatePast;
+    }
+    if (useDate) {
       loading.current = true;
-      // console.log('nextDatePast', nextDatePast);
       loadMoreData(nextDatePast, zoom, 1, width);
     }
   };
