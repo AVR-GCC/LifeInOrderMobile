@@ -6,13 +6,14 @@ import { useAppContext } from '../context/AppContext';
 import { MainProps, NavigationValues, ZoomLevel } from '../types';
 import { getMode, getZoomModeRange, modes, nextDate, zoomIndeces } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
-import { getDateLocation, getDayPixels, getFinalDayPixels, getLocationDate } from '../utils/dataStructures';
+import { getDayPixels, getFinalDayPixels, getLocationDate } from '../utils/dataStructures';
 import { dateDiffStr } from '../utils/general';
 
 const DECELERATION = 0.998;
 const MIN_VELOCITY = 0.01;
 
-type SetNavigationValues = (newMode: number, newScroll: number, newScale: number) => void;
+type SetNavigationValuesInput = { mode: number, offset: number, scale: number };
+type SetNavigationValues = (params: SetNavigationValuesInput) => void;
 
 interface UseNavigationGestureResult {
   gesture: GestureType;
@@ -20,6 +21,7 @@ interface UseNavigationGestureResult {
   navigationValue: SharedValue<NavigationValues>;
   setNavigationValues: SetNavigationValues;
   zoomStyles: Record<ZoomLevel, ViewStyle>;
+  pendingModeTransitions: { current: SetNavigationValuesInput | null };
 }
 
 export const useNavigationGesture = (data: MainProps | null): UseNavigationGestureResult => {
@@ -27,6 +29,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   const { height, width } = useWindowDimensions();
   const dataRef = useRef(data);
   const loading = useRef(false);
+  const pendingModeTransitions = useRef<SetNavigationValuesInput>(null);
 
   const navigationValue = useSharedValue<NavigationValues>({
     scroll: {
@@ -49,24 +52,24 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     two_year: useAnimatedStyle<ViewStyle>(() => ({ opacity: navigationValue.value.mode === zoomIndeces.two_year ? 1 : 0 })),
   };
 
-  const setNavigationValues: SetNavigationValues = (newMode, newScroll, newScale) => {
+  const setNavigationValues: SetNavigationValues = ({ mode, offset, scale }) => {
     // if (newMode === 1) {
     //   console.log(navigationValue.value.scroll.current.offset, '=>', newScroll);
     // }
     navigationValue.value = {
       scroll: {
         start: { location: null, offset: null },
-        current: { location: null, offset: newScroll },
+        current: { location: null, offset },
       },
       zoom: {
         start: { scale: null, distance: null },
-        current: { scale: newScale, distance: null },
+        current: { scale, distance: null },
       },
       touchCount: 0,
-      mode: newMode,
+      mode,
     };
-    if (newScroll !== getScroll()) setScroll(newScroll);
-    if (newScale !== getScale()) setScale(newScale);
+    if (offset !== getScroll()) setScroll(offset);
+    if (scale !== getScale()) setScale(scale);
   };
 
   useEffect(() => {
@@ -82,22 +85,22 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const { macroMap, mode } = data;
     if (!mode) return;
     if (mode === navigationValue.value.mode) return;
-    const scale = navigationValue.value.zoom.current.scale;
+    const curScale = navigationValue.value.zoom.current.scale;
     const curPixelsPerDay = getDayPixels(navigationValue.value);
     const newPixelsPerDay = modes[mode].dayPixels;
     const ratio = newPixelsPerDay / curPixelsPerDay;
-    const newScale = scale / ratio;
+    const scale = curScale / ratio;
     const { end: oldEnd } = macroMap[modes[navigationValue.value.mode].id];
     const { end: newEnd } = macroMap[modes[mode].id];
     if (!oldEnd || !newEnd) return;
     const endsDayDiff = dateDiffStr(oldEnd, newEnd);
-    const sharedFinalDayPixels = scale * curPixelsPerDay;
+    const sharedFinalDayPixels = curScale * curPixelsPerDay;
     const scrollDiff = endsDayDiff * sharedFinalDayPixels;
-    const newScroll = navigationValue.value.scroll.current.offset - scrollDiff;
-    setNavigationValues(mode, newScroll, newScale);
+    const offset = navigationValue.value.scroll.current.offset - scrollDiff;
+    pendingModeTransitions.current = { mode, offset, scale };
     loading.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, height, setNavigationValues])
+  }, [data, height])
 
   const scrollVelocity = useSharedValue(0);
   const lastTouchY = useSharedValue<number | null>(null);
@@ -373,7 +376,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     .onTouchesUp(onTouchesUp)
     .onTouchesCancelled(onTouchesUp);
 
-  return { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles };
+  return { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles, pendingModeTransitions };
 };
 
 export default { useNavigationGesture };

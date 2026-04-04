@@ -23,7 +23,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   const loaded = useRef(false);
 
   const separators = useSeparators(data);
-  const { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles } = useNavigationGesture(data);
+  const { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles, pendingModeTransitions } = useNavigationGesture(data);
 
   useEffect(() => {
     if (!loaded.current && data !== null) {
@@ -39,11 +39,18 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
       const { end } = macroMap[mode.id];
       if (!end) return;
       const daysToLast = dateDiff(new Date(end), todate);
-      const newScroll = getDayPixels(navigationValue.value) * daysToLast - (height / 2);
-      setNavigationValues(0, newScroll, getScale());
+      const offset = getDayPixels(navigationValue.value) * daysToLast - (height / 2);
+      setNavigationValues({ mode: 0, offset, scale: getScale() });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
+
+  const onLoadImage = () => {
+    if (pendingModeTransitions.current) {
+      setNavigationValues(pendingModeTransitions.current);
+      pendingModeTransitions.current = null;
+    }
+  }
 
   if (data === null) {
     return <Loading />;
@@ -88,7 +95,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
               key={key}
               source={{ uri: item.image }}
               // onError={(e) => console.log('Image error:', e.nativeEvent.error)}
-              // onLoad={() => console.log('Image loaded!')}
+              onLoad={onLoadImage}
             />
           );
         }
