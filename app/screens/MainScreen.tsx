@@ -15,6 +15,7 @@ import { useSeparators } from '../hooks/useSeparators';
 import { MainScreenProps, ZoomLevelData } from '../types';
 import { getDayPixels, getModeInfo } from '../utils/dataStructures';
 import { dateDiff, dateDiffStr } from '../utils/general';
+import ImageRowItem from '../components/ImageRowItem';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ data, getDayHabitValue }) {
   const { getScale } = useAppContext();
@@ -83,21 +84,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
         } else {
           if (!item.range.start || !item.range.end) return null;
           const key = `image-${item.range.start}-${item.range.end}`;
-          const daysCount = dateDiffStr(item.range.end, item.range.start);
-          const dayPixels = modes[mode].dayPixels;
-          // console.log('mode', mode);
-          // console.log('daysCount', daysCount);
-          // console.log('dayPixels', dayPixels);
-          return (
-            <Image
-              resizeMode="contain"
-              style={{ width:'100%', height: daysCount * dayPixels }}
-              key={key}
-              source={{ uri: item.image }}
-              // onError={(e) => console.log('Image error:', e.nativeEvent.error)}
-              onLoad={onLoadImage}
-            />
-          );
+          return <ImageRowItem key={key} item={item} onLoad={onLoadImage} />
         }
       })}
     </View>
