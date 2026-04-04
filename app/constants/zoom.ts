@@ -76,7 +76,7 @@ export const getZoomModeRange = (date: string, zoom: ZoomLevel, count = 1) => {
       // console.log('getZoomModeRange end', end);
       return { start, end };
     case 'half':
-      const hstartMonth = month <= 6 ? 0 : 7;
+      const hstartMonth = month <= 5 ? 0 : 6;
       dateObj.setUTCMonth(hstartMonth);
       start = dateString(dateObj);
       dateObj.setUTCMonth(hstartMonth + 6 * count);
