@@ -53,9 +53,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   };
 
   const setNavigationValues: SetNavigationValues = ({ mode, offset, scale }) => {
-    // if (newMode === 1) {
-    //   console.log(navigationValue.value.scroll.current.offset, '=>', newScroll);
-    // }
+    // const curVals = { mode: navigationValue.value.mode, offset: navigationValue.value.scroll.current.offset, scale: navigationValue.value.zoom.current.scale };
+    // console.log(curVals, '=>', { mode, offset, scale });
     navigationValue.value = {
       scroll: {
         start: { location: null, offset: null },

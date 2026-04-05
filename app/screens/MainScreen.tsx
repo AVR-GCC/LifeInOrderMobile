@@ -14,7 +14,7 @@ import { useNavigationGesture } from '../hooks/useNavigationGesture';
 import { useSeparators } from '../hooks/useSeparators';
 import { MainScreenProps, ZoomLevelData } from '../types';
 import { getDayPixels, getModeInfo } from '../utils/dataStructures';
-import { dateDiff, dateDiffStr } from '../utils/general';
+import { dateDiff, dateDiffStr, dateString } from '../utils/general';
 import ImageRowItem from '../components/ImageRowItem';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ data, getDayHabitValue }) {
@@ -84,7 +84,27 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
         } else {
           if (!item.range.start || !item.range.end) return null;
           const key = `image-${item.range.start}-${item.range.end}`;
-          return <ImageRowItem key={key} item={item} onLoad={onLoadImage} navigationValue={navigationValue} />
+          return (
+            <ImageRowItem
+              key={key}
+              item={item}
+              onLoad={onLoadImage}
+              navigationValue={navigationValue}
+              zoonToMonth={(date: string) => {
+                if (!data) return;
+                const { end: lastDateDay } = data.macroMap.day;
+                if (!lastDateDay) return;
+                const bottomDate = new Date(date);
+                bottomDate.setUTCMonth(bottomDate.getMonth() + 1);
+                bottomDate.setUTCDate(0);
+                const scale  = (height - 125) / (24 * bottomDate.getDate());
+                const dayOffset = dateDiffStr(lastDateDay, dateString(bottomDate));
+                const offset = (dayOffset - 1) * scale * 24;
+                const mode = 0;
+                setNavigationValues({ mode, scale, offset });
+              }}
+            />
+          );
         }
       })}
     </View>

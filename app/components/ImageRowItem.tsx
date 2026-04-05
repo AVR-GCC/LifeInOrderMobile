@@ -11,6 +11,7 @@ interface ImageRowItemProps {
   item: TimePeriodData;
   onLoad: () => void;
   navigationValue: SharedValue<NavigationValues>;
+  zoonToMonth: (date: string) => void;
 }
 
 const monthName = [
@@ -31,7 +32,7 @@ const monthName = [
 const SIDEBAR_SECTION_BORDER_WIDTH = 6;
 
 const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowItem({
-  item, onLoad, navigationValue
+  item, onLoad, navigationValue, zoonToMonth
 }) {
     const { zoom, range, image } = item;
     const sidebarSectionStyle = useAnimatedStyle(() => {
@@ -73,7 +74,7 @@ const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowIt
               <TouchableOpacity
                 key={`${date}-zoom-to-month`}
                 onPress={() => {
-                  console.log('touched');
+                  zoonToMonth(date);
                 }}
                 style={[styles.dayMarker, { flex }]}
               >
