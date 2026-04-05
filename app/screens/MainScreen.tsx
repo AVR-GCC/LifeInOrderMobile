@@ -84,7 +84,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
         } else {
           if (!item.range.start || !item.range.end) return null;
           const key = `image-${item.range.start}-${item.range.end}`;
-          return <ImageRowItem key={key} item={item} onLoad={onLoadImage} />
+          return <ImageRowItem key={key} item={item} onLoad={onLoadImage} navigationValue={navigationValue} />
         }
       })}
     </View>
