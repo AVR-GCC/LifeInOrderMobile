@@ -105,9 +105,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
                 const offset = (dayOffset - 1) * scale * 24;
                 const mode = 0;
                 setNavigationValues({ mode, scale, offset });
-                if (navigationValue.value.mode) {
-                  setMode(0);
-                }
+                setMode(0);
               }}
             />
           );
