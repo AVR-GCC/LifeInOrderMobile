@@ -18,7 +18,7 @@ interface DayScreenProps {
   setDayHabitValue: SetDayValue;
 }
 
-const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue, setDayHabitValue }) => {
+const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data, getDayHabitValue, setDayHabitValue }) {
   const { date } = useLocalSearchParams();
   const [dayIndexString, monthIndexString] = Array.isArray(date) ? date : date.split('-');
   const dayIndex = parseInt(dayIndexString, 10);
@@ -40,7 +40,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
     return <Screen />;
   }
 
-  if ('value' in dates.day[monthIndex]) {
+  if ('image' in dates.day[monthIndex]) {
     return <Screen />;
   }
 
@@ -48,13 +48,13 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
     let newDateIndex = dateIndex + (isDown ? 1 : -1);
     let newMonthIndex = monthIndex;
     let newMonth = dates.day[newMonthIndex];
-    if ('value' in newMonth) {
+    if ('image' in newMonth) {
       return;
     }
     if (newDateIndex < 0) {
       newMonthIndex -= 1;
       newMonth = dates.day[newMonthIndex];
-      if ('value' in newMonth) {
+      if ('image' in newMonth) {
         return;
       }
       newDateIndex = newMonth.days.length - 1;
@@ -62,7 +62,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
     if (newDateIndex === newMonth.days.length) {
       newMonthIndex += 1;
       newMonth = dates.day[newMonthIndex];
-      if ('value' in newMonth) {
+      if ('image' in newMonth) {
         return;
       }
       newDateIndex = 0;
@@ -76,6 +76,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
         <TouchableOpacity
           style={styles.backArrowContainer}
           onPress={() => {
+            if ('image' in dates.day[monthIndex]) return;
             const date = dates.day[monthIndex].days[dayIndex].date;
             router.replace(`/main?date=${date}`);
           }}
