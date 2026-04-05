@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
-import { useWindowDimensions, View, Image } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 import DayRowItem from '../components/DayRowItem';
@@ -18,7 +18,7 @@ import { dateDiff, dateDiffStr, dateString } from '../utils/general';
 import ImageRowItem from '../components/ImageRowItem';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ data, getDayHabitValue }) {
-  const { getScale } = useAppContext();
+  const { getScale, setMode } = useAppContext();
   const router = useRouter();
   const { height } = useWindowDimensions();
   const loaded = useRef(false);
@@ -105,6 +105,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
                 const offset = (dayOffset - 1) * scale * 24;
                 const mode = 0;
                 setNavigationValues({ mode, scale, offset });
+                if (navigationValue.value.mode) {
+                  setMode(0);
+                }
               }}
             />
           );
