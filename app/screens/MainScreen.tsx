@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
 import { useWindowDimensions, View, Image } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
@@ -22,6 +22,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   const router = useRouter();
   const { height } = useWindowDimensions();
   const loaded = useRef(false);
+  const { date } = useLocalSearchParams();
 
   const separators = useSeparators(data);
   const { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles, pendingModeTransitions } = useNavigationGesture(data);
@@ -35,7 +36,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
           router.replace('/day/0/habits');
         }
       });
-      const todate = new Date();
+      const dateParam = Array.isArray(date) ? date[0] : date;
+      const todate = dateParam ? new Date(dateParam) : new Date();
+
       const mode = getModeInfo(navigationValue.value);
       const { end } = macroMap[mode.id];
       if (!end) return;

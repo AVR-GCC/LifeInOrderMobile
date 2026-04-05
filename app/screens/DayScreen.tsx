@@ -75,7 +75,10 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(({ data, getDayHabitValue
       <TitleBar>
         <TouchableOpacity
           style={styles.backArrowContainer}
-          onPress={() => router.replace('/')}
+          onPress={() => {
+            const date = dates.day[monthIndex].days[dayIndex].date;
+            router.replace(`/main?date=${date}`);
+          }}
         >
           <AntDesign name="arrow-left" size={30} color={COLORS.text} />
         </TouchableOpacity>
