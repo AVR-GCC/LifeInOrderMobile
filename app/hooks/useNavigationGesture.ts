@@ -45,11 +45,26 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   });
 
   const zoomStyles = {
-    day: useAnimatedStyle<ViewStyle>(() => ({ opacity: navigationValue.value.mode === zoomIndeces.day ? 1 : 0 })),
-    quarter: useAnimatedStyle<ViewStyle>(() => ({ opacity: navigationValue.value.mode === zoomIndeces.quarter ? 1 : 0 })),
-    half: useAnimatedStyle<ViewStyle>(() => ({ opacity: navigationValue.value.mode === zoomIndeces.half ? 1 : 0 })),
-    year: useAnimatedStyle<ViewStyle>(() => ({ opacity: navigationValue.value.mode === zoomIndeces.year ? 1 : 0 })),
-    two_year: useAnimatedStyle<ViewStyle>(() => ({ opacity: navigationValue.value.mode === zoomIndeces.two_year ? 1 : 0 })),
+    day: useAnimatedStyle<ViewStyle>(() => ({
+      opacity: navigationValue.value.mode === zoomIndeces.day ? 1 : 0,
+      pointerEvents: navigationValue.value.mode === zoomIndeces.day ? 'auto' : 'none'
+    })),
+    quarter: useAnimatedStyle<ViewStyle>(() => ({
+      opacity: navigationValue.value.mode === zoomIndeces.quarter ? 1 : 0,
+      pointerEvents: navigationValue.value.mode === zoomIndeces.quarter ? 'auto' : 'none'
+    })),
+    half: useAnimatedStyle<ViewStyle>(() => ({
+      opacity: navigationValue.value.mode === zoomIndeces.half ? 1 : 0,
+      pointerEvents: navigationValue.value.mode === zoomIndeces.half ? 'auto' : 'none'
+    })),
+    year: useAnimatedStyle<ViewStyle>(() => ({
+      opacity: navigationValue.value.mode === zoomIndeces.year ? 1 : 0,
+      pointerEvents: navigationValue.value.mode === zoomIndeces.year ? 'auto' : 'none'
+    })),
+    two_year: useAnimatedStyle<ViewStyle>(() => ({
+      opacity: navigationValue.value.mode === zoomIndeces.two_year ? 1 : 0,
+      pointerEvents: navigationValue.value.mode === zoomIndeces.two_year ? 'auto' : 'none'
+    })),
   };
 
   const setNavigationValues: SetNavigationValues = ({ mode, offset, scale }) => {
