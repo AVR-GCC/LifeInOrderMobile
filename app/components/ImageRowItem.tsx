@@ -62,6 +62,7 @@ const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowIt
       buttons.push({ flex, name, date: current });
       current = dateString(currentDate);
     }
+    const height = daysCount * dayPixels;
     // console.log('mode', mode);
     // console.log('daysCount', daysCount);
     // console.log('dayPixels', dayPixels);
@@ -93,10 +94,10 @@ const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowIt
             );
           })}
         </View>
-        <View style={styles.dayContainer}>
+        <View style={[styles.imageContainer, { height }]}>
           <Image
             resizeMode="contain"
-            style={{ width:'100%', height: daysCount * dayPixels }}
+            style={[styles.image, { height }]}
             key={key}
             source={{ uri: image }}
             // onError={(e) => console.log('Image error:', e.nativeEvent.error)}
@@ -122,8 +123,11 @@ const styles = StyleSheet.create({
     borderWidth: SIDEBAR_SECTION_BORDER_WIDTH,
     borderColor: 'rgba(255, 255, 255, 0.2)'
   },
-  dayContainer: {
-    flex: 1,
+  imageContainer: {
+    width: '100%'
+  },
+  image: {
+    width: '100%'
   },
   textHolder: {
     position: 'absolute',
