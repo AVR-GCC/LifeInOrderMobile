@@ -43,7 +43,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
       const { end } = macroMap[mode.id];
       if (!end) return;
       const daysToLast = dateDiff(new Date(end), todate);
-      const offset = getDayPixels(navigationValue.value) * daysToLast - (height / 2);
+      const potentialOffset = getDayPixels(navigationValue.value) * daysToLast - (height / 2);
+      const offset = potentialOffset < 0 ? 0 : potentialOffset;
       setNavigationValues({ mode: 0, offset, scale: getScale() });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,7 +103,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
                 bottomDate.setUTCDate(0);
                 const scale  = (height - 125) / (24 * bottomDate.getDate());
                 const dayOffset = dateDiffStr(lastDateDay, dateString(bottomDate));
-                const offset = (dayOffset - 1) * scale * 24;
+                const potentialOffset = (dayOffset - 1) * scale * 24;
+                const offset = potentialOffset < 0 ? 0 : potentialOffset;
                 const mode = 0;
                 setNavigationValues({ mode, scale, offset });
                 setMode(0);
