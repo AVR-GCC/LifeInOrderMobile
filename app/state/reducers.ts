@@ -40,9 +40,12 @@ export const loadMoreDataReducer = (data: MainProps) => (zoom: ZoomLevel, newDat
   if (existingData.length > 0) {
     const { start: existingStart, end: existingEnd } = getZoomLevelDataRange(existingData)
     const future = start >= existingEnd;
-    end = future ? end : existingEnd;
-    start = future ? existingStart : start;
-    nextData = future ? [...existingData, ...newData] : [...newData, ...existingData];
+    const continuous = future ? start === existingEnd : end === existingStart;
+    if (continuous) {
+      end = future ? end : existingEnd;
+      start = future ? existingStart : start;
+      nextData = future ? [...existingData, ...newData] : [...newData, ...existingData];
+    }
   }
   // console.log('nextData', nextData.map(d => d.range));
   const nextDates = { ...dates, [zoom]: nextData };

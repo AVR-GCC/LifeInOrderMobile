@@ -119,7 +119,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     if (mode === navigationValue.value.mode) return;
     const modeTransitionValues = getModeTransitionValues();
     if (modeTransitionValues) {
-      if (loading.current) {
+      if (loading.current && mode !== 0) {
         pendingModeTransitions.current = modeTransitionValues;
         loading.current = false;
       } else {
