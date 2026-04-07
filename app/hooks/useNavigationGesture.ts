@@ -248,14 +248,14 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   }
 
   const checkLoadMoreDataInLocation = (mm: MacroMap, nv: NavigationValues) => {
-      const { date, zoom, count } = generateMissingDataVars(mm, nv);
-      if (!zoom) return;
-      if (!count || !date) {
-        setMode(zoomIndeces[zoom]);
-      } else {
-        loading.current = true;
-        loadMoreData(date, zoom, count, width);
-      }
+    const { date, zoom, count } = generateMissingDataVars(mm, nv);
+    if (!zoom) return;
+    if (!count || !date) {
+      setMode(zoomIndeces[zoom]);
+    } else {
+      loading.current = true;
+      loadMoreData(date, zoom, count, width);
+    }
   };
 
   const checkLoadMoreData = () => {
