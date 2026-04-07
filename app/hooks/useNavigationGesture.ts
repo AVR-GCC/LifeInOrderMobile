@@ -7,7 +7,7 @@ import { MacroMap, MainProps, NavigationValues, ZoomLevel } from '../types';
 import { fitsInRange, getMode, getZoomModeRange, modes, nextDate, zoomIndeces } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
 import { getDayPixels, getFinalDayPixels, getLocationDate, getModeInfo } from '../utils/dataStructures';
-import { dateDiff, dateDiffStr } from '../utils/general';
+import { dateDiff, dateDiffStr, dateString } from '../utils/general';
 
 const DECELERATION = 0.998;
 const MIN_VELOCITY = 0.01;
@@ -19,10 +19,10 @@ interface UseNavigationGestureResult {
   gesture: GestureType;
   animatedListStyle: ViewStyle;
   navigationValue: SharedValue<NavigationValues>;
-  setNavigationValues: SetNavigationValues;
   zoomStyles: Record<ZoomLevel, ViewStyle>;
   executePendingModeTransitions: () => void;
   scrollToDate: (date: string) => void;
+  zoomToMonth: (date: string) => void;
 }
 
 export const useNavigationGesture = (data: MainProps | null): UseNavigationGestureResult => {
@@ -160,6 +160,22 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const potentialOffset = getDayPixels(navigationValue.value) * daysToLast - (height / 2);
     const offset = potentialOffset < 0 ? 0 : potentialOffset;
     setNavigationValues({ mode: 0, offset, scale: getScale() });
+  };
+
+  const zoomToMonth = (date: string) => {
+    if (!data) return;
+    const { end: lastDateDay } = data.macroMap.day;
+    if (!lastDateDay) return;
+    const bottomDate = new Date(date);
+    bottomDate.setUTCMonth(bottomDate.getMonth() + 1);
+    bottomDate.setUTCDate(0);
+    const scale  = (height - 125) / (24 * bottomDate.getDate());
+    const dayOffset = dateDiffStr(lastDateDay, dateString(bottomDate));
+    const potentialOffset = (dayOffset - 1) * scale * 24;
+    const offset = potentialOffset < 0 ? 0 : potentialOffset;
+    const mode = 0;
+    setNavigationValues({ mode, scale, offset });
+    setMode(0);
   };
 
   const checkLoadMoreDataInLocation = (mm: MacroMap, nv: NavigationValues) => {
@@ -439,7 +455,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     .onTouchesUp(onTouchesUp)
     .onTouchesCancelled(onTouchesUp);
 
-  return { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles, executePendingModeTransitions, scrollToDate };
+  return { gesture, animatedListStyle, navigationValue, zoomStyles, executePendingModeTransitions, scrollToDate, zoomToMonth };
 };
 
 export default { useNavigationGesture };

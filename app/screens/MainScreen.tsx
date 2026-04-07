@@ -9,23 +9,20 @@ import Screen from '../components/Screen';
 import Separators from '../components/Separators';
 import TopBar from '../components/TopBar';
 import { modes } from '../constants/zoom';
-import { useAppContext } from '../context/AppContext';
 import { useNavigationGesture } from '../hooks/useNavigationGesture';
 import { useSeparators } from '../hooks/useSeparators';
 import { MainScreenProps, ZoomLevelData } from '../types';
-import { getDayPixels, getModeInfo } from '../utils/dataStructures';
-import { dateDiff, dateDiffStr, dateString } from '../utils/general';
+import { dateString } from '../utils/general';
 import ImageRowItem from '../components/ImageRowItem';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ data, getDayHabitValue }) {
-  const { setMode } = useAppContext();
   const router = useRouter();
   const { height } = useWindowDimensions();
   const loaded = useRef(false);
   const { date } = useLocalSearchParams();
 
   const separators = useSeparators(data);
-  const { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles, executePendingModeTransitions, scrollToDate } = useNavigationGesture(data);
+  const { gesture, animatedListStyle, navigationValue, zoonToMonth, zoomStyles, executePendingModeTransitions, scrollToDate, zoomToMonth } = useNavigationGesture(data);
 
   useEffect(() => {
     if (!loaded.current && data !== null) {
@@ -80,21 +77,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
               item={item}
               onLoad={executePendingModeTransitions}
               navigationValue={navigationValue}
-              zoonToMonth={(date: string) => {
-                if (!data) return;
-                const { end: lastDateDay } = data.macroMap.day;
-                if (!lastDateDay) return;
-                const bottomDate = new Date(date);
-                bottomDate.setUTCMonth(bottomDate.getMonth() + 1);
-                bottomDate.setUTCDate(0);
-                const scale  = (height - 125) / (24 * bottomDate.getDate());
-                const dayOffset = dateDiffStr(lastDateDay, dateString(bottomDate));
-                const potentialOffset = (dayOffset - 1) * scale * 24;
-                const offset = potentialOffset < 0 ? 0 : potentialOffset;
-                const mode = 0;
-                setNavigationValues({ mode, scale, offset });
-                setMode(0);
-              }}
+              zoonToMonth={zoomToMonth}
             />
           );
         }
