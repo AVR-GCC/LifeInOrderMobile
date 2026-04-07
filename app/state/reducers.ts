@@ -3,6 +3,7 @@ import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, Zo
 import { last } from '../utils/general';
 
 const getZoomLevelDataRange = (zld: ZoomLevelData[]) => {
+  if (zld.length === 0) return { start: null, end: null };
   const start = zld[0].range.start;
   const end = last(zld).range.end;
   return { start, end };
