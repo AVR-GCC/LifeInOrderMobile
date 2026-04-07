@@ -201,13 +201,12 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       }
       return { zoom, date: useDate, count: useCount };
     }
-    const nextDateFuture = nextDate(end, zoom, true);
     const nextDatePast = nextDate(start, zoom, false);
     let useDate;
-    if (end < '2026-04-30' && endDist < height) {
-      useDate = nextDateFuture;
+    if (end < '2026-04-30' && endDist < height && scrollVelocity.value < 0) {
+      useDate = end;
     }
-    if (startDist < height) {
+    if (startDist < height && scrollVelocity.value > 0) {
       useDate = nextDatePast;
     }
     if (useDate) {
