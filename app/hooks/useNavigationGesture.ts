@@ -152,37 +152,6 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     }
   }
 
-  const scrollToDate = (date: string) => {
-    if (loading.current || dataRef.current === null) {
-      return;
-    }
-    const { macroMap } = dataRef.current;
-    const todate = new Date(date);
-    const mode = getModeInfo(navigationValue.value);
-    const { end } = macroMap[mode.id];
-    if (!end) return;
-    const daysToLast = dateDiff(new Date(end), todate);
-    const potentialOffset = getDayPixels(navigationValue.value) * daysToLast - (height / 2);
-    const offset = potentialOffset < 0 ? 0 : potentialOffset;
-    setNavigationValues({ mode: 0, offset, scale: getScale() });
-  };
-
-  const zoomToMonth = (date: string) => {
-    if (!data) return;
-    const { end: lastDateDay } = data.macroMap.day;
-    if (!lastDateDay) return;
-    const bottomDate = new Date(date);
-    bottomDate.setUTCMonth(bottomDate.getMonth() + 1);
-    bottomDate.setUTCDate(0);
-    const scale  = (height - 125) / (24 * bottomDate.getDate());
-    const dayOffset = dateDiffStr(lastDateDay, dateString(bottomDate));
-    const potentialOffset = (dayOffset - 1) * scale * 24;
-    const offset = potentialOffset < 0 ? 0 : potentialOffset;
-    const mode = 0;
-    setNavigationValues({ mode, scale, offset });
-    setMode(0);
-  };
-
   const generateMissingDataVars: (mm: MacroMap, nv: NavigationValues) => { zoom?: ZoomLevel, date?: string, count?: number } = (mm, nv) => {
     const { start, end } = mm[modes[nv.mode].id];
     if (!start || !end) return { zoom: 'day' };
@@ -264,6 +233,38 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     }
     const { macroMap } = dataRef.current;
     checkLoadMoreDataInLocation(macroMap, navigationValue.value);
+  };
+
+  const scrollToDate = (date: string) => {
+    if (loading.current || dataRef.current === null) {
+      return;
+    }
+    const { macroMap } = dataRef.current;
+    const todate = new Date(date);
+    const mode = getModeInfo(navigationValue.value);
+    const { end } = macroMap[mode.id];
+    if (!end) return;
+    const daysToLast = dateDiff(new Date(end), todate);
+    const potentialOffset = getDayPixels(navigationValue.value) * daysToLast - (height / 2);
+    const offset = potentialOffset < 0 ? 0 : potentialOffset;
+    setNavigationValues({ mode: 0, offset, scale: getScale() });
+  };
+
+  const zoomToMonth = (date: string) => {
+    if (!data) return;
+    const { macroMap } = data;
+    const { end: lastDateDay } = macroMap.day;
+    if (!lastDateDay) return;
+    const bottomDate = new Date(date);
+    bottomDate.setUTCMonth(bottomDate.getMonth() + 1);
+    bottomDate.setUTCDate(0);
+    const scale  = (height - 125) / (24 * bottomDate.getDate());
+    const dayOffset = dateDiffStr(lastDateDay, dateString(bottomDate));
+    const potentialOffset = (dayOffset - 1) * scale * 24;
+    const offset = potentialOffset < 0 ? 0 : potentialOffset;
+    const mode = 0;
+    const foNavigationValues = fabNavigationValue({ mode, offset, scale });
+    checkLoadMoreDataInLocation(macroMap, foNavigationValues);
   };
 
   useAnimatedReaction(
