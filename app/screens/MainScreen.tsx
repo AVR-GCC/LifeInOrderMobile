@@ -18,34 +18,27 @@ import { dateDiff, dateDiffStr, dateString } from '../utils/general';
 import ImageRowItem from '../components/ImageRowItem';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ data, getDayHabitValue }) {
-  const { getScale, setMode } = useAppContext();
+  const { setMode } = useAppContext();
   const router = useRouter();
   const { height } = useWindowDimensions();
   const loaded = useRef(false);
   const { date } = useLocalSearchParams();
 
   const separators = useSeparators(data);
-  const { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles, executePendingModeTransitions } = useNavigationGesture(data);
+  const { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles, executePendingModeTransitions, scrollToDate } = useNavigationGesture(data);
 
   useEffect(() => {
     if (!loaded.current && data !== null) {
       loaded.current = true;
-      const { habits, macroMap } = data;
+      const { habits } = data;
       setTimeout(() => {
         if (habits.length === 0) {
           router.replace('/day/0/habits');
         }
       });
       const dateParam = Array.isArray(date) ? date[0] : date;
-      const todate = dateParam ? new Date(dateParam) : new Date();
-
-      const mode = getModeInfo(navigationValue.value);
-      const { end } = macroMap[mode.id];
-      if (!end) return;
-      const daysToLast = dateDiff(new Date(end), todate);
-      const potentialOffset = getDayPixels(navigationValue.value) * daysToLast - (height / 2);
-      const offset = potentialOffset < 0 ? 0 : potentialOffset;
-      setNavigationValues({ mode: 0, offset, scale: getScale() });
+      const stDate = dateParam ?? dateString(new Date());
+      scrollToDate(stDate);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);

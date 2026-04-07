@@ -6,8 +6,8 @@ import { useAppContext } from '../context/AppContext';
 import { MacroMap, MainProps, NavigationValues, ZoomLevel } from '../types';
 import { fitsInRange, getMode, getZoomModeRange, modes, nextDate, zoomIndeces } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
-import { getDayPixels, getFinalDayPixels, getLocationDate } from '../utils/dataStructures';
-import { dateDiffStr } from '../utils/general';
+import { getDayPixels, getFinalDayPixels, getLocationDate, getModeInfo } from '../utils/dataStructures';
+import { dateDiff, dateDiffStr } from '../utils/general';
 
 const DECELERATION = 0.998;
 const MIN_VELOCITY = 0.01;
@@ -22,6 +22,7 @@ interface UseNavigationGestureResult {
   setNavigationValues: SetNavigationValues;
   zoomStyles: Record<ZoomLevel, ViewStyle>;
   executePendingModeTransitions: () => void;
+  scrollToDate: (date: string) => void;
 }
 
 export const useNavigationGesture = (data: MainProps | null): UseNavigationGestureResult => {
@@ -145,6 +146,21 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       pendingModeTransitions.current = null;
     }
   }
+
+  const scrollToDate = (date: string) => {
+    if (loading.current || dataRef.current === null) {
+      return;
+    }
+    const { macroMap } = dataRef.current;
+    const todate = new Date(date);
+    const mode = getModeInfo(navigationValue.value);
+    const { end } = macroMap[mode.id];
+    if (!end) return;
+    const daysToLast = dateDiff(new Date(end), todate);
+    const potentialOffset = getDayPixels(navigationValue.value) * daysToLast - (height / 2);
+    const offset = potentialOffset < 0 ? 0 : potentialOffset;
+    setNavigationValues({ mode: 0, offset, scale: getScale() });
+  };
 
   const checkLoadMoreDataInLocation = (mm: MacroMap, nv: NavigationValues) => {
     const { start, end } = mm[modes[nv.mode].id];
@@ -423,7 +439,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     .onTouchesUp(onTouchesUp)
     .onTouchesCancelled(onTouchesUp);
 
-  return { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles, executePendingModeTransitions };
+  return { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles, executePendingModeTransitions, scrollToDate };
 };
 
 export default { useNavigationGesture };
