@@ -3,7 +3,7 @@ import { Gesture, GestureType } from 'react-native-gesture-handler';
 import { SharedValue, useAnimatedReaction, useAnimatedStyle, useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import { useAppContext } from '../context/AppContext';
-import { MainProps, NavigationValues, ZoomLevel } from '../types';
+import { MacroMap, MainProps, NavigationValues, ZoomLevel } from '../types';
 import { fitsInRange, getMode, getZoomModeRange, modes, nextDate, zoomIndeces } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
 import { getDayPixels, getFinalDayPixels, getLocationDate } from '../utils/dataStructures';
@@ -93,9 +93,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     dataRef.current = data;
   }, [data])
 
-  const getModeTransitionValues = () => {
-    if (!data) return;
-    const { macroMap, mode } = data;
+  const getModeTransitionValues = (macroMap: MacroMap, mode: number) => {
     const curScale = navigationValue.value.zoom.current.scale;
     const curPixelsPerDay = getDayPixels(navigationValue.value);
     const newPixelsPerDay = modes[mode].dayPixels;
@@ -114,10 +112,10 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   // finalize mode change
   useEffect(() => {
     if (!data) return;
-    const { mode } = data;
+    const { mode, macroMap } = data;
     if (!mode && mode !== 0) return;
     if (mode === navigationValue.value.mode) return;
-    const modeTransitionValues = getModeTransitionValues();
+    const modeTransitionValues = getModeTransitionValues(macroMap, mode);
     if (modeTransitionValues) {
       if (loading.current && mode !== 0) {
         pendingModeTransitions.current = modeTransitionValues;
@@ -127,7 +125,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.mode, height])
+  }, [data?.mode])
 
   const scrollVelocity = useSharedValue(0);
   const lastTouchY = useSharedValue<number | null>(null);
@@ -141,20 +139,16 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     ],
   }));
 
-  const checkLoadMoreData = () => {
-    if (loading.current || dataRef.current === null) {
-      return;
-    }
-    const { macroMap } = dataRef.current;
-    const { start, end } = macroMap[modes[navigationValue.value.mode].id];
+  const checkLoadMoreDataInLocation = (mm: MacroMap, nv: NavigationValues) => {
+    const { start, end } = mm[modes[nv.mode].id];
     if (!start || !end) return;
     // console.log('useNavigationGesture checkLoadMoreData start, end', start, end);
-    const locationDate = getLocationDate(macroMap, navigationValue.value);
+    const locationDate = getLocationDate(mm, nv);
     // console.log('useNavigationGesture checkLoadMoreData locationDate', locationDate);
     const startDistDays = dateDiffStr(locationDate, start);
     // console.log('useNavigationGesture checkLoadMoreData startDistDays', startDistDays);
     const endDistDays = dateDiffStr(end, locationDate);
-    const dayPixels = getFinalDayPixels(navigationValue.value);
+    const dayPixels = getFinalDayPixels(nv);
     // console.log('useNavigationGesture checkLoadMoreData dayPixels', dayPixels);
     const startDist = startDistDays * dayPixels;
     // console.log('useNavigationGesture checkLoadMoreData startDist', startDist);
@@ -163,7 +157,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const newMode = getMode(dayPixels);
     const zoom = modes[newMode].id;
     // console.log('useNavigationGesture checkLoadMoreData zoom', zoom);
-    if (newMode !== navigationValue.value.mode) {
+    if (newMode !== nv.mode) {
       // console.log('useNavigationGesture checkLoadMoreData', locationDate);
       const { start, end } = getZoomModeRange(locationDate, zoom, 1);
       // console.log('useNavigationGesture checkLoadMoreData zoom, start, end', zoom, start, end);
@@ -184,11 +178,11 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
         // console.log('loading double');
         useCount = 2;
       }
-      const haveData = fitsInRange(useDate, zoom, useCount, macroMap[zoom]);
+      const haveData = fitsInRange(useDate, zoom, useCount, mm[zoom]);
       // console.log('useNavigationGesture checkLoadMoreData useDate', useDate);
       // console.log('useNavigationGesture checkLoadMoreData useCount', useCount);
       // console.log('useNavigationGesture checkLoadMoreData haveData', haveData);
-      // console.log('useNavigationGesture checkLoadMoreData macroMap[zoom]', macroMap[zoom]);
+      // console.log('useNavigationGesture checkLoadMoreData mm[zoom]', mm[zoom]);
       if (haveData) {
         setMode(zoomIndeces[zoom]);
       } else {
@@ -210,6 +204,14 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       loading.current = true;
       loadMoreData(nextDatePast, zoom, 1, width);
     }
+  };
+
+  const checkLoadMoreData = () => {
+    if (loading.current || dataRef.current === null) {
+      return;
+    }
+    const { macroMap } = dataRef.current;
+    checkLoadMoreDataInLocation(macroMap, navigationValue.value);
   };
 
   useAnimatedReaction(
