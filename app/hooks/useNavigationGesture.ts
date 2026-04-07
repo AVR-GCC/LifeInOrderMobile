@@ -13,6 +13,7 @@ const DECELERATION = 0.998;
 const MIN_VELOCITY = 0.01;
 
 type SetNavigationValuesInput = { mode: number, offset: number, scale: number };
+type FabNavigationValues = (params: SetNavigationValuesInput) => NavigationValues;
 type SetNavigationValues = (params: SetNavigationValuesInput) => void;
 
 interface UseNavigationGestureResult {
@@ -68,23 +69,27 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     })),
   };
 
+  const fabNavigationValue: FabNavigationValues = ({ mode, offset, scale }) => ({
+    scroll: {
+      start: navigationValue.value.scroll.start,
+      current: { location: null, offset },
+    },
+    zoom: {
+      start: navigationValue.value.zoom.start,
+      current: { scale, distance: navigationValue.value.zoom.current.distance },
+    },
+    touchCount: 0,
+    mode,
+    dayEnd: navigationValue.value.dayEnd
+  });
+
   const setNavigationValues: SetNavigationValues = ({ mode, offset, scale }) => {
     // const curVals = { mode: navigationValue.value.mode, offset: navigationValue.value.scroll.current.offset, scale: navigationValue.value.zoom.current.scale };
     // console.log(curVals, '=>', { mode, offset, scale });
-    navigationValue.value = {
-      scroll: {
-        start: { location: null, offset: null },
-        current: { location: null, offset },
-      },
-      zoom: {
-        start: { scale: null, distance: null },
-        current: { scale, distance: null },
-      },
-      touchCount: 0,
-      mode,
-    };
+    navigationValue.value = fabNavigationValue({ mode, offset, scale });
     if (offset !== getScroll()) setScroll(offset);
     if (scale !== getScale()) setScale(scale);
+    if (mode !== dataRef.current?.mode) setMode(mode);
   };
 
   useEffect(() => {
