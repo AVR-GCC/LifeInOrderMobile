@@ -21,7 +21,7 @@ interface UseNavigationGestureResult {
   navigationValue: SharedValue<NavigationValues>;
   setNavigationValues: SetNavigationValues;
   zoomStyles: Record<ZoomLevel, ViewStyle>;
-  pendingModeTransitions: { current: SetNavigationValuesInput | null };
+  executePendingModeTransitions: () => void;
 }
 
 export const useNavigationGesture = (data: MainProps | null): UseNavigationGestureResult => {
@@ -125,7 +125,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.mode])
+  }, [data?.mode]);
 
   const scrollVelocity = useSharedValue(0);
   const lastTouchY = useSharedValue<number | null>(null);
@@ -138,6 +138,13 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       { scaleY: navigationValue.value.zoom.current.scale },
     ],
   }));
+
+  const executePendingModeTransitions = () => {
+    if (pendingModeTransitions.current) {
+      setNavigationValues(pendingModeTransitions.current);
+      pendingModeTransitions.current = null;
+    }
+  }
 
   const checkLoadMoreDataInLocation = (mm: MacroMap, nv: NavigationValues) => {
     const { start, end } = mm[modes[nv.mode].id];
@@ -416,7 +423,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     .onTouchesUp(onTouchesUp)
     .onTouchesCancelled(onTouchesUp);
 
-  return { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles, pendingModeTransitions };
+  return { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles, executePendingModeTransitions };
 };
 
 export default { useNavigationGesture };

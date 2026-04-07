@@ -25,7 +25,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   const { date } = useLocalSearchParams();
 
   const separators = useSeparators(data);
-  const { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles, pendingModeTransitions } = useNavigationGesture(data);
+  const { gesture, animatedListStyle, navigationValue, setNavigationValues, zoomStyles, executePendingModeTransitions } = useNavigationGesture(data);
 
   useEffect(() => {
     if (!loaded.current && data !== null) {
@@ -49,13 +49,6 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
-
-  const onLoadImage = () => {
-    if (pendingModeTransitions.current) {
-      setNavigationValues(pendingModeTransitions.current);
-      pendingModeTransitions.current = null;
-    }
-  }
 
   if (data === null) {
     return <Loading />;
@@ -92,7 +85,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
             <ImageRowItem
               key={key}
               item={item}
-              onLoad={onLoadImage}
+              onLoad={executePendingModeTransitions}
               navigationValue={navigationValue}
               zoonToMonth={(date: string) => {
                 if (!data) return;
