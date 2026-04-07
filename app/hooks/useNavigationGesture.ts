@@ -3,7 +3,7 @@ import { Gesture, GestureType } from 'react-native-gesture-handler';
 import { SharedValue, useAnimatedReaction, useAnimatedStyle, useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import { useAppContext } from '../context/AppContext';
-import { MacroMap, MainProps, NavigationValues, ZoomLevel } from '../types';
+import { DateRange, MacroMap, MainProps, NavigationValues, ZoomLevel } from '../types';
 import { fitsInRange, getMode, getZoomModeRange, modes, nextDate, zoomIndeces } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
 import { getDayPixels, getFinalDayPixels, getLocationDate, getModeInfo } from '../utils/dataStructures';
@@ -178,9 +178,9 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     setMode(0);
   };
 
-  const checkLoadMoreDataInLocation = (mm: MacroMap, nv: NavigationValues) => {
+  const generateMissingDataVars: (mm: MacroMap, nv: NavigationValues) => { zoom?: ZoomLevel, date?: string, count?: number } = (mm, nv) => {
     const { start, end } = mm[modes[nv.mode].id];
-    if (!start || !end) return;
+    if (!start || !end) return { zoom: 'day' };
     // console.log('useNavigationGesture checkLoadMoreData start, end', start, end);
     const locationDate = getLocationDate(mm, nv);
     // console.log('useNavigationGesture checkLoadMoreData locationDate', locationDate);
@@ -223,12 +223,9 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       // console.log('useNavigationGesture checkLoadMoreData haveData', haveData);
       // console.log('useNavigationGesture checkLoadMoreData mm[zoom]', mm[zoom]);
       if (haveData) {
-        setMode(zoomIndeces[zoom]);
-      } else {
-        loading.current = true;
-        loadMoreData(useDate, zoom, useCount, width);
+        return { zoom };
       }
-      return;
+      return { zoom, date: useDate, count: useCount };
     }
     const nextDateFuture = nextDate(end, zoom, true);
     const nextDatePast = nextDate(start, zoom, false);
@@ -240,9 +237,20 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       useDate = nextDatePast;
     }
     if (useDate) {
-      loading.current = true;
-      loadMoreData(nextDatePast, zoom, 1, width);
+      return { zoom, date: useDate, count: 1 };
     }
+    return {};
+  }
+
+  const checkLoadMoreDataInLocation = (mm: MacroMap, nv: NavigationValues) => {
+      const { date, zoom, count } = generateMissingDataVars(mm, nv);
+      if (!zoom) return;
+      if (!count || !date) {
+        setMode(zoomIndeces[zoom]);
+      } else {
+        loading.current = true;
+        loadMoreData(date, zoom, count, width);
+      }
   };
 
   const checkLoadMoreData = () => {
