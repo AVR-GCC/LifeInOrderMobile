@@ -80,7 +80,6 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     },
     touchCount: 0,
     mode,
-    dayEnd: navigationValue.value.dayEnd
   });
 
   const setNavigationValues: SetNavigationValues = ({ mode, offset, scale }) => {
