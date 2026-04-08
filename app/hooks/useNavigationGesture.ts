@@ -243,7 +243,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const { end } = macroMap[mode.id].range;
     if (!end) return;
     const daysToLast = dateDiff(new Date(end), todate);
-    const offset = getDayPixels(navigationValue.value) * daysToLast - (height / 2) - macroMap[mode.id].offset;
+    const offset = getDayPixels(navigationValue.value) * (daysToLast - macroMap[mode.id].offset) - (height / 2);
     setNavigationValues({ mode: 0, offset, scale: getScale() });
   };
 

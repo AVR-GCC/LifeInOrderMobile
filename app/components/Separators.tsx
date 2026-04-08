@@ -44,7 +44,7 @@ const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function Separato
     <View
       style={[
         styles.separatorContainer,
-        { bottom: dayOffset * dayHeight - 1 - offset },
+        { bottom: (dayOffset - offset) * dayHeight - 1 },
       ]}
       pointerEvents="none"
     >
