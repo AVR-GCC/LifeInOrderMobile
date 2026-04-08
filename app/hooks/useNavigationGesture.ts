@@ -180,7 +180,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const zoom = modes[newMode].id;
     // console.log('useNavigationGesture checkLoadMoreData zoom', zoom);
     if (newMode !== nv.mode) {
-      // console.log('useNavigationGesture checkLoadMoreData', locationDate);
+      // console.log('useNavigationGesture checkLoadMoreData zoom', zoom);
+      // console.log('useNavigationGesture checkLoadMoreData locationDate', locationDate);
       const { start, end } = getZoomModeRange(locationDate, zoom, 1);
       // console.log('useNavigationGesture checkLoadMoreData zoom, start, end', zoom, start, end);
       const newStartDistDays = dateDiffStr(locationDate, start);
@@ -212,10 +213,10 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     }
     const nextDatePast = nextDate(start, zoom, false);
     let useDate;
-    if (endDist < height && scrollVelocity.value < 0) {
+    if (endDist < height) {
       useDate = end;
     }
-    if (startDist < height && scrollVelocity.value > 0) {
+    if (startDist < height) {
       useDate = nextDatePast;
     }
     if (useDate) {
