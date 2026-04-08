@@ -26,7 +26,7 @@ interface SeparatorLineProps {
   dayHeight: number,
   separator: SeparatorData;
   navigationValue: SharedValue<NavigationValues>;
-  offsetFromOriginalDate: Record<ZoomLevel, number>;
+  offsetFromOriginalDate: number;
 }
 
 const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function SeparatorLine({ separator, navigationValue, dayHeight, offsetFromOriginalDate }) {
@@ -44,7 +44,7 @@ const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function Separato
     <View
       style={[
         styles.separatorContainer,
-        { bottom: dayOffset * dayHeight - 1 - offsetFromOriginalDate[modes[navigationValue.value.mode].id] },
+        { bottom: dayOffset * dayHeight - 1 - offsetFromOriginalDate },
       ]}
       pointerEvents="none"
     >
@@ -88,7 +88,7 @@ const Separators: React.FC<SeparatorsProps> = React.memo(function Separators({ s
           separator={s}
           navigationValue={navigationValue}
           dayHeight={dayHeight}
-          offsetFromOriginalDate={offsetFromOriginalDate}
+          offsetFromOriginalDate={offsetFromOriginalDate[modes[mode].id]}
         />
       ))}
     </>
