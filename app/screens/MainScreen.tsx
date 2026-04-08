@@ -92,7 +92,15 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
         <GestureDetector gesture={gesture}>
           <Animated.View style={[animatedListStyle, { transformOrigin: 'bottom center' }]}>
             {modes.map(m => (
-              <Animated.View key={`zoom-style-${m.id}`} style={[{ position: 'absolute', bottom: macroMap[m.id].offset * -1 * modes[mode].dayPixels, left: 0, right: 0 }, zoomStyles[m.id]]}>
+              <Animated.View
+                key={`zoom-style-${m.id}`}
+                style={[{
+                  position: 'absolute',
+                  bottom: macroMap[m.id].offset * -1 * modes[mode].dayPixels,
+                  left: 0,
+                  right: 0
+                }, zoomStyles[m.id]]}
+              >
                 <View id={m.id}>
                   {list(dates[m.id])}
                 </View>

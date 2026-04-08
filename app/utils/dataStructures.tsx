@@ -19,7 +19,7 @@ export const getLocationDate = (macroMap: MacroMap, navVal: NavigationValues) =>
   const distance = navVal.scroll.current.offset + (navVal.scroll.current.location ?? 400);
   const dayDistance = distance / scale;
   const date = new Date(end);
-  date.setDate(date.getDate() - dayDistance + offset);
+  date.setDate(date.getDate() - dayDistance - offset);
   const dateStr = dateString(date);
   return dateStr;
 };

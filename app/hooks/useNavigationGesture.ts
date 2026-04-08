@@ -104,13 +104,23 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const newPixelsPerDay = modes[mode].dayPixels;
     const ratio = newPixelsPerDay / curPixelsPerDay;
     const scale = curScale / ratio;
-    const { end: oldEnd } = macroMap[modes[navigationValue.value.mode].id].range;
-    const { end: newEnd } = macroMap[modes[mode].id].range;
+    const { range: { end: oldEnd }, offset: oldOffset } = macroMap[modes[navigationValue.value.mode].id];
+    const { range: { end: newEnd }, offset: newOffset } = macroMap[modes[mode].id];
     if (!oldEnd || !newEnd) return;
+    // console.log('oldEnd, newEnd', oldEnd, newEnd);
+    // console.log('oldOffset, newOffset', oldOffset, newOffset);
     const endsDayDiff = dateDiffStr(oldEnd, newEnd);
+    // console.log('endsDayDiff', endsDayDiff);
+    const offsetDiff = newOffset - oldOffset;
+    // console.log('offsetDiff', offsetDiff);
+    const totalDaysDiff = endsDayDiff + offsetDiff;
+    // console.log('totalDaysDiff', totalDaysDiff);
     const sharedFinalDayPixels = curScale * curPixelsPerDay;
-    const scrollDiff = endsDayDiff * sharedFinalDayPixels;
+    // console.log('sharedFinalDayPixels', sharedFinalDayPixels);
+    const scrollDiff = totalDaysDiff * sharedFinalDayPixels;
+    // console.log('scrollDiff', scrollDiff);
     const offset = navigationValue.value.scroll.current.offset - scrollDiff;
+    // console.log('offset', offset);
     return { mode, offset, scale };
   }
 
