@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
-import { NavigationValues, SeparatorData, ZoomLevel } from '../types';
+import { MacroMap, NavigationValues, SeparatorData, ZoomLevel } from '../types';
 import { modes } from '../constants/zoom';
 
 const SEPARATOR_COLORS: Record<string, string> = {
@@ -26,10 +26,10 @@ interface SeparatorLineProps {
   dayHeight: number,
   separator: SeparatorData;
   navigationValue: SharedValue<NavigationValues>;
-  offsetFromOriginalDate: number;
+  offset: number;
 }
 
-const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function SeparatorLine({ separator, navigationValue, dayHeight, offsetFromOriginalDate }) {
+const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function SeparatorLine({ separator, navigationValue, dayHeight, offset }) {
   const { dayOffset, type, label } = separator;
 
   const labelStyle = useAnimatedStyle(() => {
@@ -44,7 +44,7 @@ const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function Separato
     <View
       style={[
         styles.separatorContainer,
-        { bottom: dayOffset * dayHeight - 1 - offsetFromOriginalDate },
+        { bottom: dayOffset * dayHeight - 1 - offset },
       ]}
       pointerEvents="none"
     >
@@ -73,12 +73,12 @@ const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function Separato
 
 interface SeparatorsProps {
   mode: number;
+  macroMap: MacroMap;
   separators: SeparatorData[];
   navigationValue: SharedValue<NavigationValues>;
-  offsetFromOriginalDate: Record<ZoomLevel, number>;
 }
 
-const Separators: React.FC<SeparatorsProps> = React.memo(function Separators({ separators, navigationValue, mode, offsetFromOriginalDate }) {
+const Separators: React.FC<SeparatorsProps> = React.memo(function Separators({ separators, navigationValue, mode, macroMap }) {
   const dayHeight = modes[mode].dayPixels;
   return (
     <>
@@ -88,7 +88,7 @@ const Separators: React.FC<SeparatorsProps> = React.memo(function Separators({ s
           separator={s}
           navigationValue={navigationValue}
           dayHeight={dayHeight}
-          offsetFromOriginalDate={offsetFromOriginalDate[modes[mode].id]}
+          offset={macroMap[modes[mode].id].offset}
         />
       ))}
     </>

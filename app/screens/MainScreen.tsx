@@ -44,7 +44,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
     return <Loading />;
   }
 
-  const { dates, habits, mode, offsetFromOriginalDate } = data;
+  const { dates, habits, mode, macroMap } = data;
 
   if (!dates) {
     return <Loading />;
@@ -92,13 +92,13 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
         <GestureDetector gesture={gesture}>
           <Animated.View style={[animatedListStyle, { transformOrigin: 'bottom center' }]}>
             {modes.map(m => (
-              <Animated.View key={`zoom-style-${m.id}`} style={[{ position: 'absolute', bottom: offsetFromOriginalDate[m.id] * -1, left: 0, right: 0 }, zoomStyles[m.id]]}>
+              <Animated.View key={`zoom-style-${m.id}`} style={[{ position: 'absolute', bottom: macroMap[m.id].offset * -1, left: 0, right: 0 }, zoomStyles[m.id]]}>
                 <View id={m.id}>
                   {list(dates[m.id])}
                 </View>
               </Animated.View>
             ))}
-            <Separators separators={separators} navigationValue={navigationValue} mode={mode} offsetFromOriginalDate={offsetFromOriginalDate} />
+            <Separators separators={separators} navigationValue={navigationValue} mode={mode} macroMap={macroMap} />
           </Animated.View>
         </GestureDetector>
       </View>

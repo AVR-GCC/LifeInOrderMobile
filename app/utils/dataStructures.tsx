@@ -1,6 +1,6 @@
 import { modes } from "../constants/zoom";
-import { MacroMap, NavigationValues, ZoomLevel } from "../types";
-import { dateDiffStr, dateString } from "./general";
+import { MacroMap, NavigationValues } from "../types";
+import { dateString } from "./general";
 
 // MacroMap + NavigationValues
 export const getModeInfo = (navVal: NavigationValues) => modes[navVal.mode];
@@ -12,7 +12,7 @@ export const getFinalDayPixels = (navVal: NavigationValues) => {
 };
 
 export const getLocationDate = (macroMap: MacroMap, navVal: NavigationValues) => {
-  const { end } = macroMap[getModeInfo(navVal).id];
+  const { end } = macroMap[getModeInfo(navVal).id].range;
   if (!end) return dateString(new Date());
   const scale = getFinalDayPixels(navVal);
   const distance = navVal.scroll.current.offset + (navVal.scroll.current.location ?? 400);
@@ -23,19 +23,9 @@ export const getLocationDate = (macroMap: MacroMap, navVal: NavigationValues) =>
   return dateStr;
 };
 
-export const getDateLocation = (macroMap: MacroMap, navVal: NavigationValues, zoom: ZoomLevel, date: string) => {
-  const { end } = macroMap[zoom];
-  if (!end) return 100;
-  const days = dateDiffStr(end, date);
-  const scale = getFinalDayPixels(navVal);
-  const distance = Math.ceil(days * scale);
-  return distance;
-}
-
 export default {
   getModeInfo,
   getDayPixels,
   getFinalDayPixels,
-  getDateLocation,
   getLocationDate
 };

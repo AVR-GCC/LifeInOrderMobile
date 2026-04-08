@@ -54,14 +54,17 @@ export type ZoomLevelData = MonthData | TimePeriodData;
 
 export type DatesData = Record<ZoomLevel, ZoomLevelData[]>;
 
-export type MacroMap = Record<ZoomLevel, DateRange>;
+export type MacroMapEntry = {
+  range: DateRange,
+  offset: number
+}
+export type MacroMap = Record<ZoomLevel, MacroMapEntry>;
 
 export interface MainProps {
   habits: HabitWithValues[];
   dates: DatesData;
   macroMap: MacroMap;
   mode: number;
-  offsetFromOriginalDate: Record<ZoomLevel, number>;
 }
 
 export interface NavigationValues {

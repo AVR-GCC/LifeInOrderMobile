@@ -3,7 +3,7 @@ import { Gesture, GestureType } from 'react-native-gesture-handler';
 import { SharedValue, useAnimatedReaction, useAnimatedStyle, useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import { useAppContext } from '../context/AppContext';
-import { DateRange, MacroMap, MainProps, NavigationValues, ZoomLevel } from '../types';
+import { MacroMap, MainProps, NavigationValues, ZoomLevel } from '../types';
 import { fitsInRange, getMode, getZoomModeRange, modes, nextDate, zoomIndeces } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
 import { getDayPixels, getFinalDayPixels, getLocationDate, getModeInfo } from '../utils/dataStructures';
@@ -104,8 +104,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const newPixelsPerDay = modes[mode].dayPixels;
     const ratio = newPixelsPerDay / curPixelsPerDay;
     const scale = curScale / ratio;
-    const { end: oldEnd } = macroMap[modes[navigationValue.value.mode].id];
-    const { end: newEnd } = macroMap[modes[mode].id];
+    const { end: oldEnd } = macroMap[modes[navigationValue.value.mode].id].range;
+    const { end: newEnd } = macroMap[modes[mode].id].range;
     if (!oldEnd || !newEnd) return;
     const endsDayDiff = dateDiffStr(oldEnd, newEnd);
     const sharedFinalDayPixels = curScale * curPixelsPerDay;
@@ -152,7 +152,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   }
 
   const generateMissingDataVars: (mm: MacroMap, nv: NavigationValues) => { zoom?: ZoomLevel, date?: string, count?: number } = (mm, nv) => {
-    const { start, end } = mm[modes[nv.mode].id];
+    const { start, end } = mm[modes[nv.mode].id].range;
     if (!start || !end) return { zoom: 'day' };
     // console.log('useNavigationGesture checkLoadMoreData start, end', start, end);
     const locationDate = getLocationDate(mm, nv);
@@ -190,7 +190,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
         // console.log('loading double');
         useCount = 2;
       }
-      const haveData = fitsInRange(useDate, zoom, useCount, mm[zoom]);
+      const haveData = fitsInRange(useDate, zoom, useCount, mm[zoom].range);
       // console.log('useNavigationGesture checkLoadMoreData useDate', useDate);
       // console.log('useNavigationGesture checkLoadMoreData useCount', useCount);
       // console.log('useNavigationGesture checkLoadMoreData haveData', haveData);
@@ -237,20 +237,20 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     if (loading.current || dataRef.current === null) {
       return;
     }
-    const { macroMap, offsetFromOriginalDate } = dataRef.current;
+    const { macroMap } = dataRef.current;
     const todate = new Date(date);
     const mode = getModeInfo(navigationValue.value);
-    const { end } = macroMap[mode.id];
+    const { end } = macroMap[mode.id].range;
     if (!end) return;
     const daysToLast = dateDiff(new Date(end), todate);
-    const offset = getDayPixels(navigationValue.value) * daysToLast - (height / 2) - offsetFromOriginalDate[mode.id];
+    const offset = getDayPixels(navigationValue.value) * daysToLast - (height / 2) - macroMap[mode.id].offset;
     setNavigationValues({ mode: 0, offset, scale: getScale() });
   };
 
   const zoomToMonth = (date: string) => {
     if (!data) return;
     const { macroMap } = data;
-    const { end: lastDateDay } = macroMap.day;
+    const { end: lastDateDay } = macroMap.day.range;
     if (!lastDateDay) return;
     const bottomDate = new Date(date);
     bottomDate.setUTCMonth(bottomDate.getMonth() + 1);

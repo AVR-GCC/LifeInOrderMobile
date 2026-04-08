@@ -8,7 +8,7 @@ export const useSeparators = (data: MainProps | null): SeparatorData[] => {
   return useMemo((): SeparatorData[] => {
     if (!data) return [];
     const { macroMap, mode } = data;
-    const { start, end } = macroMap[modes[mode].id];
+    const { start, end } = macroMap[modes[mode].id].range;
     // console.log('start, end', start, end);
     if (!start || !end) return [];
     const startDate = new Date(start);
