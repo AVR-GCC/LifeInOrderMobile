@@ -368,8 +368,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       const curLocation = height - 125 - scroll.location;
       const newScroll = (startLocation + startScroll.offset) * zoom.scale / startZoom.scale - curLocation;
 
-        navigationValue.value.scroll.current.offset = newScroll;
-        scheduleOnRN(setScroll, newScroll);
+      navigationValue.value.scroll.current.offset = newScroll;
+      scheduleOnRN(setScroll, newScroll);
       scheduleOnRN(checkLoadMoreData);
     },
     [navigationValue]
