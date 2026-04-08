@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
-import { NavigationValues, SeparatorData } from '../types';
+import { NavigationValues, SeparatorData, ZoomLevel } from '../types';
 import { modes } from '../constants/zoom';
 
 const SEPARATOR_COLORS: Record<string, string> = {
@@ -26,9 +26,10 @@ interface SeparatorLineProps {
   dayHeight: number,
   separator: SeparatorData;
   navigationValue: SharedValue<NavigationValues>;
+  offsetFromOriginalDate: Record<ZoomLevel, number>;
 }
 
-const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function SeparatorLine({ separator, navigationValue, dayHeight }) {
+const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function SeparatorLine({ separator, navigationValue, dayHeight, offsetFromOriginalDate }) {
   const { dayOffset, type, label } = separator;
 
   const labelStyle = useAnimatedStyle(() => {
@@ -43,7 +44,7 @@ const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function Separato
     <View
       style={[
         styles.separatorContainer,
-        { bottom: dayOffset * dayHeight - 1 },
+        { bottom: dayOffset * dayHeight - 1 - offsetFromOriginalDate[modes[navigationValue.value.mode].id] },
       ]}
       pointerEvents="none"
     >
@@ -74,9 +75,10 @@ interface SeparatorsProps {
   mode: number;
   separators: SeparatorData[];
   navigationValue: SharedValue<NavigationValues>;
+  offsetFromOriginalDate: Record<ZoomLevel, number>;
 }
 
-const Separators: React.FC<SeparatorsProps> = React.memo(function Separators({ separators, navigationValue, mode }) {
+const Separators: React.FC<SeparatorsProps> = React.memo(function Separators({ separators, navigationValue, mode, offsetFromOriginalDate }) {
   const dayHeight = modes[mode].dayPixels;
   return (
     <>
@@ -86,6 +88,7 @@ const Separators: React.FC<SeparatorsProps> = React.memo(function Separators({ s
           separator={s}
           navigationValue={navigationValue}
           dayHeight={dayHeight}
+          offsetFromOriginalDate={offsetFromOriginalDate}
         />
       ))}
     </>

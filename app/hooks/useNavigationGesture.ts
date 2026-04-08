@@ -202,7 +202,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     }
     const nextDatePast = nextDate(start, zoom, false);
     let useDate;
-    if (end < '2026-04-30' && endDist < height && scrollVelocity.value < 0) {
+    if (endDist < height && scrollVelocity.value < 0) {
       useDate = end;
     }
     if (startDist < height && scrollVelocity.value > 0) {
@@ -237,14 +237,13 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     if (loading.current || dataRef.current === null) {
       return;
     }
-    const { macroMap } = dataRef.current;
+    const { macroMap, offsetFromOriginalDate } = dataRef.current;
     const todate = new Date(date);
     const mode = getModeInfo(navigationValue.value);
     const { end } = macroMap[mode.id];
     if (!end) return;
     const daysToLast = dateDiff(new Date(end), todate);
-    const potentialOffset = getDayPixels(navigationValue.value) * daysToLast - (height / 2);
-    const offset = potentialOffset < 0 ? 0 : potentialOffset;
+    const offset = getDayPixels(navigationValue.value) * daysToLast - (height / 2) - offsetFromOriginalDate[mode.id];
     setNavigationValues({ mode: 0, offset, scale: getScale() });
   };
 
@@ -258,8 +257,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     bottomDate.setUTCDate(0);
     const scale  = (height - 125) / (24 * bottomDate.getDate());
     const dayOffset = dateDiffStr(lastDateDay, dateString(bottomDate));
-    const potentialOffset = (dayOffset - 1) * scale * 24;
-    const offset = potentialOffset < 0 ? 0 : potentialOffset;
+    const offset = (dayOffset - 1) * scale * 24;
     const mode = 0;
     const foNavigationValues = fabNavigationValue({ mode, offset, scale });
     checkLoadMoreDataInLocation(macroMap, foNavigationValues);
@@ -282,10 +280,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       const curLocation = height - 125 - scroll.location;
       const newScroll = (startLocation + startScroll.offset) * zoom.scale / startZoom.scale - curLocation;
 
-      if (newScroll >= 0) {
         navigationValue.value.scroll.current.offset = newScroll;
         scheduleOnRN(setScroll, newScroll);
-      }
       scheduleOnRN(checkLoadMoreData);
     },
     [navigationValue]

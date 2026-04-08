@@ -61,6 +61,7 @@ export interface MainProps {
   dates: DatesData;
   macroMap: MacroMap;
   mode: number;
+  offsetFromOriginalDate: Record<ZoomLevel, number>;
 }
 
 export interface NavigationValues {

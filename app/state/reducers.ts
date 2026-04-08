@@ -1,6 +1,6 @@
-import { zoomIndeces } from '../constants/zoom';
+import { modes, zoomIndeces } from '../constants/zoom';
 import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, ZoomLevel, ZoomLevelData, MacroMap } from '../types';
-import { last } from '../utils/general';
+import { dateDiffStr, last } from '../utils/general';
 
 const getZoomLevelDataRange = (zld: ZoomLevelData[]) => {
   if (zld.length === 0) return { start: null, end: null };
@@ -25,11 +25,18 @@ export const loadInitialDataReducer = () => (dayLevelData: MonthData[], habits: 
     year: [],
     two_year: []
   };
-  return { dates, habits, macroMap, mode: 0 };
+  const offsetFromOriginalDate = {
+    day: 0,
+    quarter: 0,
+    half: 0,
+    year: 0,
+    two_year: 0
+  }
+  return { dates, habits, macroMap, mode: 0, offsetFromOriginalDate };
 };
 
 export const loadMoreDataReducer = (data: MainProps) => (zoom: ZoomLevel, newData: ZoomLevelData[]) => {
-  const { dates, macroMap } = data;
+  const { dates, macroMap, mode, offsetFromOriginalDate } = data;
   // console.log('loadMoreDataReducer zoom', zoom);
   // console.log('loadMoreDataReducer newData', newData);
   const existingData = dates[zoom];
@@ -38,26 +45,29 @@ export const loadMoreDataReducer = (data: MainProps) => (zoom: ZoomLevel, newDat
   // console.log('loadMoreDataReducer start, end', start, end);
   // console.log('new data range', start, end);
   if (!start || !end) return data;
-  if (existingData.length > 0) {
-    const { start: existingStart, end: existingEnd } = getZoomLevelDataRange(existingData)
-    const future = start >= existingEnd;
-    const continuous = future ? start === existingEnd : end === existingStart;
-    if (continuous) {
-      end = future ? end : existingEnd;
-      start = future ? existingStart : start;
-      nextData = future ? [...existingData, ...newData] : [...newData, ...existingData];
-    }
+  const { start: existingStart, end: existingEnd } = getZoomLevelDataRange(existingData)
+  const future = start >= existingEnd;
+  const continuous = future ? start === existingEnd : end === existingStart;
+  if (continuous) {
+    end = future ? end : existingEnd;
+    start = future ? existingStart : start;
+    nextData = future ? [...existingData, ...newData] : [...newData, ...existingData];
   }
   // console.log('nextData', nextData.map(d => d.range));
   const nextDates = { ...dates, [zoom]: nextData };
-  const mode = zoomIndeces[zoom];
   const range = { start, end };
   // console.log('total data range', start, end);
   const nextMacroMap: MacroMap = { ...macroMap, [zoom]: range };
   console.log('loadMoreDataReducer zoom', zoom);
   console.log('loadMoreDataReducer nextMacroMap', nextMacroMap);
   // console.log('nextDates', nextDates);
-  return { ...data, dates: nextDates, macroMap: nextMacroMap, mode };
+  // const oldModeInfo = modes[mode];
+  // const modeChamge = modeInfo.id !== zoom;
+  const nextMode = zoomIndeces[zoom];
+  const newModeInfo = modes[nextMode];
+  const nextOffsetFromOriginalDate = { ...offsetFromOriginalDate };
+  nextOffsetFromOriginalDate[zoom] = continuous && future ? dateDiffStr(end, existingEnd) * newModeInfo.dayPixels + offsetFromOriginalDate[zoom] : 0;
+  return { ...data, dates: nextDates, macroMap: nextMacroMap, mode: nextMode, offsetFromOriginalDate: nextOffsetFromOriginalDate };
 };
 
 export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, monthIndex: number, habitIndex: number, valueId: string) => {
