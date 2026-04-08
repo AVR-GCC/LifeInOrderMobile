@@ -274,30 +274,6 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     checkLoadMoreDataInLocation(macroMap, foNavigationValues);
   };
 
-  useAnimatedReaction(
-    () => ({ scroll: navigationValue.value.scroll.current, zoom: navigationValue.value.zoom.current }),
-    (newNavigationValue) => {
-      'worklet';
-      const { scroll, zoom } = newNavigationValue;
-      const startScroll = navigationValue.value.scroll.start;
-      const startZoom = navigationValue.value.zoom.start;
-      if (
-        startScroll.location === null
-        || startScroll.offset === null
-        || startZoom.scale === null
-        || scroll.location === null
-      ) return;
-      const startLocation = height - 125 - startScroll.location;
-      const curLocation = height - 125 - scroll.location;
-      const newScroll = (startLocation + startScroll.offset) * zoom.scale / startZoom.scale - curLocation;
-
-        navigationValue.value.scroll.current.offset = newScroll;
-        scheduleOnRN(setScroll, newScroll);
-      scheduleOnRN(checkLoadMoreData);
-    },
-    [navigationValue]
-  );
-
   useFrameCallback((frameInfo) => {
     'worklet';
     if (!isMomentumActive.value) return;
@@ -374,6 +350,30 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     lastTouchTime.value = null;
     setStartValues(arg.allTouches);
   };
+
+  useAnimatedReaction(
+    () => ({ scroll: navigationValue.value.scroll.current, zoom: navigationValue.value.zoom.current }),
+    (newNavigationValue) => {
+      'worklet';
+      const { scroll, zoom } = newNavigationValue;
+      const startScroll = navigationValue.value.scroll.start;
+      const startZoom = navigationValue.value.zoom.start;
+      if (
+        startScroll.location === null
+        || startScroll.offset === null
+        || startZoom.scale === null
+        || scroll.location === null
+      ) return;
+      const startLocation = height - 125 - startScroll.location;
+      const curLocation = height - 125 - scroll.location;
+      const newScroll = (startLocation + startScroll.offset) * zoom.scale / startZoom.scale - curLocation;
+
+        navigationValue.value.scroll.current.offset = newScroll;
+        scheduleOnRN(setScroll, newScroll);
+      scheduleOnRN(checkLoadMoreData);
+    },
+    [navigationValue]
+  );
 
   const onTouchesMove = (arg: { allTouches: { absoluteY: number }[] }) => {
     const touchCount = arg.allTouches.length;
