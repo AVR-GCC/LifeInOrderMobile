@@ -307,12 +307,6 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const currentOffset = navigationValue.value.scroll.current.offset;
     const newOffset = currentOffset + delta;
 
-    if (newOffset < 0) {
-      isMomentumActive.value = false;
-      scrollVelocity.value = 0;
-      return;
-    }
-
     navigationValue.value = {
       zoom: navigationValue.value.zoom,
       scroll: {
