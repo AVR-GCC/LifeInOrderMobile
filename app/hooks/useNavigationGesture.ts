@@ -351,30 +351,6 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     setStartValues(arg.allTouches);
   };
 
-  useAnimatedReaction(
-    () => ({ scroll: navigationValue.value.scroll.current, zoom: navigationValue.value.zoom.current }),
-    (newNavigationValue) => {
-      'worklet';
-      const { scroll, zoom } = newNavigationValue;
-      const startScroll = navigationValue.value.scroll.start;
-      const startZoom = navigationValue.value.zoom.start;
-      if (
-        startScroll.location === null
-        || startScroll.offset === null
-        || startZoom.scale === null
-        || scroll.location === null
-      ) return;
-      const startLocation = height - 125 - startScroll.location;
-      const curLocation = height - 125 - scroll.location;
-      const newScroll = (startLocation + startScroll.offset) * zoom.scale / startZoom.scale - curLocation;
-
-      navigationValue.value.scroll.current.offset = newScroll;
-      scheduleOnRN(setScroll, newScroll);
-      scheduleOnRN(checkLoadMoreData);
-    },
-    [navigationValue]
-  );
-
   const onTouchesMove = (arg: { allTouches: { absoluteY: number }[] }) => {
     const touchCount = arg.allTouches.length;
 
@@ -389,29 +365,42 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       }
 
       const { abs } = Math;
-      const curLocation = (arg.allTouches[0].absoluteY + arg.allTouches[1].absoluteY) / 2;
+      const newLocation = (arg.allTouches[0].absoluteY + arg.allTouches[1].absoluteY) / 2;
       // const curLocation = height / 2;
       const originalDistanceScale = navigationValue.value.zoom.start.distance / navigationValue.value.zoom.start.scale;
-      const curDistance = arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY;
-      const newScale = abs(curDistance / originalDistanceScale);
-      const newDayPixels = newScale * modes[navigationValue.value.mode].dayPixels;
-      const limitedScale = newDayPixels > ((height - 125) / 7)
+      const newDistance = arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY;
+      const unlimitedScale = abs(newDistance / originalDistanceScale);
+      const newDayPixels = unlimitedScale * modes[navigationValue.value.mode].dayPixels;
+      const newScale = newDayPixels > ((height - 125) / 7)
         ? navigationValue.value.zoom.current.scale
-        : newScale;
+        : unlimitedScale;
+
+      const oldLocation = navigationValue.value.scroll.current.location;
+      const oldOffset = navigationValue.value.scroll.current.offset;
+      let newScroll = oldOffset;
+      if (oldLocation) {
+        const oldScale = navigationValue.value.zoom.current.scale;
+
+        const oldFormattedLocation = height - 125 - oldLocation;
+        const newFormattedLocation = height - 125 - newLocation;
+        newScroll = (oldFormattedLocation + oldOffset) * newScale / oldScale - newFormattedLocation;
+      }
 
       navigationValue.value = {
         zoom: {
           start: navigationValue.value.zoom.start,
-          current: { scale: limitedScale, distance: curDistance },
+          current: { scale: newScale, distance: newDistance },
         },
         scroll: {
           start: navigationValue.value.scroll.start,
-          current: { location: curLocation, offset: navigationValue.value.scroll.current.offset },
+          current: { location: newLocation, offset: newScroll },
         },
         touchCount,
         mode: navigationValue.value.mode
       };
+      scheduleOnRN(setScroll, newScroll);
       scheduleOnRN(setScale, newScale);
+      scheduleOnRN(checkLoadMoreData);
     } else if (touchCount === 1) {
       if (
         navigationValue.value.scroll.start.location === null
@@ -434,15 +423,27 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       lastTouchY.value = currentY;
       lastTouchTime.value = now;
 
+      const oldLocation = navigationValue.value.scroll.current.location;
+      const newLocation = arg.allTouches[0].absoluteY;
+      const oldOffset = navigationValue.value.scroll.current.offset ;
+      let newScroll = oldOffset;
+      if (oldLocation) {
+        const oldFormattedLocation = height - 125 - oldLocation;
+        const newFormattedLocation = height - 125 - newLocation;
+        newScroll = oldFormattedLocation + oldOffset - newFormattedLocation;
+      }
+
       navigationValue.value = {
         zoom: navigationValue.value.zoom,
         scroll: {
           start: navigationValue.value.scroll.start,
-          current: { location: arg.allTouches[0].absoluteY, offset: navigationValue.value.scroll.current.offset },
+          current: { location: newLocation, offset: newScroll },
         },
         touchCount,
         mode: navigationValue.value.mode
       };
+      scheduleOnRN(setScroll, newScroll);
+      scheduleOnRN(checkLoadMoreData);
     }
   };
 
