@@ -136,6 +136,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
         pendingModeTransitions.current = modeTransitionValues;
         loading.current = false;
       } else {
+        pendingModeTransitions.current = null;
         setNavigationValues(modeTransitionValues);
       }
     }
