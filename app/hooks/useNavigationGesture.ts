@@ -266,20 +266,22 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const latestDate = new Date(date);
     latestDate.setUTCMonth(latestDate.getMonth() + 1);
     latestDate.setUTCDate(0);
+    const latestDateStr = dateString(latestDate);
     const earliestDate = new Date(date);
     earliestDate.setUTCMonth(earliestDate.getMonth() - 1);
     earliestDate.setUTCDate(1);
+    const earliestDateStr = dateString(earliestDate);
     const scale  = (height - 125) / (24 * latestDate.getDate());
-    const dayOffset = dateDiffStr(lastDateDay, dateString(latestDate));
+    const dayOffset = dateDiffStr(lastDateDay, latestDateStr);
     const offset = (dayOffset - 1) * scale * 24;
     const mode = 0;
-    const haveData = fitsInRange(dateString(earliestDate), 'day', 3, macroMap.day.range);
+    const haveData = fitsInRange(earliestDateStr, 'day', 3, macroMap.day.range);
     if (haveData) {
       setNavigationValues({ mode, offset, scale });
     } else {
       pendingModeTransitions.current = { mode, offset, scale };
       loading.current = true;
-      loadMoreData(date, 'day', 3, width);
+      loadMoreData(earliestDateStr, 'day', 3, width);
     }
   };
 
