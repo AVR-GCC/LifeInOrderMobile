@@ -130,7 +130,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const { mode, macroMap } = data;
     if (!mode && mode !== 0) return;
     if (mode === navigationValue.value.mode) return;
-    const modeTransitionValues = getModeTransitionValues(macroMap, mode);
+    const modeTransitionValues = pendingModeTransitions.current || getModeTransitionValues(macroMap, mode);
     if (modeTransitionValues) {
       if (loading.current && mode !== 0) {
         pendingModeTransitions.current = modeTransitionValues;
@@ -263,15 +263,24 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const { macroMap } = data;
     const { end: lastDateDay } = macroMap.day.range;
     if (!lastDateDay) return;
-    const bottomDate = new Date(date);
-    bottomDate.setUTCMonth(bottomDate.getMonth() + 1);
-    bottomDate.setUTCDate(0);
-    const scale  = (height - 125) / (24 * bottomDate.getDate());
-    const dayOffset = dateDiffStr(lastDateDay, dateString(bottomDate));
+    const latestDate = new Date(date);
+    latestDate.setUTCMonth(latestDate.getMonth() + 1);
+    latestDate.setUTCDate(0);
+    const earliestDate = new Date(date);
+    earliestDate.setUTCMonth(earliestDate.getMonth() - 1);
+    earliestDate.setUTCDate(1);
+    const scale  = (height - 125) / (24 * latestDate.getDate());
+    const dayOffset = dateDiffStr(lastDateDay, dateString(latestDate));
     const offset = (dayOffset - 1) * scale * 24;
     const mode = 0;
-    const foNavigationValues = fabNavigationValue({ mode, offset, scale });
-    checkLoadMoreDataInLocation(macroMap, foNavigationValues);
+    const haveData = fitsInRange(dateString(earliestDate), 'day', 3, macroMap.day.range);
+    if (haveData) {
+      setNavigationValues({ mode, offset, scale });
+    } else {
+      pendingModeTransitions.current = { mode, offset, scale };
+      loading.current = true;
+      loadMoreData(date, 'day', 3, width);
+    }
   };
 
   useFrameCallback((frameInfo) => {

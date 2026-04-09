@@ -22,7 +22,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   const { date } = useLocalSearchParams();
 
   const separators = useSeparators(data);
-  const { gesture, animatedListStyle, navigationValue, zoonToMonth, zoomStyles, executePendingModeTransitions, scrollToDate, zoomToMonth } = useNavigationGesture(data);
+  const { gesture, animatedListStyle, navigationValue, zoomToMonth, zoomStyles, executePendingModeTransitions, scrollToDate } = useNavigationGesture(data);
 
   useEffect(() => {
     if (!loaded.current && data !== null) {
