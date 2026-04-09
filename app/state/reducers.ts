@@ -50,7 +50,7 @@ export const loadMoreDataReducer = (data: MainProps) => (zoom: ZoomLevel, newDat
   const nextDates = { ...dates, [zoom]: nextData };
   const range = { start, end };
   const nextMode = zoomIndeces[zoom];
-  const offset = continuous && future ? dateDiffStr(end, existingEnd) + macroMap[zoom].offset : 0;
+  const offset = continuous ? dateDiffStr(end, existingEnd) + macroMap[zoom].offset : 0;
   // console.log('total data range', start, end);
   const nextMacroMap: MacroMap = { ...macroMap, [zoom]: { offset, range } };
   console.log('loadMoreDataReducer zoom', zoom);
