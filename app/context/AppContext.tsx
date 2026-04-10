@@ -100,8 +100,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (dataRef.current === null) return;
     if (loadingDataRef.current) return;
     loadingDataRef.current = true;
-    // console.log('loadMoreData date', date);
-    // console.log('loadMoreData zoom', zoom);
     const res = await getUserList(date, zoom, count, width);
     if (res) {
       const newData = loadMoreDataReducer(dataRef.current)(zoom, res);

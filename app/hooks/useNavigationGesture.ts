@@ -6,7 +6,7 @@ import { useAppContext } from '../context/AppContext';
 import { MacroMap, MainProps, NavigationValues, ZoomLevel } from '../types';
 import { fitsInRange, getMode, getZoomModeRange, modes, nextDate, zoomIndeces } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
-import { getDayPixels, getFinalDayPixels, getLocationDate, getModeInfo } from '../utils/dataStructures';
+import { getDayPixels, getFinalDayPixels, getLocationDate, getModeInfo, mergeDateRanges } from '../utils/dataStructures';
 import { dateDiff, dateDiffStr, dateString } from '../utils/general';
 
 const DECELERATION = 0.998;
@@ -262,27 +262,33 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   const zoomToMonth = (date: string) => {
     if (!data) return;
     const { macroMap } = data;
-    const { end: lastDateDay } = macroMap.day.range;
-    if (!lastDateDay) return;
-    const latestDate = new Date(date);
-    latestDate.setUTCMonth(latestDate.getMonth() + 1);
-    latestDate.setUTCDate(0);
-    const latestDateStr = dateString(latestDate);
-    const earliestDate = new Date(date);
-    earliestDate.setUTCMonth(earliestDate.getMonth() - 1);
-    earliestDate.setUTCDate(1);
-    const earliestDateStr = dateString(earliestDate);
-    const scale  = (height - 125) / (24 * latestDate.getDate());
-    const dayOffset = dateDiffStr(lastDateDay, latestDateStr);
+    const { range, offset: macroMapDayOffset } = macroMap.day;
+    // const earliestVisibleDate = new Date(date);
+    const latestVisibleDate = new Date(date);
+    latestVisibleDate.setUTCMonth(latestVisibleDate.getMonth() + 1);
+    latestVisibleDate.setUTCDate(0);
+    const latestVisibleDateStr = dateString(latestVisibleDate);
+    const latestLoadedDate = new Date(date);
+    latestLoadedDate.setUTCMonth(latestLoadedDate.getMonth() + 2);
+    const latestLoadedDateStr = dateString(latestLoadedDate);
+    const earliestLoadedDate = new Date(date);
+    earliestLoadedDate.setUTCMonth(earliestLoadedDate.getMonth() - 1);
+    earliestLoadedDate.setUTCDate(1);
+    const earliestLoadedDateStr = dateString(earliestLoadedDate);
+    const scale  = (height - 125) / (24 * latestVisibleDate.getDate());
+    const { contiguous, range: { end: lastDateInNewRange } } = mergeDateRanges(range, { start: earliestLoadedDateStr, end: latestLoadedDateStr });
+    if (!lastDateInNewRange || !range.end) return;
+    const macroMapDayOffsetFinal = contiguous ? macroMapDayOffset + dateDiffStr(lastDateInNewRange, range.end) : 0;
+    const dayOffset = dateDiffStr(lastDateInNewRange, latestVisibleDateStr) - macroMapDayOffsetFinal;
     const offset = (dayOffset - 1) * scale * 24;
     const mode = 0;
-    const haveData = fitsInRange(earliestDateStr, 'day', 3, macroMap.day.range);
+    const haveData = fitsInRange(earliestLoadedDateStr, 'day', 3, range);
     if (haveData) {
       setNavigationValues({ mode, offset, scale });
     } else {
       pendingModeTransitions.current = { mode, offset, scale };
       loading.current = true;
-      loadMoreData(earliestDateStr, 'day', 3, width);
+      loadMoreData(earliestLoadedDateStr, 'day', 3, width);
     }
   };
 

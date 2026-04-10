@@ -1,5 +1,6 @@
 import { modes, zoomIndeces } from '../constants/zoom';
 import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, ZoomLevel, ZoomLevelData, MacroMap } from '../types';
+import { mergeDateData, mergeDateRanges } from '../utils/dataStructures';
 import { dateDiffStr, last } from '../utils/general';
 
 const getZoomLevelDataRange = (zld: ZoomLevelData[]) => {
@@ -30,34 +31,24 @@ export const loadInitialDataReducer = () => (dayLevelData: MonthData[], habits: 
 
 export const loadMoreDataReducer = (data: MainProps) => (zoom: ZoomLevel, newData: ZoomLevelData[]) => {
   const { dates, macroMap } = data;
-  // console.log('loadMoreDataReducer zoom', zoom);
-  // console.log('loadMoreDataReducer newData', newData);
   const existingData = dates[zoom];
-  let nextData = newData;
   let { start, end } = getZoomLevelDataRange(newData)
-  // console.log('loadMoreDataReducer start, end', start, end);
-  // console.log('new data range', start, end);
-  if (!start || !end) return data;
   const { start: existingStart, end: existingEnd } = getZoomLevelDataRange(existingData)
-  const future = start >= existingEnd;
-  const continuous = future ? start === existingEnd : end === existingStart;
-  if (continuous) {
-    end = future ? end : existingEnd;
-    start = future ? existingStart : start;
-    nextData = future ? [...existingData, ...newData] : [...newData, ...existingData];
-  }
-  // console.log('nextData', nextData.map(d => d.range));
-  const nextDates = { ...dates, [zoom]: nextData };
-  const range = { start, end };
+  const { contiguous, range } = mergeDateRanges({ start: existingStart, end: existingEnd }, { start, end });
+  if (!start || !end || !range.start || !range.end) return data;
   const nextMode = zoomIndeces[zoom];
-  const offset = continuous ? dateDiffStr(end, existingEnd) + macroMap[zoom].offset : 0;
-  // console.log('total data range', start, end);
-  const nextMacroMap: MacroMap = { ...macroMap, [zoom]: { offset, range } };
-  console.log('loadMoreDataReducer zoom', zoom);
-  console.log('loadMoreDataReducer nextMacroMap', nextMacroMap);
-  // console.log('nextDates', nextDates);
-  // const oldModeInfo = modes[mode];
-  // const modeChamge = modeInfo.id !== zoom;
+  if (!contiguous) {
+    const nextMacroMap: MacroMap = { ...macroMap, [zoom]: { offset: 0, range } };
+    const nextDates = { ...dates, [zoom]: newData };
+    // console.log('range', range);
+    // console.log('newData', JSON.stringify(newData, null, 2));
+    return { ...data, dates: nextDates, macroMap: nextMacroMap, mode: nextMode };
+  }
+  const nextData = mergeDateData(range, zoom, existingData, newData);
+  const nextDates = { ...dates, [zoom]: nextData };
+  const nextOffset = dateDiffStr(range.end, existingEnd) + macroMap[zoom].offset;
+  console.log('{ offset: nextOffset, range, zoom }', { offset: nextOffset, range, zoom });
+  const nextMacroMap: MacroMap = { ...macroMap, [zoom]: { offset: nextOffset, range } };
   return { ...data, dates: nextDates, macroMap: nextMacroMap, mode: nextMode };
 };
 
