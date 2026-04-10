@@ -1,7 +1,6 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
-import Octicons from '@expo/vector-icons/Octicons';
 import DayRow from './DayRow';
 import { BASE_DAY_HEIGHT, LEFT_BAR_WIDTH } from '../constants/mainScreen';
 import { COLORS } from '../constants/theme';
@@ -24,9 +23,11 @@ const DayRowItem: React.FC<DayRowItemProps> = React.memo(function DayRowItem({
 }) {
   const router = useRouter();
   const key = `${dayIndex}-${monthIndex}`;
-  const dayDate = monthData.days[dayIndex]?.date ?? null;
-  const dayOfWeek = dayDate ? new Date(dayDate + 'T00:00:00').getDay() : null;
+  const dayDateStr = monthData.days[dayIndex]?.date ?? null;
+  const dayDate = new Date(dayDateStr + 'T00:00:00');
+  const dayOfWeek = dayDateStr ? dayDate.getDay() : null;
   const isWeekend = dayOfWeek === 5 || dayOfWeek === 6;
+  const date = dayDate.getDate();
 
   return (
     <View style={styles.content}>
@@ -35,7 +36,10 @@ const DayRowItem: React.FC<DayRowItemProps> = React.memo(function DayRowItem({
           onPress={() => router.replace(`/day/${key}`)}
           style={styles.dayMarker}
         >
-          <Octicons name="dash" size={22} color={COLORS.text} />
+            <View style={styles.dateContainer}>
+
+          <Text style={styles.dateText}>{date}</Text>
+            </View>
         </TouchableOpacity>
       </View>
       <View style={styles.dayContainer}>
@@ -56,12 +60,28 @@ const styles = StyleSheet.create({
     height: BASE_DAY_HEIGHT,
   },
   leftBar: {
-    paddingLeft: 10,
-    paddingRight: 5,
     width: LEFT_BAR_WIDTH,
   },
   dayMarker: {
     flex: 1,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
+    borderBottomWidth: 1
+  },
+  dateContainer: {
+    flex: 1,
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  dateText: {
+    flex: 1,
+    display: 'flex',
+    justifyContent: 'center',
+    color: COLORS.text
   },
   dayContainer: {
     flex: 1,
