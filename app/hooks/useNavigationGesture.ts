@@ -1,6 +1,6 @@
 import { useWindowDimensions, ViewStyle } from 'react-native';
 import { Gesture, GestureType } from 'react-native-gesture-handler';
-import { SharedValue, useAnimatedReaction, useAnimatedStyle, useFrameCallback, useSharedValue } from 'react-native-reanimated';
+import { SharedValue, useAnimatedStyle, useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import { useAppContext } from '../context/AppContext';
 import { MacroMap, MainProps, NavigationValues, ZoomLevel } from '../types';
@@ -24,6 +24,7 @@ interface UseNavigationGestureResult {
   executePendingModeTransitions: () => void;
   scrollToDate: (date: string) => void;
   zoomToMonth: (date: string) => void;
+  zoomToQuarter: (date: string) => void;
 }
 
 export const useNavigationGesture = (data: MainProps | null): UseNavigationGestureResult => {
@@ -259,6 +260,40 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     setNavigationValues({ mode: 0, offset, scale: getScale() });
   };
 
+  const zoomToQuarter = (date: string) => {
+    if (!data) return;
+    const { macroMap } = data;
+    const { range, offset: macroMapDayOffset } = macroMap.quarter;
+    const earliestVisibleDate = new Date(date);
+    const latestVisibleDate = new Date(date);
+    latestVisibleDate.setUTCMonth(latestVisibleDate.getMonth() + 3);
+    latestVisibleDate.setUTCDate(0);
+    const latestVisibleDateStr = dateString(latestVisibleDate);
+    const latestLoadedDate = new Date(date);
+    latestLoadedDate.setUTCMonth(latestLoadedDate.getMonth() + 6);
+    const latestLoadedDateStr = dateString(latestLoadedDate);
+    const earliestLoadedDate = new Date(date);
+    earliestLoadedDate.setUTCMonth(earliestLoadedDate.getMonth() - 3);
+    earliestLoadedDate.setUTCDate(1);
+    const earliestLoadedDateStr = dateString(earliestLoadedDate);
+    const numDays = dateDiff(latestVisibleDate, earliestVisibleDate);
+    const scale  = (height - 125) / (8 * numDays);
+    const { contiguous, range: { end: lastDateInNewRange } } = mergeDateRanges(range, { start: earliestLoadedDateStr, end: latestLoadedDateStr });
+    if (!lastDateInNewRange || !range.end) return;
+    const macroMapDayOffsetFinal = contiguous ? macroMapDayOffset + dateDiffStr(lastDateInNewRange, range.end) : 0;
+    const dayOffset = dateDiffStr(lastDateInNewRange, latestVisibleDateStr) - macroMapDayOffsetFinal;
+    const offset = dayOffset * scale * 8;
+    const mode = 1;
+    const haveData = fitsInRange(earliestLoadedDateStr, 'quarter', 3, range);
+    if (haveData) {
+      setNavigationValues({ mode, offset, scale });
+    } else {
+      pendingModeTransitions.current = { mode, offset, scale };
+      loading.current = true;
+      loadMoreData(earliestLoadedDateStr, 'quarter', 3, width);
+    }
+  };
+
   const zoomToMonth = (date: string) => {
     if (!data) return;
     const { macroMap } = data;
@@ -487,7 +522,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     .onTouchesUp(onTouchesUp)
     .onTouchesCancelled(onTouchesUp);
 
-  return { gesture, animatedListStyle, navigationValue, zoomStyles, executePendingModeTransitions, scrollToDate, zoomToMonth };
+  return { gesture, animatedListStyle, navigationValue, zoomStyles, executePendingModeTransitions, scrollToDate, zoomToMonth, zoomToQuarter };
 };
 
 export default { useNavigationGesture };

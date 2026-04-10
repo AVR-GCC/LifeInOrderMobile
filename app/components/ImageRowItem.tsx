@@ -1,9 +1,9 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View, Image } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
-import { NavigationValues, TimePeriodData } from '../types';
-import { dateDiffStr, dateString } from '../utils/general';
-import { modes, zoomIndeces } from '../constants/zoom';
+import { NavigationValues, TimePeriodData, ZoomLevel } from '../types';
+import { dateDiff, dateDiffStr, dateString } from '../utils/general';
+import { modes, zoomIndeces, zoomMonths } from '../constants/zoom';
 import { COLORS } from '../constants/theme';
 import Animated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
@@ -11,28 +11,75 @@ interface ImageRowItemProps {
   item: TimePeriodData;
   onLoad: () => void;
   navigationValue: SharedValue<NavigationValues>;
-  zoonToMonth: (date: string) => void;
+  zoomToMonth: (date: string) => void;
+  zoomToQuarter: (date: string) => void;
 }
 
-const monthName = [
-  'JANUARY',
-  'FEBRUARY',
-  'MARCH',
-  'APRIL',
-  'MAY',
-  'JUNE',
-  'JULY',
-  'AUGUST',
-  'SEPTEMBER',
-  'OCTOBER',
-  'NOVEMBER',
-  'DECEMBER',
-]
+const sectionNames: Record<ZoomLevel, (date: Date) => string> = {
+  day: () => '',
+  quarter: date => {
+    const month = date.getMonth();
+    return [
+      'JANUARY',
+      'FEBRUARY',
+      'MARCH',
+      'APRIL',
+      'MAY',
+      'JUNE',
+      'JULY',
+      'AUGUST',
+      'SEPTEMBER',
+      'OCTOBER',
+      'NOVEMBER',
+      'DECEMBER',
+    ][month]
+  },
+  half: date => {
+    const month = date.getMonth();
+    const year = date.getFullYear();
+    return [
+      `Q1 ${year}`,
+      `Q1 ${year}`,
+      `Q1 ${year}`,
+      `Q2 ${year}`,
+      `Q2 ${year}`,
+      `Q2 ${year}`,
+      `Q3 ${year}`,
+      `Q3 ${year}`,
+      `Q3 ${year}`,
+      `Q4 ${year}`,
+      `Q4 ${year}`,
+      `Q4 ${year}`,
+    ][month]
+  },
+  year: date => {
+    const month = date.getMonth();
+    const year = date.getFullYear();
+    return [
+      `Q1 ${year}`,
+      `Q1 ${year}`,
+      `Q1 ${year}`,
+      `Q2 ${year}`,
+      `Q2 ${year}`,
+      `Q2 ${year}`,
+      `Q3 ${year}`,
+      `Q3 ${year}`,
+      `Q3 ${year}`,
+      `Q4 ${year}`,
+      `Q4 ${year}`,
+      `Q4 ${year}`,
+    ][month]
+  },
+  two_year: date => {
+    const year = date.getFullYear();
+    return year.toString();
+  },
+}
 
 const SIDEBAR_SECTION_BORDER_WIDTH = 6;
 
 const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowItem({
-  item, onLoad, navigationValue, zoonToMonth
+  item, onLoad, navigationValue, zoomToMonth, zoomToQuarter
 }) {
     const { zoom, range, image } = item;
     const sidebarSectionStyle = useAnimatedStyle(() => {
@@ -46,21 +93,21 @@ const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowIt
     const key = `image-${range.start}-${range.end}`;
     const daysCount = dateDiffStr(range.end, range.start);
     const dayPixels = modes[zoomIndeces[zoom]].dayPixels;
-    const marchFirst = new Date('2026-03-01');
-    marchFirst.setMonth(3);
     const { start, end } = range;
     const buttons = [];
     let current = start;
     while (current < end) {
       const currentDate = new Date(current);
+      const nextDate = new Date(current);
       const month = currentDate.getMonth();
-      const name = monthName[month];
-      currentDate.setUTCMonth(month + 1);
-      currentDate.setUTCDate(0);
-      const flex = currentDate.getDate();
-      currentDate.setDate(flex + 1);
+      const name = sectionNames[zoom](currentDate);
+      const prevZoom = modes[zoomIndeces[zoom] - 1].id;
+      nextDate.setUTCMonth(month + zoomMonths[prevZoom]);
+      nextDate.setUTCDate(0);
+      const flex = dateDiff(nextDate, currentDate);
+      nextDate.setUTCDate(nextDate.getDate() + 1);
       buttons.push({ flex, name, date: current });
-      current = dateString(currentDate);
+      current = dateString(nextDate);
     }
     const height = daysCount * dayPixels;
     // console.log('mode', mode);
@@ -75,7 +122,8 @@ const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowIt
               <TouchableOpacity
                 key={`${date}-zoom-to-month`}
                 onPress={() => {
-                  zoonToMonth(date);
+                  if (zoom === 'quarter') zoomToMonth(date);
+                  if (['half', 'year'].includes(zoom)) zoomToQuarter(date)
                 }}
                 style={[styles.dayMarker, { flex }]}
               >
