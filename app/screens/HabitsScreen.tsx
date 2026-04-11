@@ -54,7 +54,7 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
             deleteHabit={deleteHabit}
             editHabit={() => {}}
             createHabit={async () => {
-              await createHabit(habits[habits.length - 1]?.habit?.sequence || 1);
+              await createHabit(habits[habits.length - 1]?.habit?.sequence + 1 || 1);
               router.replace(`/day/${date}/habits/${habits.length}`)
             }}
           />
