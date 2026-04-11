@@ -123,6 +123,7 @@ const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowIt
                 onPress={() => {
                   if (zoom === 'quarter') zoomToPeriod(date, 'day');
                   if (['half', 'year'].includes(zoom)) zoomToPeriod(date, 'quarter')
+                  if (zoom === 'two_year') zoomToPeriod(date, 'year');
                 }}
                 style={[styles.dayMarker, { flex }]}
               >
