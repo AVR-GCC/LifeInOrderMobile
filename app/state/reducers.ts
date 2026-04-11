@@ -47,13 +47,12 @@ export const loadMoreDataReducer = (data: MainProps) => (zoom: ZoomLevel, newDat
   const nextData = mergeDateData(range, zoom, existingData, newData);
   const nextDates = { ...dates, [zoom]: nextData };
   const nextOffset = dateDiffStr(range.end, existingEnd) + macroMap[zoom].offset;
-  console.log('{ offset: nextOffset, range, zoom }', { offset: nextOffset, range, zoom });
   const nextMacroMap: MacroMap = { ...macroMap, [zoom]: { offset: nextOffset, range } };
   return { ...data, dates: nextDates, macroMap: nextMacroMap, mode: nextMode };
 };
 
 export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, monthIndex: number, habitIndex: number, valueId: string) => {
-  const dates = { ...data.dates };
+  const { dates, macroMap } = data;
   const newDayZoomData = [...dates.day];
   const newMonth = { ...newDayZoomData[monthIndex] };
   if ('image' in newMonth) return data;
@@ -62,8 +61,22 @@ export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, 
   newDate.values = { ...newDate.values, [habitId]: valueId };
   newMonth.days[dateIndex] = newDate;
   newDayZoomData[monthIndex] = newMonth;
+  const newMacroMap: MacroMap = {
+    day: macroMap.day,
+    quarter: { offset: 0, range: { start: null, end: null } },
+    half: { offset: 0, range: { start: null, end: null } },
+    year: { offset: 0, range: { start: null, end: null } },
+    two_year: { offset: 0, range: { start: null, end: null } }
+  };
+  const newDates: DatesData = {
+    day: newDayZoomData,
+    quarter: [],
+    half: [],
+    year: [],
+    two_year: []
+  };
   dates.day = newDayZoomData;
-  return { ...data, dates };
+  return { ...data, dates: newDates, macroMap: newMacroMap };
 };
 
 export const addHabitReducer = (data: MainProps) => (habit: Habit) => {
