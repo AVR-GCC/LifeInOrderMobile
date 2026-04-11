@@ -11,8 +11,7 @@ interface ImageRowItemProps {
   item: TimePeriodData;
   onLoad: () => void;
   navigationValue: SharedValue<NavigationValues>;
-  zoomToMonth: (date: string) => void;
-  zoomToQuarter: (date: string) => void;
+  zoomToPeriod: (date: string, zoom: ZoomLevel) => void;
 }
 
 const sectionNames: Record<ZoomLevel, (date: Date) => string> = {
@@ -79,7 +78,7 @@ const sectionNames: Record<ZoomLevel, (date: Date) => string> = {
 const SIDEBAR_SECTION_BORDER_WIDTH = 6;
 
 const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowItem({
-  item, onLoad, navigationValue, zoomToMonth, zoomToQuarter
+  item, onLoad, navigationValue, zoomToPeriod
 }) {
     const { zoom, range, image } = item;
     const sidebarSectionStyle = useAnimatedStyle(() => {
@@ -122,8 +121,8 @@ const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowIt
               <TouchableOpacity
                 key={`${date}-zoom-to-month`}
                 onPress={() => {
-                  if (zoom === 'quarter') zoomToMonth(date);
-                  if (['half', 'year'].includes(zoom)) zoomToQuarter(date)
+                  if (zoom === 'quarter') zoomToPeriod(date, 'day');
+                  if (['half', 'year'].includes(zoom)) zoomToPeriod(date, 'quarter')
                 }}
                 style={[styles.dayMarker, { flex }]}
               >

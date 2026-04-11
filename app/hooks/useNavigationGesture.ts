@@ -4,7 +4,7 @@ import { SharedValue, useAnimatedStyle, useFrameCallback, useSharedValue } from 
 import { scheduleOnRN } from 'react-native-worklets';
 import { useAppContext } from '../context/AppContext';
 import { MacroMap, MainProps, NavigationValues, ZoomLevel } from '../types';
-import { fitsInRange, getMode, getZoomModeRange, modes, nextDate, zoomIndeces } from '../constants/zoom';
+import { fitsInRange, getMode, getZoomModeRange, modes, nextDate, zoomIndeces, zoomMonths } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
 import { getDayPixels, getFinalDayPixels, getLocationDate, getModeInfo, mergeDateRanges } from '../utils/dataStructures';
 import { dateDiff, dateDiffStr, dateString } from '../utils/general';
@@ -23,8 +23,7 @@ interface UseNavigationGestureResult {
   zoomStyles: Record<ZoomLevel, ViewStyle>;
   executePendingModeTransitions: () => void;
   scrollToDate: (date: string) => void;
-  zoomToMonth: (date: string) => void;
-  zoomToQuarter: (date: string) => void;
+  zoomToPeriod: (date: string, zoom: ZoomLevel) => void;
 }
 
 export const useNavigationGesture = (data: MainProps | null): UseNavigationGestureResult => {
@@ -260,70 +259,39 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     setNavigationValues({ mode: 0, offset, scale: getScale() });
   };
 
-  const zoomToQuarter = (date: string) => {
+  const zoomToPeriod = (date: string, zoom: ZoomLevel) => {
     if (!data) return;
     const { macroMap } = data;
-    const { range, offset: macroMapDayOffset } = macroMap.quarter;
+    const { range, offset: macroMapDayOffset } = macroMap[zoom];
+    const newZoomMonths = zoomMonths[zoom];
+    const mode = zoomIndeces[zoom];
+    const newZoomDayPixels = modes[mode].dayPixels;
     const earliestVisibleDate = new Date(date);
     const latestVisibleDate = new Date(date);
-    latestVisibleDate.setUTCMonth(latestVisibleDate.getMonth() + 3);
+    latestVisibleDate.setUTCMonth(latestVisibleDate.getMonth() + newZoomMonths);
     latestVisibleDate.setUTCDate(0);
     const latestVisibleDateStr = dateString(latestVisibleDate);
     const latestLoadedDate = new Date(date);
-    latestLoadedDate.setUTCMonth(latestLoadedDate.getMonth() + 6);
+    latestLoadedDate.setUTCMonth(latestLoadedDate.getMonth() + newZoomMonths * 2);
     const latestLoadedDateStr = dateString(latestLoadedDate);
     const earliestLoadedDate = new Date(date);
-    earliestLoadedDate.setUTCMonth(earliestLoadedDate.getMonth() - 3);
+    earliestLoadedDate.setUTCMonth(earliestLoadedDate.getMonth() - newZoomMonths);
     earliestLoadedDate.setUTCDate(1);
     const earliestLoadedDateStr = dateString(earliestLoadedDate);
     const numDays = dateDiff(latestVisibleDate, earliestVisibleDate);
-    const scale  = (height - 125) / (8 * numDays);
+    const scale  = (height - 125) / (newZoomDayPixels * numDays);
     const { contiguous, range: { end: lastDateInNewRange } } = mergeDateRanges(range, { start: earliestLoadedDateStr, end: latestLoadedDateStr });
     if (!lastDateInNewRange || !range.end) return;
     const macroMapDayOffsetFinal = contiguous ? macroMapDayOffset + dateDiffStr(lastDateInNewRange, range.end) : 0;
     const dayOffset = dateDiffStr(lastDateInNewRange, latestVisibleDateStr) - macroMapDayOffsetFinal;
-    const offset = dayOffset * scale * 8;
-    const mode = 1;
-    const haveData = fitsInRange(earliestLoadedDateStr, 'quarter', 3, range);
+    const offset = dayOffset * scale * newZoomDayPixels;
+    const haveData = fitsInRange(earliestLoadedDateStr, zoom, 3, range);
     if (haveData) {
       setNavigationValues({ mode, offset, scale });
     } else {
       pendingModeTransitions.current = { mode, offset, scale };
       loading.current = true;
-      loadMoreData(earliestLoadedDateStr, 'quarter', 3, width);
-    }
-  };
-
-  const zoomToMonth = (date: string) => {
-    if (!data) return;
-    const { macroMap } = data;
-    const { range, offset: macroMapDayOffset } = macroMap.day;
-    // const earliestVisibleDate = new Date(date);
-    const latestVisibleDate = new Date(date);
-    latestVisibleDate.setUTCMonth(latestVisibleDate.getMonth() + 1);
-    latestVisibleDate.setUTCDate(0);
-    const latestVisibleDateStr = dateString(latestVisibleDate);
-    const latestLoadedDate = new Date(date);
-    latestLoadedDate.setUTCMonth(latestLoadedDate.getMonth() + 2);
-    const latestLoadedDateStr = dateString(latestLoadedDate);
-    const earliestLoadedDate = new Date(date);
-    earliestLoadedDate.setUTCMonth(earliestLoadedDate.getMonth() - 1);
-    earliestLoadedDate.setUTCDate(1);
-    const earliestLoadedDateStr = dateString(earliestLoadedDate);
-    const scale  = (height - 125) / (24 * latestVisibleDate.getDate());
-    const { contiguous, range: { end: lastDateInNewRange } } = mergeDateRanges(range, { start: earliestLoadedDateStr, end: latestLoadedDateStr });
-    if (!lastDateInNewRange || !range.end) return;
-    const macroMapDayOffsetFinal = contiguous ? macroMapDayOffset + dateDiffStr(lastDateInNewRange, range.end) : 0;
-    const dayOffset = dateDiffStr(lastDateInNewRange, latestVisibleDateStr) - macroMapDayOffsetFinal;
-    const offset = (dayOffset - 1) * scale * 24;
-    const mode = 0;
-    const haveData = fitsInRange(earliestLoadedDateStr, 'day', 3, range);
-    if (haveData) {
-      setNavigationValues({ mode, offset, scale });
-    } else {
-      pendingModeTransitions.current = { mode, offset, scale };
-      loading.current = true;
-      loadMoreData(earliestLoadedDateStr, 'day', 3, width);
+      loadMoreData(earliestLoadedDateStr, zoom, 3, width);
     }
   };
 
@@ -522,7 +490,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     .onTouchesUp(onTouchesUp)
     .onTouchesCancelled(onTouchesUp);
 
-  return { gesture, animatedListStyle, navigationValue, zoomStyles, executePendingModeTransitions, scrollToDate, zoomToMonth, zoomToQuarter };
+  return { gesture, animatedListStyle, navigationValue, zoomStyles, executePendingModeTransitions, scrollToDate, zoomToPeriod };
 };
 
 export default { useNavigationGesture };

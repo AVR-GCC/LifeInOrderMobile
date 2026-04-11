@@ -22,7 +22,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   const { date } = useLocalSearchParams();
 
   const separators = useSeparators(data);
-  const { gesture, animatedListStyle, navigationValue, zoomToMonth, zoomToQuarter, zoomStyles, executePendingModeTransitions, scrollToDate } = useNavigationGesture(data);
+  const { gesture, animatedListStyle, navigationValue, zoomToPeriod, zoomStyles, executePendingModeTransitions, scrollToDate } = useNavigationGesture(data);
 
   useEffect(() => {
     if (!loaded.current && data !== null) {
@@ -77,8 +77,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
               item={item}
               onLoad={executePendingModeTransitions}
               navigationValue={navigationValue}
-              zoomToMonth={zoomToMonth}
-              zoomToQuarter={zoomToQuarter}
+              zoomToPeriod={zoomToPeriod}
             />
           );
         }
