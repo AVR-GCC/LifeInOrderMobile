@@ -36,10 +36,9 @@ const DayRowItem: React.FC<DayRowItemProps> = React.memo(function DayRowItem({
           onPress={() => router.replace(`/day/${key}`)}
           style={styles.dayMarker}
         >
-            <View style={styles.dateContainer}>
-
-          <Text style={styles.dateText}>{date}</Text>
-            </View>
+          <View style={styles.dateContainer}>
+            <Text style={styles.dateText}>{date}</Text>
+          </View>
         </TouchableOpacity>
       </View>
       <View style={styles.dayContainer}>
