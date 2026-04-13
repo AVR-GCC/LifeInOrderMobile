@@ -30,16 +30,17 @@ const DayRowItem: React.FC<DayRowItemProps> = React.memo(function DayRowItem({
   const date = dayDate.getDate();
 
   return (
-    <View style={styles.content}>
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={() => router.replace(`/day/${key}`)}
+      style={styles.content}
+    >
       <View style={[styles.leftBar, isWeekend && styles.weekendRow]}>
-        <TouchableOpacity
-          onPress={() => router.replace(`/day/${key}`)}
-          style={styles.dayMarker}
-        >
+        <View style={styles.dayMarker}>
           <View style={styles.dateContainer}>
             <Text style={styles.dateText}>{date}</Text>
           </View>
-        </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.dayContainer}>
         <DayRow
@@ -49,7 +50,7 @@ const DayRowItem: React.FC<DayRowItemProps> = React.memo(function DayRowItem({
           getDayHabitValue={getDayHabitValue}
         />
       </View>
-    </View>
+    </TouchableOpacity>
   );
 });
 
