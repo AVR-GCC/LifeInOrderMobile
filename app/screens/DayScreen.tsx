@@ -1,4 +1,4 @@
-import { AntDesign } from '@expo/vector-icons';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import moment from 'moment';
 import React from 'react';
@@ -91,7 +91,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data
             style={styles.settingsButtonContainer}
             onPress={() => router.replace(`/day/${date}/habits`)}
           >
-            <AntDesign name="setting" size={30} color={COLORS.text} />
+            <Ionicons name="settings-outline" size={30} color={COLORS.text} />
           </TouchableOpacity>
           <View style={styles.verticalChevronsContainer}>
             <VerticalChevrons
