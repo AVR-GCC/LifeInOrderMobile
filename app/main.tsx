@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppContext } from './context/AppContext';
 import MainScreen from './screens/MainScreen';
 
-const MainRoute: React.FC = React.memo(() => {
+const MainRoute: React.FC = React.memo(function MainRoute() {
   const { data, getDayHabitValue } = useAppContext();
 
   return (
@@ -13,4 +13,4 @@ const MainRoute: React.FC = React.memo(() => {
   );
 });
 
-export default MainRoute; 
+export default MainRoute;

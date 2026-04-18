@@ -11,7 +11,7 @@ interface ImageRowItemProps {
   item: TimePeriodData;
   onLoad: () => void;
   navigationValue: SharedValue<NavigationValues>;
-  zoomToPeriod: (date: string, zoom: ZoomLevel) => void;
+  onPress: (targetDate: string, currentZoom: ZoomLevel) => void;
 }
 
 const sectionNames: Record<ZoomLevel, (date: Date) => string> = {
@@ -78,7 +78,7 @@ const sectionNames: Record<ZoomLevel, (date: Date) => string> = {
 const SIDEBAR_SECTION_BORDER_WIDTH = 6;
 
 const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowItem({
-  item, onLoad, navigationValue, zoomToPeriod
+  item, onLoad, navigationValue, onPress
 }) {
     const { zoom, range, image } = item;
     const sidebarSectionStyle = useAnimatedStyle(() => {
@@ -118,13 +118,8 @@ const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowIt
           {buttons.map(({ flex, name, date }) => {
             const height = flex * dayPixels;
             return (
-              <TouchableOpacity
+              <View
                 key={`${date}-zoom-to-month`}
-                onPress={() => {
-                  if (zoom === 'quarter') zoomToPeriod(date, 'day');
-                  if (['half', 'year'].includes(zoom)) zoomToPeriod(date, 'quarter')
-                  if (zoom === 'two_year') zoomToPeriod(date, 'year');
-                }}
                 style={[styles.dayMarker, { flex }]}
               >
                 <View style={[
@@ -138,7 +133,7 @@ const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowIt
                 ]}>
                   <Animated.Text style={[sidebarSectionStyle, styles.verticalText]}>{name}</Animated.Text>
                 </View>
-              </TouchableOpacity>
+              </View>
             );
           })}
         </View>
@@ -152,6 +147,18 @@ const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowIt
             onLoad={onLoad}
           />
         </View>
+        <View style={styles.touchOverlay}>
+          {buttons.map(({ flex, date }) => (
+            <TouchableOpacity
+              key={`${date}-touch`}
+              activeOpacity={0.7}
+              onPress={() => {
+                onPress(date, zoom);
+              }}
+              style={{ flex }}
+            />
+          ))}
+        </View>
       </View>
     );
 });
@@ -160,7 +167,10 @@ const styles = StyleSheet.create({
   content: {
     flexDirection: 'row',
     // height: BASE_DAY_HEIGHT,
-  },
+  } as const,
+  touchOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  } as const,
   leftBar: {
     width: LEFT_BAR_WIDTH,
   },

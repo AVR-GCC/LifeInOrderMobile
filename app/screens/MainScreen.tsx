@@ -22,7 +22,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   const { date } = useLocalSearchParams();
 
   const separators = useSeparators(data);
-  const { gesture, animatedListStyle, navigationValue, zoomToPeriod, zoomStyles, executePendingModeTransitions, scrollToDate } = useNavigationGesture(data);
+  const { gesture, animatedListStyle, navigationValue, zoomToPeriod, zoomStyles, executePendingModeTransitions, scrollToDate, isPanning } = useNavigationGesture(data);
 
   useEffect(() => {
     if (!loaded.current && data !== null) {
@@ -58,16 +58,23 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
     <View style={{ display: 'flex', flexDirection: 'column' }}>
       {dateItems.map((item, index) => {
         if ('days' in item) {
-          return item.days.map((_day, dayIndex) => (
-            <DayRowItem
-              key={`${dayIndex}-${index}`}
-              dayIndex={dayIndex}
-              monthIndex={index}
-              monthData={item}
-              habits={habits}
-              getDayHabitValue={getDayHabitValue}
-            />
-          ));
+          return item.days.map((_day, dayIndex) => {
+            const key = `${dayIndex}-${index}`;
+            return (
+              <DayRowItem
+                key={key}
+                dayIndex={dayIndex}
+                monthIndex={index}
+                monthData={item}
+                habits={habits}
+                onPress={() => {
+                  if (isPanning.current) return;
+                  router.replace(`/day/${key}`);
+                }}
+                getDayHabitValue={getDayHabitValue}
+              />
+            );
+          });
         } else {
           if (!item.range.start || !item.range.end) return null;
           const key = `image-${item.range.start}-${item.range.end}`;
@@ -77,7 +84,12 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
               item={item}
               onLoad={executePendingModeTransitions}
               navigationValue={navigationValue}
-              zoomToPeriod={zoomToPeriod}
+              onPress={(targetDate, currentZoom) => {
+                if (isPanning.current) return;
+                if (currentZoom === 'quarter') zoomToPeriod(targetDate, 'day');
+                if (['half', 'year'].includes(currentZoom)) zoomToPeriod(targetDate, 'quarter');
+                if (currentZoom === 'two_year') zoomToPeriod(targetDate, 'year');
+              }}
             />
           );
         }

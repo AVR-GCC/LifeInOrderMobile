@@ -11,6 +11,7 @@ import { dateDiff, dateDiffStr, dateString } from '../utils/general';
 
 const DECELERATION = 0.998;
 const MIN_VELOCITY = 0.01;
+const PAN_THRESHOLD = 5;
 
 type SetNavigationValuesInput = { mode: number, offset: number, scale: number };
 type FabNavigationValues = (params: SetNavigationValuesInput) => NavigationValues;
@@ -24,6 +25,7 @@ interface UseNavigationGestureResult {
   executePendingModeTransitions: () => void;
   scrollToDate: (date: string) => void;
   zoomToPeriod: (date: string, zoom: ZoomLevel) => void;
+  isPanning: React.RefObject<boolean>;
 }
 
 export const useNavigationGesture = (data: MainProps | null): UseNavigationGestureResult => {
@@ -31,6 +33,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   const { height, width } = useWindowDimensions();
   const dataRef = useRef(data);
   const loading = useRef(false);
+  const isPanning = useRef(false);
   const pendingModeTransitions = useRef<SetNavigationValuesInput>(null);
 
   const navigationValue = useSharedValue<NavigationValues>({
@@ -147,6 +150,12 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   const lastTouchY = useSharedValue<number | null>(null);
   const lastTouchTime = useSharedValue<number | null>(null);
   const isMomentumActive = useSharedValue(false);
+  const initialTouchY = useSharedValue<number | null>(null);
+  const panDetected = useSharedValue(false);
+
+  const setIsPanning = (value: boolean) => {
+    isPanning.current = value;
+  };
 
   const animatedListStyle = useAnimatedStyle(() => ({
     transform: [
@@ -369,11 +378,27 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     scrollVelocity.value = 0;
     lastTouchY.value = null;
     lastTouchTime.value = null;
+    panDetected.value = false;
+    initialTouchY.value = arg.allTouches.length === 1 ? arg.allTouches[0].absoluteY : null;
+    scheduleOnRN(setIsPanning, false);
     setStartValues(arg.allTouches);
   };
 
   const onTouchesMove = (arg: { allTouches: { absoluteY: number }[] }) => {
     const touchCount = arg.allTouches.length;
+
+    if (!panDetected.value) {
+      if (touchCount >= 2) {
+        panDetected.value = true;
+        scheduleOnRN(setIsPanning, true);
+      } else if (touchCount === 1 && initialTouchY.value !== null) {
+        const dy = Math.abs(arg.allTouches[0].absoluteY - initialTouchY.value);
+        if (dy > PAN_THRESHOLD) {
+          panDetected.value = true;
+          scheduleOnRN(setIsPanning, true);
+        }
+      }
+    }
 
     if (touchCount >= 2) {
       if (
@@ -490,7 +515,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     .onTouchesUp(onTouchesUp)
     .onTouchesCancelled(onTouchesUp);
 
-  return { gesture, animatedListStyle, navigationValue, zoomStyles, executePendingModeTransitions, scrollToDate, zoomToPeriod };
+  return { gesture, animatedListStyle, navigationValue, zoomStyles, executePendingModeTransitions, scrollToDate, zoomToPeriod, isPanning };
 };
 
 export default { useNavigationGesture };

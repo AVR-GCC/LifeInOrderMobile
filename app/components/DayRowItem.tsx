@@ -11,6 +11,7 @@ interface DayRowItemProps {
   monthIndex: number;
   monthData: MonthData;
   habits: HabitWithValues[];
+  onPress: () => void;
   getDayHabitValue: GetDayHabitValue;
 }
 
@@ -19,10 +20,9 @@ const DayRowItem: React.FC<DayRowItemProps> = React.memo(function DayRowItem({
   monthIndex,
   monthData,
   habits,
+  onPress,
   getDayHabitValue,
 }) {
-  const router = useRouter();
-  const key = `${dayIndex}-${monthIndex}`;
   const dayDateStr = monthData.days[dayIndex]?.date ?? null;
   const dayDate = new Date(dayDateStr + 'T00:00:00');
   const dayOfWeek = dayDateStr ? dayDate.getDay() : null;
@@ -32,7 +32,7 @@ const DayRowItem: React.FC<DayRowItemProps> = React.memo(function DayRowItem({
   return (
     <TouchableOpacity
       activeOpacity={0.7}
-      onPress={() => router.replace(`/day/${key}`)}
+      onPress={onPress}
       style={styles.content}
     >
       <View style={[styles.leftBar, isWeekend && styles.weekendRow]}>
