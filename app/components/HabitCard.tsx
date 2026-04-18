@@ -15,7 +15,7 @@ interface HabitCardProps {
   createHabit: () => void;
 }
 
-const HabitCard: React.FC<HabitCardProps> = React.memo(({
+const HabitCard: React.FC<HabitCardProps> = React.memo(function HabitCard({
   habit,
   index,
   totalHabits,
@@ -23,14 +23,14 @@ const HabitCard: React.FC<HabitCardProps> = React.memo(({
   deleteHabit,
   editHabit,
   createHabit,
-}) => {
+}) {
   if (!habit) {
     return (
       <TouchableOpacity
         style={[styles.habitCard, styles.newHabit]}
         onPress={createHabit}
       >
-        <AntDesign name="plus" size={24} color={COLORS.text} />
+        <AntDesign name="plus" size={20} color={COLORS.text} />
         <Text style={styles.newHabitText}>Create Habit</Text>
       </TouchableOpacity>
     )
@@ -55,20 +55,19 @@ const HabitCard: React.FC<HabitCardProps> = React.memo(({
       <View style={styles.rightSide}>
         <View style={styles.buttonHolder}>
           <VerticalChevrons
-            dark
             onPress={(isDown) => switchHabits(isDown, index)}
             upDisabled={index === 0}
             downDisabled={index === totalHabits - 1}
           />
         </View>
         <TouchableOpacity style={styles.buttonHolder} onPress={editHabit}>
-          <Ionicons name="pencil" size={24} color={COLORS.colorOne} />
+          <Ionicons name="pencil" size={20} color={COLORS.colorTwo} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.buttonHolder}
           onPress={() => deleteHabit(index)}
         >
-          <Ionicons name="trash" size={24} color="#ef4444" />
+          <Ionicons name="trash" size={20} color="#ef4444" />
         </TouchableOpacity>
       </View>
     </View>
@@ -80,51 +79,54 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: COLORS.colorThree,
+    backgroundColor: COLORS.colorOne,
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.colorTwo,
+    padding: 12,
+    marginBottom: 8,
   },
   leftSide: {
     flex: 1,
-    marginRight: 16,
+    marginRight: 12,
   },
   habitName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
-    marginBottom: 8,
-    color: COLORS.colorOne,
+    marginBottom: 6,
+    marginLeft: 2,
+    color: COLORS.text,
   },
   valueColors: {
     flexDirection: 'row',
-    backgroundColor: COLORS.colorTwo
   },
   valueColor: {
-    width: 24,
-    height: 24,
-    borderRadius: '50%',
-    margin: 3,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    margin: 2,
   },
   rightSide: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   buttonHolder: {
-    marginLeft: 16,
+    marginLeft: 12,
   },
   newHabit: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000',
-    borderColor: COLORS.colorThree,
-    borderWidth: 1
+    backgroundColor: 'transparent',
+    borderColor: COLORS.colorTwo,
+    borderWidth: 1,
+    borderStyle: 'dashed',
   },
   newHabitText: {
-    fontSize: 20,
+    fontSize: 16,
     color: COLORS.text,
-    margin: 10,
-    marginBottom: 13
+    margin: 8,
+    marginBottom: 10,
   }
 });
 

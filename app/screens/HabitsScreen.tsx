@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flex: 1,
-    padding: 20,
+    padding: 16,
   },
   bottomBuffer: {
     height: 70,
