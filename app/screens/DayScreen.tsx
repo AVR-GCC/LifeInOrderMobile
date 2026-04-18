@@ -106,22 +106,55 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data
         <ScrollView style={styles.scrollContainer}>
           {habits.map((h, habitIndex) => {
             const valueId = getDayHabitValue(dateIndex, monthIndex, habitIndex);
-            const valueIndex = valueId === null ? null : h.values_hashmap[valueId];
-            const value = valueIndex === null ? null : h.values[valueIndex];
+            const selectedIndex = valueId === null ? null : h.values_hashmap[valueId];
+            const selectedValue = selectedIndex === null ? null : h.values[selectedIndex];
             
             return (
               <TouchableOpacity
                 key={h.habit.id}
-                style={[styles.habitButton, { borderColor: value?.color || UNFILLED_COLOR }]}
-                activeOpacity={1}
+                activeOpacity={0.8}
+                style={[styles.habitCard, { borderColor: selectedValue?.color || UNFILLED_COLOR }]}
                 onPress={() => {
-                  const nextIndex = valueIndex === null ? 0 : (valueIndex + 1) % h.values.length;
+                  const nextIndex = selectedIndex === null ? 0 : (selectedIndex + 1) % h.values.length;
                   const nextValue = h.values[nextIndex];
                   if (nextValue) setDayHabitValue(dateIndex, monthIndex, habitIndex, nextValue.id);
                 }}
               >
-                <Text style={styles.habitTitle}>{h.habit.name}</Text>
-                <Text style={styles.valueLabel}>{value?.label}</Text>
+                <View style={styles.habitHeaderRow}>
+                  <Text style={styles.habitTitle}>{h.habit.name}</Text>
+                  <Text style={styles.currentValueLabel}>{selectedValue?.label ?? 'none'}</Text>
+                </View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsRow}>
+                  {h.values.map((v, vIndex) => {
+                    const isSelected = selectedIndex === vIndex;
+                    return (
+                      <TouchableOpacity
+                        key={v.id}
+                        activeOpacity={0.7}
+                        style={[
+                          styles.pill,
+                          isSelected
+                            ? { backgroundColor: v.color, borderColor: v.color }
+                            : { backgroundColor: '#3a4a5a', borderColor: '#3a4a5a' },
+                        ]}
+                        onPress={() => {
+                          setDayHabitValue(dateIndex, monthIndex, habitIndex, v.id);
+                        }}
+                      >
+                        <View style={[styles.pillDot, { backgroundColor: isSelected ? COLORS.colorOne : v.color }]} />
+                        <Text
+                          style={[
+                            styles.pillText,
+                            isSelected ? { color: '#fff', fontWeight: '600' } : { color: '#ccc' },
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {v.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
               </TouchableOpacity>
             );
           })}
@@ -183,30 +216,50 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 20,
   },
-  habitButton: {
+  habitCard: {
+    backgroundColor: COLORS.colorOne,
+    borderWidth: 3,
+    borderRadius: 10,
+    padding: 14,
+    marginVertical: 8,
+    marginHorizontal: 10,
+  },
+  habitHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: COLORS.colorThree,
-    width: '80%',
-    height: 80,
-    borderWidth: 5,
-    borderRadius: 10,
-    padding: 20,
-    marginVertical: 15,
-    alignSelf: 'center',
+    marginBottom: 8,
   },
   habitTitle: {
-    flex: 1,
     fontSize: 16,
-    fontWeight: '500',
-    color: '#222',
+    fontWeight: '700',
+    color: COLORS.text,
   },
-  valueLabel: {
-    flex: 2,
-    fontSize: 16,
+  currentValueLabel: {
+    fontSize: 14,
     fontWeight: '400',
-    color: '#444',
+    color: '#888',
+  },
+  pillsRow: {
+    flexDirection: 'row',
+  },
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginRight: 8,
+  },
+  pillDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  pillText: {
+    fontSize: 13,
   },
   bottomBuffer: {
     height: 50,
