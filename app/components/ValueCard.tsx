@@ -34,7 +34,7 @@ interface ValueCardProps {
   setFocusLastCardRef: (func: () => void) => void;
 }
 
-const ValueCard: React.FC<ValueCardProps> = React.memo(({
+const ValueCard: React.FC<ValueCardProps> = React.memo(function ValueCard({
   habit,
   habitIndex,
   value,
@@ -47,9 +47,13 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
   createValue,
   onInputFocused,
   setFocusLastCardRef
-}) => {
+}) {
   const [inputFocused, setInputFocused] = useState(false);
   const inputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    setFocusLastCardRef(() => inputRef.current?.focus());
+  }, [setFocusLastCardRef]);
 
   if (value === null) {
     return (
@@ -71,10 +75,6 @@ const ValueCard: React.FC<ValueCardProps> = React.memo(({
       });
     }
   };
-
-  useEffect(() => {
-    setFocusLastCardRef(() => inputRef.current?.focus());
-  }, []);
 
   return (
     <View style={[styles.valueCard, palleteOpen ? {} : { paddingBottom: 0 }]}>
