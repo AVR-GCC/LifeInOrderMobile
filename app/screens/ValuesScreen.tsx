@@ -18,14 +18,14 @@ interface ValuesScreenProps {
   createValue: CreateValue;
 }
 
-const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
+const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(function ValuesScreen({
   data,
   updateHabit,
   switchValues,
   deleteValue,
   updateValue,
   createValue
-}) => {
+}) {
   const { date, habit } = useLocalSearchParams();
   const router = useRouter();
   const [openPallete, setOpenPallete] = useState<string | null>(null);
@@ -39,14 +39,6 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
   const scrollViewRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
   const focusLastCardRef = useRef<() => void>(null);
-
-  if (data === null || date === undefined || habit === undefined) {
-    return (
-      <Screen>
-        <Text style={styles.text}>Loading...</Text>
-      </Screen>
-    );
-  }
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -76,9 +68,6 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
     };
   }, [targetY, scroll]);
 
-  const habitIndex = parseInt(habit.toString(), 10);
-  const { habits } = data;
-
   useEffect(() => {
     setTimeout(() => {
       if (habits[habitIndex].freshly_created && inputRef.current) {
@@ -86,6 +75,17 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
       }
     }, 500);
   }, []);
+
+  if (data === null || date === undefined || habit === undefined) {
+    return (
+      <Screen>
+        <Text style={styles.text}>Loading...</Text>
+      </Screen>
+    );
+  }
+
+  const habitIndex = parseInt(habit.toString(), 10);
+  const { habits } = data;
 
   const createValueLocal = async () => {
     const thisHabitValues = habits[habitIndex].values;
@@ -104,7 +104,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(({
             style={styles.backArrowContainer}
             onPress={() => router.replace(`/day/${date}/habits`)}
           >
-            <AntDesign name="arrow-left" size={30} color={COLORS.text} />
+            <AntDesign name="arrow-left" size={22} color={COLORS.text} />
           </TouchableOpacity>
           <TextInput
             ref={inputRef}
@@ -236,14 +236,14 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 4,
-    fontSize: 24,
-    height: 60,
+    fontSize: 18,
+    height: 40,
     fontWeight: '600',
     backgroundColor: 'transparent',
     color: COLORS.text,
     borderWidth: 1,
     borderColor: 'transparent',
-    padding: 10,
+    padding: 8,
     borderRadius: 10,
   },
   inputFocused: {
@@ -264,13 +264,13 @@ const styles = StyleSheet.create({
     color: COLORS.text
   },
   smallInput: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '400',
     backgroundColor: 'transparent',
     color: COLORS.text,
     borderWidth: 1,
     borderColor: 'transparent',
-    padding: 10,
+    padding: 6,
     borderRadius: 10,
   },
   smallInputFocused: {
