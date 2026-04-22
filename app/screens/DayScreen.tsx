@@ -9,6 +9,7 @@ import TitleBar from '../components/TitleBar';
 import VerticalChevrons from '../components/VerticalChevrons';
 import { COLORS } from '../constants/theme';
 import type { GetDayHabitValue, MainProps, SetDayValue } from '../types';
+import BackArrow from '../components/BackArrow';
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -81,7 +82,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data
             router.replace(`/main?date=${date}`);
           }}
         >
-          <AntDesign name="arrow-left" size={30} color={COLORS.text} />
+          <BackArrow />
         </TouchableOpacity>
         <Text style={styles.dayTitle}>
           {dayNames[moment(dates.day[monthIndex].days[dayIndex].date).day()]}, {moment(dates.day[monthIndex].days[dayIndex].date).format('MMMM DD, YYYY')}
@@ -175,10 +176,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: -3
-  },
-  backArrow: {
-    width: 40,
-    height: 40,
   },
   dayTitle: {
     flex: 6,

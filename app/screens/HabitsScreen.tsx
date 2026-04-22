@@ -7,6 +7,7 @@ import Screen from '../components/Screen';
 import TitleBar from '../components/TitleBar';
 import { COLORS } from '../constants/theme';
 import type { CreateHabit, DeleteHabit, MainProps, SwitchHabits } from '../types';
+import BackArrow from '../components/BackArrow';
 
 interface HabitsScreenProps {
   data: MainProps | null;
@@ -39,7 +40,7 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
             if (habits.length !== 0) router.replace(`/day/${date}`)
           }}
         >
-          <AntDesign name="arrow-left" size={30} color={COLORS.text} />
+          <BackArrow />
         </TouchableOpacity>
         <Text style={styles.title}>Habits</Text>
       </TitleBar>
@@ -97,10 +98,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 10
-  },
-  backArrow: {
-    width: 40,
-    height: 40,
   },
   scrollContainer: {
     flex: 1,

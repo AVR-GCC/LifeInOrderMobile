@@ -8,6 +8,7 @@ import ValueCard from '../components/ValueCard';
 import VerticalChevrons from '../components/VerticalChevrons';
 import { COLORS } from '../constants/theme';
 import type { CreateValue, DeleteValue, MainProps, SwitchValues, UpdateHabit, UpdateValue } from '../types';
+import BackArrow from '../components/BackArrow';
 
 interface ValuesScreenProps {
   data: MainProps | null;
@@ -104,7 +105,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(function ValuesScre
             style={styles.backArrowContainer}
             onPress={() => router.replace(`/day/${date}/habits`)}
           >
-            <AntDesign name="arrow-left" size={30} color={COLORS.text} />
+            <BackArrow />
           </TouchableOpacity>
           <TextInput
             ref={inputRef}
@@ -226,10 +227,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 10
-  },
-  backArrow: {
-    width: 40,
-    height: 40,
   },
   scrollContainer: {
     flex: 1,
