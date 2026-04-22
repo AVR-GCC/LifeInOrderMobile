@@ -104,7 +104,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(function ValuesScre
             style={styles.backArrowContainer}
             onPress={() => router.replace(`/day/${date}/habits`)}
           >
-            <AntDesign name="arrow-left" size={22} color={COLORS.text} />
+            <AntDesign name="arrow-left" size={30} color={COLORS.text} />
           </TouchableOpacity>
           <TextInput
             ref={inputRef}
@@ -224,7 +224,8 @@ const styles = StyleSheet.create({
     flex: 1,
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginLeft: 10
   },
   backArrow: {
     width: 40,
