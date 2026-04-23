@@ -8,7 +8,7 @@ import Screen from '../components/Screen';
 import TitleBar from '../components/TitleBar';
 import VerticalChevrons from '../components/VerticalChevrons';
 import { COLORS } from '../constants/theme';
-import type { GetDayHabitValue, MainProps, MonthData, SetDayValue } from '../types';
+import type { GetDayHabitValue, HabitWithValues, MainProps, MonthData, SetDayValue } from '../types';
 import BackArrow from '../components/BackArrow';
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -106,67 +106,69 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data
           </View>
         </View>
       </TitleBar>
-  )
+  );
+
+  const _habitCard = (h: HabitWithValues, habitIndex: number) => {
+    const valueId = getDayHabitValue(dateIndex, monthIndex, habitIndex);
+    const selectedIndex = valueId === null ? null : h.values_hashmap[valueId];
+    const selectedValue = selectedIndex === null ? null : h.values[selectedIndex];
+
+    return (
+      <TouchableOpacity
+        key={h.habit.id}
+        activeOpacity={0.8}
+        style={[styles.habitCard, { borderColor: selectedValue?.color || UNFILLED_COLOR }]}
+        onPress={() => {
+          const nextIndex = selectedIndex === null ? 0 : (selectedIndex + 1) % h.values.length;
+          const nextValue = h.values[nextIndex];
+          if (nextValue) setDayHabitValue(dateIndex, monthIndex, habitIndex, nextValue.id);
+        }}
+      >
+        <View style={styles.habitHeaderRow}>
+          <Text style={styles.habitTitle}>{h.habit.name}</Text>
+          <Text style={styles.currentValueLabel}>{selectedValue?.label ?? 'none'}</Text>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsRow}>
+          {h.values.map((v, vIndex) => {
+            const isSelected = selectedIndex === vIndex;
+            return (
+              <TouchableOpacity
+                key={v.id}
+                activeOpacity={0.7}
+                style={[
+                  styles.pill,
+                  isSelected
+                    ? { backgroundColor: v.color, borderColor: v.color }
+                    : { backgroundColor: '#3a4a5a', borderColor: '#3a4a5a' },
+                ]}
+                onPress={() => {
+                  setDayHabitValue(dateIndex, monthIndex, habitIndex, v.id);
+                }}
+              >
+                <View style={[styles.pillDot, { backgroundColor: isSelected ? COLORS.colorOne : v.color }]} />
+                <Text
+                  style={[
+                    styles.pillText,
+                    isSelected ? { color: '#fff', fontWeight: '600' } : { color: '#ccc' },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {v.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <Screen>
       {_titleBar()}
       <View style={styles.dayContainer}>
         <ScrollView style={styles.scrollContainer}>
-          {habits.map((h, habitIndex) => {
-            const valueId = getDayHabitValue(dateIndex, monthIndex, habitIndex);
-            const selectedIndex = valueId === null ? null : h.values_hashmap[valueId];
-            const selectedValue = selectedIndex === null ? null : h.values[selectedIndex];
-            
-            return (
-              <TouchableOpacity
-                key={h.habit.id}
-                activeOpacity={0.8}
-                style={[styles.habitCard, { borderColor: selectedValue?.color || UNFILLED_COLOR }]}
-                onPress={() => {
-                  const nextIndex = selectedIndex === null ? 0 : (selectedIndex + 1) % h.values.length;
-                  const nextValue = h.values[nextIndex];
-                  if (nextValue) setDayHabitValue(dateIndex, monthIndex, habitIndex, nextValue.id);
-                }}
-              >
-                <View style={styles.habitHeaderRow}>
-                  <Text style={styles.habitTitle}>{h.habit.name}</Text>
-                  <Text style={styles.currentValueLabel}>{selectedValue?.label ?? 'none'}</Text>
-                </View>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsRow}>
-                  {h.values.map((v, vIndex) => {
-                    const isSelected = selectedIndex === vIndex;
-                    return (
-                      <TouchableOpacity
-                        key={v.id}
-                        activeOpacity={0.7}
-                        style={[
-                          styles.pill,
-                          isSelected
-                            ? { backgroundColor: v.color, borderColor: v.color }
-                            : { backgroundColor: '#3a4a5a', borderColor: '#3a4a5a' },
-                        ]}
-                        onPress={() => {
-                          setDayHabitValue(dateIndex, monthIndex, habitIndex, v.id);
-                        }}
-                      >
-                        <View style={[styles.pillDot, { backgroundColor: isSelected ? COLORS.colorOne : v.color }]} />
-                        <Text
-                          style={[
-                            styles.pillText,
-                            isSelected ? { color: '#fff', fontWeight: '600' } : { color: '#ccc' },
-                          ]}
-                          numberOfLines={1}
-                        >
-                          {v.label}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              </TouchableOpacity>
-            );
-          })}
+          {habits.map(_habitCard)}
           <View style={styles.bottomBuffer} />
         </ScrollView>
       </View>
