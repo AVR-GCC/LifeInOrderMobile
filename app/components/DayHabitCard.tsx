@@ -16,58 +16,60 @@ interface DayHabitCardProps {
 const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCard({
   dateIndex, monthIndex, habitIndex, getDayHabitValue, setDayHabitValue, habit
 }) {
-    const valueId = getDayHabitValue(dateIndex, monthIndex, habitIndex);
-    const selectedIndex = valueId === null ? null : habit.values_hashmap[valueId];
-    const selectedValue = selectedIndex === null ? null : habit.values[selectedIndex];
+    if (habit.habit.habit_type === 'color') {
+      const valueId = getDayHabitValue(dateIndex, monthIndex, habitIndex);
+      const selectedIndex = valueId === null ? null : habit.values_hashmap[valueId];
+      const selectedValue = selectedIndex === null ? null : habit.values[selectedIndex];
 
-    return (
-      <TouchableOpacity
-        key={habit.habit.id}
-        activeOpacity={0.8}
-        style={[styles.habitCard, { borderColor: selectedValue?.color || UNFILLED_COLOR }]}
-        onPress={() => {
-          const nextIndex = selectedIndex === null ? 0 : (selectedIndex + 1) % habit.values.length;
-          const nextValue = habit.values[nextIndex];
-          if (nextValue) setDayHabitValue(dateIndex, monthIndex, habitIndex, nextValue.id);
-        }}
-      >
-        <View style={styles.habitHeaderRow}>
-          <Text style={styles.habitTitle}>{habit.habit.name}</Text>
-          <Text style={styles.currentValueLabel}>{selectedValue?.label ?? 'none'}</Text>
-        </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsRow}>
-          {habit.values.map((v, vIndex) => {
-            const isSelected = selectedIndex === vIndex;
-            return (
-              <TouchableOpacity
-                key={v.id}
-                activeOpacity={0.7}
-                style={[
-                  styles.pill,
-                  isSelected
-                    ? { backgroundColor: v.color, borderColor: v.color }
-                    : { backgroundColor: '#3a4a5a', borderColor: '#3a4a5a' },
-                ]}
-                onPress={() => {
-                  setDayHabitValue(dateIndex, monthIndex, habitIndex, v.id);
-                }}
-              >
-                <View style={[styles.pillDot, { backgroundColor: isSelected ? COLORS.colorOne : v.color }]} />
-                <Text
+      return (
+        <TouchableOpacity
+          key={habit.habit.id}
+          activeOpacity={0.8}
+          style={[styles.habitCard, { borderColor: selectedValue?.color || UNFILLED_COLOR }]}
+          onPress={() => {
+            const nextIndex = selectedIndex === null ? 0 : (selectedIndex + 1) % habit.values.length;
+            const nextValue = habit.values[nextIndex];
+            if (nextValue) setDayHabitValue(dateIndex, monthIndex, habitIndex, nextValue.id);
+          }}
+        >
+          <View style={styles.habitHeaderRow}>
+            <Text style={styles.habitTitle}>{habit.habit.name}</Text>
+            <Text style={styles.currentValueLabel}>{selectedValue?.label ?? 'none'}</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsRow}>
+            {habit.values.map((v, vIndex) => {
+              const isSelected = selectedIndex === vIndex;
+              return (
+                <TouchableOpacity
+                  key={v.id}
+                  activeOpacity={0.7}
                   style={[
-                    styles.pillText,
-                    isSelected ? { color: '#fff', fontWeight: '600' } : { color: '#ccc' },
+                    styles.pill,
+                    isSelected
+                      ? { backgroundColor: v.color, borderColor: v.color }
+                      : { backgroundColor: '#3a4a5a', borderColor: '#3a4a5a' },
                   ]}
-                  numberOfLines={1}
+                  onPress={() => {
+                    setDayHabitValue(dateIndex, monthIndex, habitIndex, v.id);
+                  }}
                 >
-                  {v.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </TouchableOpacity>
-    );
+                  <View style={[styles.pillDot, { backgroundColor: isSelected ? COLORS.colorOne : v.color }]} />
+                  <Text
+                    style={[
+                      styles.pillText,
+                      isSelected ? { color: '#fff', fontWeight: '600' } : { color: '#ccc' },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {v.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </TouchableOpacity>
+      );
+    }
 });
 
 const styles = StyleSheet.create({
