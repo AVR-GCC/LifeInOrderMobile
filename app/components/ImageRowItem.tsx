@@ -182,7 +182,8 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.2)'
   },
   imageContainer: {
-    width: '100%'
+    width: '100%',
+    paddingRight: LEFT_BAR_WIDTH
   },
   image: {
     width: '100%'
