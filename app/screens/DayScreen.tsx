@@ -8,7 +8,7 @@ import Screen from '../components/Screen';
 import TitleBar from '../components/TitleBar';
 import VerticalChevrons from '../components/VerticalChevrons';
 import { COLORS } from '../constants/theme';
-import type { GetDayHabitValue, MainProps, SetDayValue } from '../types';
+import type { GetDayHabitValue, MainProps, MonthData, SetDayValue } from '../types';
 import BackArrow from '../components/BackArrow';
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -45,6 +45,8 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data
     return <Screen />;
   }
 
+  const currentMonth = dates.day[monthIndex] as MonthData;
+
   const handleChevronPress = (isDown: boolean) => {
     let newDateIndex = dateIndex + (isDown ? 1 : -1);
     let newMonthIndex = monthIndex;
@@ -71,21 +73,22 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data
     router.replace(`/day/${newDateIndex}-${newMonthIndex}`);
   };
 
-  return (
-    <Screen>
+  const titleText = `${dayNames[moment(currentMonth.days[dayIndex].date).day()]}, ${moment(currentMonth.days[dayIndex].date).format('MMMM DD, YYYY')}`;
+
+  const _titleBar = () => (
       <TitleBar>
         <TouchableOpacity
           style={styles.backArrowContainer}
           onPress={() => {
             if ('image' in dates.day[monthIndex]) return;
-            const date = dates.day[monthIndex].days[dayIndex].date;
+            const date = currentMonth.days[dayIndex].date;
             router.replace(`/main?date=${date}`);
           }}
         >
           <BackArrow />
         </TouchableOpacity>
         <Text style={styles.dayTitle}>
-          {dayNames[moment(dates.day[monthIndex].days[dayIndex].date).day()]}, {moment(dates.day[monthIndex].days[dayIndex].date).format('MMMM DD, YYYY')}
+          {titleText}
         </Text>
         <View style={styles.rightIcons}>
           <TouchableOpacity
@@ -98,11 +101,16 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data
             <VerticalChevrons
               onPress={handleChevronPress}
               upDisabled={dateIndex === 0 && monthIndex === 0}
-              downDisabled={dateIndex === dates.day[monthIndex].days.length - 1 && monthIndex === dates.day.length - 1}
+              downDisabled={dateIndex === currentMonth.days.length - 1 && monthIndex === dates.day.length - 1}
             />
           </View>
         </View>
       </TitleBar>
+  )
+
+  return (
+    <Screen>
+      {_titleBar()}
       <View style={styles.dayContainer}>
         <ScrollView style={styles.scrollContainer}>
           {habits.map((h, habitIndex) => {
