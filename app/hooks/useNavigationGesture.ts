@@ -8,6 +8,7 @@ import { fitsInRange, getMode, getZoomModeRange, modes, nextDate, zoomIndeces, z
 import { useEffect, useRef } from 'react';
 import { getDayPixels, getFinalDayPixels, getLocationDate, getModeInfo, mergeDateRanges } from '../utils/dataStructures';
 import { dateDiff, dateDiffStr, dateString } from '../utils/general';
+import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
 
 const DECELERATION = 0.998;
 const MIN_VELOCITY = 0.01;
@@ -242,7 +243,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       setMode(zoomIndeces[zoom]);
     } else {
       loading.current = true;
-      loadMoreData(date, zoom, count, width);
+      loadMoreData(date, zoom, count, width - LEFT_BAR_WIDTH);
     }
   };
 
@@ -300,7 +301,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     } else {
       pendingModeTransitions.current = { mode, offset, scale };
       loading.current = true;
-      loadMoreData(earliestLoadedDateStr, zoom, 3, width);
+      loadMoreData(earliestLoadedDateStr, zoom, 3, width - LEFT_BAR_WIDTH);
     }
   };
 
