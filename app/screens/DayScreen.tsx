@@ -11,6 +11,7 @@ import { COLORS } from '../constants/theme';
 import type { GetDayHabitValue, HabitWithValues, MainProps, MonthData, SetDayValue } from '../types';
 import BackArrow from '../components/BackArrow';
 import DayHabitCard from '../components/DayHabitCard';
+import useKeyboardScroll from '../hooks/useKeyboardScroll';
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -26,6 +27,8 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data
   const dayIndex = parseInt(dayIndexString, 10);
   const monthIndex = parseInt(monthIndexString, 10);
   const router = useRouter();
+
+  const { KeyboardScrollView, setTargetY } = useKeyboardScroll();
 
   if (data === null || date === undefined) {
     return (
@@ -116,6 +119,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data
       habitIndex={habitIndex}
       monthIndex={monthIndex}
       dateIndex={dateIndex}
+      onInputFocused={setTargetY}
       getDayHabitValue={getDayHabitValue}
       setDayHabitValue={setDayHabitValue}
     />
@@ -125,10 +129,10 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data
     <Screen>
       {_titleBar()}
       <View style={styles.dayContainer}>
-        <ScrollView style={styles.scrollContainer}>
+        <KeyboardScrollView style={styles.scrollContainer}>
           {habits.map(_habitCard)}
           <View style={styles.bottomBuffer} />
-        </ScrollView>
+        </KeyboardScrollView>
       </View>
     </Screen>
   );

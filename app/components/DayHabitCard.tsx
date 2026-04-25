@@ -11,10 +11,11 @@ interface DayHabitCardProps {
   getDayHabitValue: GetDayHabitValue;
   setDayHabitValue: SetDayValue;
   habit: HabitWithValues;
+  onInputFocused: (y: number) => void;
 }
 
 const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCard({
-  dateIndex, monthIndex, habitIndex, getDayHabitValue, setDayHabitValue, habit
+  dateIndex, monthIndex, habitIndex, getDayHabitValue, setDayHabitValue, habit, onInputFocused
 }) {
     const [focused, setFocused] = useState(false);
     const inputRef = useRef<TextInput>(null);
@@ -75,6 +76,15 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
     const value = getDayHabitValue(dateIndex, monthIndex, habitIndex) || '';
     const borderColor = focused ? COLORS.text : value.length > 0 ? COLORS.text : COLORS.border;
 
+    const onFocus = () => {
+      setFocused(true);
+      if (inputRef.current) {
+        inputRef.current.measure((_x, _y, _w, height, _px, pageY) => {
+          onInputFocused(pageY + height);
+        });
+      }
+    };
+
     return (
       <TouchableOpacity
         style={[styles.habitCard, { borderColor }]}
@@ -94,7 +104,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
           onChangeText={arg => {
             console.log('arg', arg);
           }}
-          onFocus={() => setFocused(true)}
+          onFocus={onFocus}
           onBlur={() => setFocused(false)}
           multiline
           textAlignVertical="top"
