@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, Keyboard, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Screen from '../components/Screen';
 import TitleBar from '../components/TitleBar';
 import ValueCard from '../components/ValueCard';
@@ -8,6 +8,7 @@ import VerticalChevrons from '../components/VerticalChevrons';
 import { COLORS } from '../constants/theme';
 import type { CreateValue, DeleteValue, MainProps, SwitchValues, UpdateHabit, UpdateValue } from '../types';
 import BackArrow from '../components/BackArrow';
+import useKeyboardScroll from '../hooks/useKeyboardScroll';
 
 interface ValuesScreenProps {
   data: MainProps | null;
@@ -32,41 +33,11 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(function ValuesScre
   const [inputFocused, setInputFocused] = useState(false);
   const [weightInputFocused, setWeightInputFocused] = useState(false);
   const [weightInputEmpty, setWeightInputEmpty] = useState(false);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [targetY, setTargetY] = useState(0);
-  const [scroll, setScroll] = useState(0);
 
-  const scrollViewRef = useRef<ScrollView>(null);
+  const { KeyboardScrollView, setTargetY } = useKeyboardScroll();
+
   const inputRef = useRef<TextInput>(null);
   const focusLastCardRef = useRef<() => void>(null);
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      (event) => {
-        const keyboardHeight = event.endCoordinates.height;
-        setKeyboardHeight(keyboardHeight);
-        if (scrollViewRef.current !== null && targetY > 0) {
-          const windowHeight = Dimensions.get('window').height;
-          const offset = windowHeight - keyboardHeight - 60;
-          const y = scroll + targetY - offset;
-          if (y > 0) {
-            scrollViewRef.current.scrollTo({ y, animated: true });
-          }
-        }
-      }
-    );
-
-    const keyboardDidHideListener = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => setKeyboardHeight(0)
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, [targetY, scroll]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -166,13 +137,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(function ValuesScre
           onInputFocused={setTargetY}
           setFocusLastCardRef={_focusLastCard => {}}
         />
-        <ScrollView
-          style={styles.scrollContainer}
-          ref={scrollViewRef}
-          onScroll={event => {
-            setScroll(event.nativeEvent.contentOffset.y);
-          }}
-        >
+        <KeyboardScrollView style={styles.scrollContainer}>
           {habits[habitIndex].values.map((v, index) => (
             <ValueCard
               key={v.id}
@@ -196,9 +161,8 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(function ValuesScre
               }}
             />
           ))}
-          <View style={{ height: keyboardHeight }} />
           <View style={styles.bottomBuffer} />
-        </ScrollView>
+        </KeyboardScrollView>
       </View>
     </Screen>
   );
