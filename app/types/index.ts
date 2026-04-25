@@ -15,6 +15,8 @@ export interface Habit {
   habit_type: string;
 }
 
+export type HabitType = 'color' | 'text' | null;
+
 export interface HabitWithValues {
   habit: Habit;
   values: Value[];
@@ -95,7 +97,7 @@ export interface NavigationValues {
 
 export type GetDayHabitValue = (dateIndex: number, monthIndex: number, habitIndex: number) => string | null;
 export type SetDayValue = (dateIndex: number, monthIndex: number, habitIndex: number, valueId: string) => void;
-export type CreateHabit = (sequence: number) => Promise<null | undefined>;
+export type CreateHabit = (sequence: number, type: HabitType, name: string) => Promise<null | undefined>;
 export type UpdateHabit = (habitIndex: number, newValueValues: Partial<Habit>) => void;
 export type DeleteHabit = (index: number) => void;
 export type SwitchHabits = (isDown: boolean, index: number) => void;

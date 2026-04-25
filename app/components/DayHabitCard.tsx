@@ -1,5 +1,5 @@
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../constants/theme';
 import { UNFILLED_COLOR } from './DayRow';
 import { GetDayHabitValue, HabitWithValues, SetDayValue } from '../types';
@@ -16,11 +16,13 @@ interface DayHabitCardProps {
 const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCard({
   dateIndex, monthIndex, habitIndex, getDayHabitValue, setDayHabitValue, habit
 }) {
+    const [focused, setFocused] = useState(false);
+    const inputRef = useRef<TextInput>(null);
+
     if (habit.habit.habit_type === 'color') {
       const valueId = getDayHabitValue(dateIndex, monthIndex, habitIndex);
       const selectedIndex = valueId === null ? null : habit.values_hashmap[valueId];
       const selectedValue = selectedIndex === null ? null : habit.values[selectedIndex];
-
       return (
         <TouchableOpacity
           key={habit.habit.id}
@@ -70,9 +72,86 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
         </TouchableOpacity>
       );
     }
+    const value = getDayHabitValue(dateIndex, monthIndex, habitIndex) || '';
+    const borderColor = focused ? COLORS.green : value.length > 0 ? COLORS.green : COLORS.border;
+
+    return (
+      <TouchableOpacity
+        style={[styles.card, { borderColor }]}
+        onPress={() => inputRef.current?.focus()}
+        activeOpacity={0.9}
+      >
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardName}>{habit.habit.name}</Text>
+          <Text style={styles.textHabitIcon}>✏️</Text>
+        </View>
+        <TextInput
+          ref={inputRef}
+          style={[styles.textHabitInput, focused && styles.textHabitInputFocused]}
+          placeholder="Type something…"
+          placeholderTextColor={COLORS.muted}
+          value={value}
+          onChangeText={arg => {
+            console.log('arg', arg);
+          }}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          multiline
+          textAlignVertical="top"
+        />
+        {/* Character count hint when focused */}
+        {focused && (
+          <Text style={styles.charCount}>{value.length} chars</Text>
+        )}
+      </TouchableOpacity>
+    );
 });
 
 const styles = StyleSheet.create({
+  card: {
+    backgroundColor: COLORS.surface,
+    borderWidth: 2,
+    borderRadius: 16,
+    padding: 16,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  cardName: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  cardSelected: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  textHabitIcon: { fontSize: 16 },
+  textHabitInput: {
+    backgroundColor: COLORS.surface2,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: COLORS.text,
+    minHeight: 42,
+    maxHeight: 120,
+  },
+  textHabitInputFocused: {
+    borderColor: COLORS.green,
+  },
+  charCount: {
+    color: COLORS.muted,
+    fontSize: 11,
+    textAlign: 'right',
+    marginTop: 4,
+  },
+
   habitCard: {
     backgroundColor: COLORS.colorOne,
     borderWidth: 3,

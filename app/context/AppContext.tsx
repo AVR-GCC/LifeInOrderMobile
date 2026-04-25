@@ -27,14 +27,14 @@ import {
   updateValueReducer
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
-import type { DeleteValue, Habit, MainProps, Value, ZoomLevel } from '../types';
+import type { CreateHabit, DeleteValue, Habit, MainProps, Value, ZoomLevel } from '../types';
 import { nextDate } from '../constants/zoom';
 
 interface AppContextType {
   data: MainProps | null;
   setDayHabitValue: (dateIndex: number, monthIndex: number, habitIndex: number, valueId: string) => void;
   getDayHabitValue: (dateIndex: number, monthIndex: number, habitIndex: number) => string | null;
-  createHabit: (sequence: number) => Promise<null | undefined>;
+  createHabit: CreateHabit;
   updateHabit: (habitIndex: number, newHabitValues: Partial<Habit>) => void;
   deleteHabit: (index: number) => void;
   switchHabits: (isDown: boolean, index: number) => void;
@@ -122,13 +122,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return getDayHabitValueSelector(data)(dateIndex, monthIndex, habitIndex);
   };
 
-  const createHabit = async (sequence: number) => {
+  const createHabit: CreateHabit = async (sequence, type = 'color', name = '') => {
     if (data === null) return null;
     const newHabit = {
-      name: '',
+      name,
       weight: 1,
       sequence,
-      habit_type: 'color',
+      habit_type: type,
     };
     const newHabitValue = await createHabitServer(newHabit);
     setData(addHabitReducer(data)(newHabitValue));

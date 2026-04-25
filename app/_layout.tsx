@@ -37,6 +37,12 @@ export default function RootLayout() {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="day/[date]/new-habit"
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack>
       </GestureHandlerRootView>
     </AppProvider>

@@ -24,6 +24,7 @@ function DayRow({
       style={styles.dayRow}
     >
       {habits.map((h, habitIndex) => {
+        if (h.habit.habit_type !== 'color') return;
         const valueId = getDayHabitValue(dayIndex, monthIndex, habitIndex);
         let background = UNFILLED_COLOR;
         if (valueId !== null) {

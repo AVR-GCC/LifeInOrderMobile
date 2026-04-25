@@ -1,4 +1,3 @@
-import { AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -16,7 +15,7 @@ interface HabitsScreenProps {
   createHabit: CreateHabit;
 }
 
-export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, deleteHabit, createHabit }) => {
+export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, deleteHabit }) => {
   const { date } = useLocalSearchParams();
   const router = useRouter();
 
@@ -55,8 +54,7 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
             deleteHabit={deleteHabit}
             editHabit={() => {}}
             createHabit={async () => {
-              await createHabit(habits[habits.length - 1]?.habit?.sequence + 1 || 1);
-              router.replace(`/day/${date}/habits/${habits.length}`)
+              router.replace(`/day/${date}/new-habit`);
             }}
           />
           {habits.map((h, index) => (

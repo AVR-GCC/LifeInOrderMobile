@@ -99,7 +99,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
 
   return (
     <Screen>
-      <TopBar habits={habits} />
+      <TopBar habits={habits.filter(h => h.habit.habit_type === 'color')} />
       <View style={{ display: 'flex', flexDirection: 'column-reverse', height: height - 125, overflow: 'hidden' }}>
         <GestureDetector gesture={gesture}>
           <Animated.View style={[animatedListStyle, { transformOrigin: 'bottom center' }]}>

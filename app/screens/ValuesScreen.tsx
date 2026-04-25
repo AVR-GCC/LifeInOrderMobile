@@ -1,4 +1,3 @@
-import { AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Dimensions, Keyboard, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -27,7 +26,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(function ValuesScre
   updateValue,
   createValue
 }) {
-  const { date, habit } = useLocalSearchParams();
+  const { date, habit, name } = useLocalSearchParams();
   const router = useRouter();
   const [openPallete, setOpenPallete] = useState<string | null>(null);
   const [inputFocused, setInputFocused] = useState(false);
@@ -71,7 +70,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(function ValuesScre
 
   useEffect(() => {
     setTimeout(() => {
-      if (habits[habitIndex].freshly_created && inputRef.current) {
+      if (!name && habits[habitIndex].freshly_created && inputRef.current) {
         inputRef.current.focus();
       }
     }, 500);
