@@ -73,11 +73,11 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
       );
     }
     const value = getDayHabitValue(dateIndex, monthIndex, habitIndex) || '';
-    const borderColor = focused ? COLORS.green : value.length > 0 ? COLORS.green : COLORS.border;
+    const borderColor = focused ? COLORS.text : value.length > 0 ? COLORS.text : COLORS.border;
 
     return (
       <TouchableOpacity
-        style={[styles.card, { borderColor }]}
+        style={[styles.habitCard, { borderColor }]}
         onPress={() => inputRef.current?.focus()}
         activeOpacity={0.9}
       >
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     maxHeight: 120,
   },
   textHabitInputFocused: {
-    borderColor: COLORS.green,
+    borderColor: COLORS.text,
   },
   charCount: {
     color: COLORS.muted,
