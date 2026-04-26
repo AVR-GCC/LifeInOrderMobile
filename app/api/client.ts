@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Habit, Value, ZoomLevel } from '../types';
+import type { Habit, SetDayValueServer, Value, ZoomLevel } from '../types';
 import { getZoomModeRange } from '../constants/zoom';
 
 // const baseUrl = 'http://10.0.0.6:8080'; // TODO: Make this configurable via environment variables
@@ -64,8 +64,6 @@ export const throttleGetUserList = () => {
 }
 
 export const getUserList = throttleGetUserList();
-
-type SetDayValueServer = (date: string, habitId: string, values: { valueId: string, text: string }) => void;
 
 export const setDayValueServer: SetDayValueServer = (() => {
   const throttles: { [key: string]: ReturnType<typeof setTimeout> } = {};

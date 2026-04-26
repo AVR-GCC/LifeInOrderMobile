@@ -27,12 +27,12 @@ import {
   updateValueReducer
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
-import type { CreateHabit, DeleteValue, Habit, MainProps, Value, ZoomLevel } from '../types';
+import type { CreateHabit, DeleteValue, Habit, MainProps, SetDayValue, Value, ZoomLevel } from '../types';
 import { nextDate } from '../constants/zoom';
 
 interface AppContextType {
   data: MainProps | null;
-  setDayHabitValue: (dateIndex: number, monthIndex: number, habitIndex: number, valueId: string) => void;
+  setDayHabitValue: SetDayValue;
   getDayHabitValue: (dateIndex: number, monthIndex: number, habitIndex: number) => string | null;
   createHabit: CreateHabit;
   updateHabit: (habitIndex: number, newHabitValues: Partial<Habit>) => void;
@@ -108,7 +108,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadingDataRef.current = false;
   };
 
-  const setDayHabitValue = (dateIndex: number, monthIndex: number, habitIndex: number, values: { valueId: string, text: string }) => {
+  const setDayHabitValue: SetDayValue = (dateIndex, monthIndex, habitIndex, values) => {
     if (data === null) return;
     const { dates, habits } = data;
     const month = dates.day[monthIndex];

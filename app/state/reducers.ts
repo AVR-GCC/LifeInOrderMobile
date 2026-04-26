@@ -1,4 +1,4 @@
-import { modes, zoomIndeces } from '../constants/zoom';
+import { zoomIndeces } from '../constants/zoom';
 import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, ZoomLevel, ZoomLevelData, MacroMap } from '../types';
 import { mergeDateData, mergeDateRanges } from '../utils/dataStructures';
 import { dateDiffStr, last } from '../utils/general';
@@ -51,7 +51,7 @@ export const loadMoreDataReducer = (data: MainProps) => (zoom: ZoomLevel, newDat
   return { ...data, dates: nextDates, macroMap: nextMacroMap, mode: nextMode };
 };
 
-export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, monthIndex: number, habitIndex: number, values: { valueId: string, text: string }) => {
+export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, monthIndex: number, habitIndex: number, values: { valueId: string, text: string | null }) => {
   const { dates, macroMap } = data;
   const newDayZoomData = [...dates.day];
   const newMonth = { ...newDayZoomData[monthIndex] };
@@ -59,7 +59,7 @@ export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, 
   const newDate = { ...newMonth.days[dateIndex] };
   const habit = data.habits[habitIndex].habit;
   const { valueId, text } = values;
-  newDate.values = { ...newDate.values, [habit.id]: habit.habit_type === 'color' ? valueId : text };
+  newDate.values = { ...newDate.values, [habit.id]: habit.habit_type === 'color' || text === null ? valueId : text };
   newMonth.days[dateIndex] = newDate;
   newDayZoomData[monthIndex] = newMonth;
   const newMacroMap: MacroMap = {
