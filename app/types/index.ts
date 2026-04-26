@@ -96,7 +96,7 @@ export interface NavigationValues {
   
 
 export type GetDayHabitValue = (dateIndex: number, monthIndex: number, habitIndex: number) => string | null;
-export type SetDayValue = (dateIndex: number, monthIndex: number, habitIndex: number, valueId: string) => void;
+export type SetDayValue = (dateIndex: number, monthIndex: number, habitIndex: number, values: { valueId: string, text: string }) => void;
 export type CreateHabit = (sequence: number, type: HabitType, name: string) => Promise<null | undefined>;
 export type UpdateHabit = (habitIndex: number, newValueValues: Partial<Habit>) => void;
 export type DeleteHabit = (index: number) => void;

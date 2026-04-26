@@ -32,7 +32,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
           onPress={() => {
             const nextIndex = selectedIndex === null ? 0 : (selectedIndex + 1) % habit.values.length;
             const nextValue = habit.values[nextIndex];
-            if (nextValue) setDayHabitValue(dateIndex, monthIndex, habitIndex, nextValue.id);
+            if (nextValue) setDayHabitValue(dateIndex, monthIndex, habitIndex, { valueId: nextValue.id, text: '' });
           }}
         >
           <View style={styles.habitHeaderRow}>
@@ -53,7 +53,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
                       : { backgroundColor: '#3a4a5a', borderColor: '#3a4a5a' },
                   ]}
                   onPress={() => {
-                    setDayHabitValue(dateIndex, monthIndex, habitIndex, v.id);
+                    setDayHabitValue(dateIndex, monthIndex, habitIndex, { valueId: v.id, text: '' });
                   }}
                 >
                   <View style={[styles.pillDot, { backgroundColor: isSelected ? COLORS.colorOne : v.color }]} />
@@ -102,7 +102,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
           placeholderTextColor={COLORS.muted}
           value={value}
           onChangeText={arg => {
-            console.log('arg', arg);
+            setDayHabitValue(dateIndex, monthIndex, habitIndex, { valueId: habit.values[0].id, text: arg });
           }}
           onFocus={onFocus}
           onBlur={() => setFocused(false)}

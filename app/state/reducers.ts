@@ -51,14 +51,15 @@ export const loadMoreDataReducer = (data: MainProps) => (zoom: ZoomLevel, newDat
   return { ...data, dates: nextDates, macroMap: nextMacroMap, mode: nextMode };
 };
 
-export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, monthIndex: number, habitIndex: number, valueId: string) => {
+export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, monthIndex: number, habitIndex: number, values: { valueId: string, text: string }) => {
   const { dates, macroMap } = data;
   const newDayZoomData = [...dates.day];
   const newMonth = { ...newDayZoomData[monthIndex] };
   if ('image' in newMonth) return data;
   const newDate = { ...newMonth.days[dateIndex] };
-  const habitId = data.habits[habitIndex].habit.id;
-  newDate.values = { ...newDate.values, [habitId]: valueId };
+  const habit = data.habits[habitIndex].habit;
+  const { valueId, text } = values;
+  newDate.values = { ...newDate.values, [habit.id]: habit.habit_type === 'color' ? valueId : text };
   newMonth.days[dateIndex] = newDate;
   newDayZoomData[monthIndex] = newMonth;
   const newMacroMap: MacroMap = {

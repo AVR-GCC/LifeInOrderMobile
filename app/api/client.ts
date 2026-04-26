@@ -65,17 +65,17 @@ export const throttleGetUserList = () => {
 
 export const getUserList = throttleGetUserList();
 
-type SetDayValueServer = (date: string, habitId: string, valueId: string) => void;
+type SetDayValueServer = (date: string, habitId: string, values: { valueId: string, text: string }) => void;
 
 export const setDayValueServer: SetDayValueServer = (() => {
-  const debounces: { [key: string]: ReturnType<typeof setTimeout> } = {};
-  const func: SetDayValueServer = async (date, habitId, valueId) => {
+  const throttles: { [key: string]: ReturnType<typeof setTimeout> } = {};
+  const func: SetDayValueServer = async (date, habitId, { valueId, text }) => {
     try {
       await axios.post(`${baseUrl}/day_values`, {
         value_id: valueId,
         habit_id: habitId,
         date,
-        text: null,
+        text,
         number: null
       });
     } catch (error) {
@@ -83,12 +83,12 @@ export const setDayValueServer: SetDayValueServer = (() => {
     }
   };
   
-  const debounced: SetDayValueServer = (date, habitId, valueId) => {
+  const throttled: SetDayValueServer = (date, habitId, values) => {
     const key = `${date}-${habitId}`;
-    if (debounces[key]) clearTimeout(debounces[key]);
-    debounces[key] = setTimeout(() => func(date, habitId, valueId), 1000);
+    if (throttles[key]) clearTimeout(throttles[key]);
+    throttles[key] = setTimeout(() => func(date, habitId, values), 1000);
   };
-  return debounced;
+  return throttled;
 })();
 
 export const createHabitServer = async (newHabit: Partial<Habit>) => {
