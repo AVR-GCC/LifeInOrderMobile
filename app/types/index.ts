@@ -7,15 +7,15 @@ export interface Value {
   created_at: string;
 }
 
+export type HabitType = 'color' | 'text';
+
 export interface Habit {
   id: string;
   name: string;
   weight: number;
   sequence: number;
-  habit_type: string;
+  habit_type: HabitType;
 }
-
-export type HabitType = 'color' | 'text' | null;
 
 export interface HabitWithValues {
   habit: Habit;

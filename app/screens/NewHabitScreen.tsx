@@ -86,7 +86,7 @@ function TypeCard({ type, selected, onPress }: TypeCardProps) {
 export default function NewHabitScreen({ habits, createHabit }: TypeNewHabitsScreenProps) {
   const { date } = useLocalSearchParams();
   const router = useRouter();
-  const [selectedType, setSelectedType] = useState<HabitType>(null);
+  const [selectedType, setSelectedType] = useState<HabitType | null>(null);
   const [name, setName] = useState('');
 
   const isReady = selectedType !== null && name.trim().length > 0;
