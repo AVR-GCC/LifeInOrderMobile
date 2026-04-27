@@ -131,7 +131,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       habit_type: type,
     };
     const newHabitValue = await createHabitServer(newHabit);
-    setData(addHabitReducer(data)(newHabitValue));
+    const values = [];
+    if (type === 'text') {
+      const newValue = {
+        label: newHabit.name,
+        color: colorOptions[0],
+        habit_id: parseInt(newHabitValue.id, 10),
+        sequence: 1,
+        created_at: 'new'
+      };
+      const newValueValues = await createValueServer(newValue);
+      values.push(newValueValues);
+    }
+    setData(addHabitReducer(data)(newHabitValue, values));
   }
 
   const updateHabit = (habitIndex: number, newHabitValues: Partial<Value>) => {

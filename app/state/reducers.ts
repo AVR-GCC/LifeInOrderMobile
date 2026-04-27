@@ -80,10 +80,14 @@ export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, 
   return { ...data, dates: newDates, macroMap: newMacroMap };
 };
 
-export const addHabitReducer = (data: MainProps) => (habit: Habit) => {
+export const addHabitReducer = (data: MainProps) => (habit: Habit, values: Value[]) => {
   const newData = { ...data };
   const newHabits = [...newData.habits];
-  newHabits.push({ habit, values: [], values_hashmap: {}, freshly_created: true });
+  const values_hashmap: Record<string, number> = {};
+  values.forEach((v, i) => {
+    values_hashmap[v.id.toString()] = i;
+  });
+  newHabits.push({ habit, values, values_hashmap, freshly_created: true });
   return { ...newData, habits: newHabits };
 }
 

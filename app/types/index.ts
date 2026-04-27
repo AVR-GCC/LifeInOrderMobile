@@ -20,7 +20,7 @@ export interface Habit {
 export interface HabitWithValues {
   habit: Habit;
   values: Value[];
-  values_hashmap: { [key: string]: number };
+  values_hashmap: Record<string, number>;
   freshly_created?: boolean;
 }
 
