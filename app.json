@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "LifeInOrderMobile",
-    "slug": "LifeInOrderMobile",
+    "name": "Life In Order",
+    "slug": "life-in-order",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "lifeinordermobile",
+    "scheme": "lifeinorder",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.LifeInOrderMobile"
+      "bundleIdentifier": "com.lifeinorder.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +17,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.LifeInOrderMobile"
+      "package": "com.lifeinorder.app"
     },
     "web": {
       "bundler": "metro",
