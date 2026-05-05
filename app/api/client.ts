@@ -3,7 +3,8 @@ import type { Habit, SetDayValueServer, Value, ZoomLevel } from '../types';
 import { getZoomModeRange } from '../constants/zoom';
 
 // const baseUrl = 'http://10.0.0.6:8080'; // TODO: Make this configurable via environment variables
-const baseUrl = 'http://192.168.1.174:8080'; // TODO: Make this configurable via environment variables
+// const baseUrl = 'http://192.168.1.174:8080'; // TODO: Make this configurable via environment variables
+const baseUrl = 'https://lifeinorderbackend.fly.dev';
 
 export const getUserConfig = async () => {
   try {
