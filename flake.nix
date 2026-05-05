@@ -1,5 +1,6 @@
 # flake.nix
 {
+  nixpkgs.config.allowUnfree = true;
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   outputs = { self, nixpkgs }: {
     devShells.x86_64-linux.default = let
