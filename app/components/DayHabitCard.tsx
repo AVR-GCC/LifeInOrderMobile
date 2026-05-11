@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../constants/theme';
@@ -19,6 +20,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
 }) {
     const [focused, setFocused] = useState(false);
     const inputRef = useRef<TextInput>(null);
+    const router = useRouter();
 
     if (habit.habit.habit_type === 'color') {
       const valueId = getDayHabitValue(dateIndex, monthIndex, habitIndex);
@@ -93,7 +95,12 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
       >
         <View style={styles.cardHeader}>
           <Text style={styles.cardName}>{habit.habit.name}</Text>
-          <Text style={styles.textHabitIcon}>✏️</Text>
+          <TouchableOpacity
+            onPress={() => router.replace(`/day/${dateIndex}-${monthIndex}/text-value?habitIndex=${habitIndex}`)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.textHabitIcon}>✏️</Text>
+          </TouchableOpacity>
         </View>
         <TextInput
           ref={inputRef}

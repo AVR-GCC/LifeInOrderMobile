@@ -38,6 +38,12 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen
+            name="day/[date]/text-value"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
             name="day/[date]/new-habit"
             options={{
               headerShown: false,
