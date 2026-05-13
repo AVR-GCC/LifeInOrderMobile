@@ -20,8 +20,9 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
   const { date, habitIndex: habitIndexParam } = useLocalSearchParams();
   const router = useRouter();
   const inputRef = useRef<TextInput>(null);
+  const prevHeight = useRef<number | null>(null);
 
-  const { KeyboardScrollView, setTargetY } = useKeyboardScroll();
+  const { KeyboardScrollView, setTargetY, scrollDelta } = useKeyboardScroll();
 
   const [dayIndexString, monthIndexString] = Array.isArray(date) ? date : (date ?? '').split('-');
   const dateIndex = parseInt(dayIndexString, 10);
@@ -39,9 +40,13 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
 
   // Auto-focus the input when the screen mounts
   useEffect(() => {
-    const timer = setTimeout(() => inputRef.current?.focus(), 100);
-    return () => clearTimeout(timer);
-  }, []);
+      if (inputRef.current) {
+        inputRef.current.measure((_x, _y, _w, height, _px, pageY) => {
+          inputRef.current?.focus()
+          setTargetY(height + pageY + 20);
+        });
+      }
+  }, [setTargetY]);
 
   if (!data || !habit) {
     return (
@@ -51,13 +56,21 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
     );
   }
 
-  const handleChangeText = (newText: string) => {
-    setText(newText);
-    setDayHabitValue(dateIndex, monthIndex, habitIndex, {
-      valueId: habit.values[0].id,
-      text: newText,
-    });
-  };
+    const handleChangeText = (newText: string) => {
+      if (inputRef.current) {
+        inputRef.current.measure((_x, _y, _w, height, _px, _pageY) => {
+          if (prevHeight.current !== height && prevHeight.current) {
+            scrollDelta(height - prevHeight.current);
+          }
+          prevHeight.current = height;
+        });
+      }
+      setText(newText);
+      setDayHabitValue(dateIndex, monthIndex, habitIndex, {
+        valueId: habit.values[0].id,
+        text: newText,
+      });
+    };
 
   return (
     <Screen>
@@ -85,7 +98,7 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
             const { locationY } = e.nativeEvent;
             if (inputRef.current) {
               inputRef.current.measure((_x, _y, _w, _height, _px, pageY) => {
-                setTargetY(locationY + pageY);
+                setTargetY(locationY + pageY + 20);
               });
             }
           }}

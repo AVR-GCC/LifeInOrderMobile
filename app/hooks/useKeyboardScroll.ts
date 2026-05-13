@@ -24,7 +24,7 @@ export default function useKeyboardScroll() {
           const windowHeight = Dimensions.get('window').height;
           const offset = windowHeight - kbHeight - 60;
           const y = scrollRef.current + targetY - offset;
-          if (y > 0) {
+          if (y > scrollRef.current) {
             scrollViewRef.current.scrollTo({ y, animated: true });
           }
         }
@@ -60,8 +60,15 @@ export default function useKeyboardScroll() {
     );
   }).current;
 
+  const scrollDelta = (delta: number) => {
+    if (!scrollViewRef.current) return;
+    const y = scrollRef.current + delta;
+    scrollViewRef.current.scrollTo({ y, animated: true });
+  };
+
   return {
     KeyboardScrollView,
     setTargetY,
+    scrollDelta
   };
 }
