@@ -56,21 +56,21 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
     );
   }
 
-    const handleChangeText = (newText: string) => {
-      if (inputRef.current) {
-        inputRef.current.measure((_x, _y, _w, height, _px, _pageY) => {
-          if (prevHeight.current !== height && prevHeight.current) {
-            scrollDelta(height - prevHeight.current);
-          }
-          prevHeight.current = height;
-        });
-      }
-      setText(newText);
-      setDayHabitValue(dateIndex, monthIndex, habitIndex, {
-        valueId: habit.values[0].id,
-        text: newText,
+  const handleChangeText = (newText: string) => {
+    if (inputRef.current) {
+      inputRef.current.measure((_x, _y, _w, height, _px, _pageY) => {
+        if (prevHeight.current !== height && prevHeight.current) {
+          scrollDelta(height - prevHeight.current);
+        }
+        prevHeight.current = height;
       });
-    };
+    }
+    setText(newText);
+    setDayHabitValue(dateIndex, monthIndex, habitIndex, {
+      valueId: habit.values[0].id,
+      text: newText,
+    });
+  };
 
   return (
     <Screen>
