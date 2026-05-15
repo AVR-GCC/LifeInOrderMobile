@@ -7,11 +7,17 @@ interface KeyboardScrollViewProps {
 }
 
 export default function useKeyboardScroll() {
-  const [targetY, setTargetY] = useState(0);
+  const [targetY, setTargetYState] = useState(0);
   const scrollRef = useRef(0);
   const keyboardHeightRef = useRef(0);
   const scrollViewRef = useRef<ScrollView>(null);
   const [, forceRender] = useState(0);
+
+  const setTargetY = (y: number) => {
+    if (keyboardHeightRef.current === 0) {
+      setTargetYState(y);
+    }
+  }
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -23,8 +29,8 @@ export default function useKeyboardScroll() {
         if (scrollViewRef.current !== null && targetY > 0) {
           const windowHeight = Dimensions.get('window').height;
           const offset = windowHeight - kbHeight - 60;
-          const y = scrollRef.current + targetY - offset;
-          if (y > scrollRef.current) {
+          if (targetY > offset) {
+            const y = scrollRef.current + targetY - offset;
             scrollViewRef.current.scrollTo({ y, animated: true });
           }
         }
