@@ -40,13 +40,14 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
 
   // Auto-focus the input when the screen mounts
   useEffect(() => {
-      if (inputRef.current) {
-        inputRef.current.measure((_x, _y, _w, height, _px, pageY) => {
-          inputRef.current?.focus()
-          setTargetY(height + pageY + 20);
-        });
-      }
-  }, [setTargetY]);
+    if (inputRef.current) {
+      inputRef.current.measure((_x, _y, _w, height, _px, pageY) => {
+        inputRef.current?.focus()
+        setTargetY(height + pageY + 20);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!data || !habit) {
     return (

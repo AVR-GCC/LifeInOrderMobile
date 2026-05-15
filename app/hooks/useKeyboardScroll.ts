@@ -17,7 +17,7 @@ export default function useKeyboardScroll() {
     if (keyboardHeightRef.current === 0) {
       setTargetYState(y);
     }
-  }
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
