@@ -176,7 +176,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const { start, end } = mm[modes[nv.mode].id].range;
     if (!start || !end) return { zoom: 'day' };
     // console.log('useNavigationGesture checkLoadMoreData start, end', start, end);
-    const locationDate = getLocationDate(mm, nv);
+    const locationDate = getLocationDate(mm, nv, height);
     // console.log('useNavigationGesture checkLoadMoreData locationDate', locationDate);
     const startDistDays = dateDiffStr(locationDate, start);
     // console.log('useNavigationGesture checkLoadMoreData startDistDays', startDistDays);

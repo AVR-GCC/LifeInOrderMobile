@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
-import { useRouter } from 'expo-router';
 import DayRow from './DayRow';
 import { BASE_DAY_HEIGHT, LEFT_BAR_WIDTH } from '../constants/mainScreen';
 import { COLORS } from '../constants/theme';
