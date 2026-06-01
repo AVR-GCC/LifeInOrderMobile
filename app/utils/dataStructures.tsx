@@ -18,10 +18,10 @@ export const getLocationDate = (macroMap: MacroMap, navVal: NavigationValues, he
   const scale = getFinalDayPixels(navVal);
   let delta = 0;
   if (screenLocation === 'current') {
-    delta = height - (navVal.scroll.current.location ?? 400);
+    delta += height - 120 - (navVal.scroll.current.location ?? 400);
   }
   if (screenLocation === 'top') {
-    delta = height;
+    delta += height - 120;
   }
   const distance = navVal.scroll.current.offset + delta;
   const dayDistance = distance / scale;
