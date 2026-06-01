@@ -101,6 +101,16 @@ export const getZoomModeRange = (date: string, zoom: ZoomLevel, count = 1) => {
   }
 };
 
+export const getMinRangeCountIncludingBothDates = (earlyDate: string, lateDate: string, zoom: ZoomLevel) => {
+  let count = 1;
+  let range = getZoomModeRange(earlyDate, zoom, count);
+  while (range.end < lateDate) {
+    count++;
+    range = getZoomModeRange(earlyDate, zoom, count);
+  }
+  return count;
+}
+
 export const fitsInRange = (date: string, zoom: ZoomLevel, count: number, range: DateRange) => {
   const { start: tStart, end: tEnd } = range;
   if (!tStart || !tEnd) return false;

@@ -1,4 +1,4 @@
-import { modes, nextDate } from "../constants/zoom";
+import { getMinRangeCountIncludingBothDates, getMode, getZoomModeRange, modes, nextDate, zoomIndeces } from "../constants/zoom";
 import { DateRange, MacroMap, NavigationValues, ZoomLevel, ZoomLevelData } from "../types";
 import { dateString } from "./general";
 
@@ -63,6 +63,35 @@ export const mergeDateData = (range: DateRange, zoom: ZoomLevel, baseData: ZoomL
     curDate = nextDate(curDate, zoom, true);
   }
   return res;
+}
+
+export const getRequiredMacroMap = (mm: MacroMap, nv: NavigationValues, height: number) => {
+  const dayPixels = getFinalDayPixels(nv);
+  const modeIndex = getMode(dayPixels);
+  const mode = modes[modeIndex];
+  const topDate = getLocationDate(mm, nv, height, 'top');
+  const bottomDate = getLocationDate(mm, nv, height, 'bottom');
+  const upperLimit = getLocationDate(mm, nv, height, 'top', (3 / 2) * height);
+  const lowerLimit = getLocationDate(mm, nv, height, 'bottom', (-3 / 2) * height);
+  const res: MacroMap = {
+    day: { offset: 0, range: { start: null, end: null } },
+    quarter: { offset: 0, range: { start: null, end: null } },
+    half: { offset: 0, range: { start: null, end: null } },
+    year: { offset: 0, range: { start: null, end: null } },
+    two_year: { offset: 0, range: { start: null, end: null } }
+  };
+  const currentCount = getMinRangeCountIncludingBothDates(upperLimit, lowerLimit, mode.id);
+  res[mode.id].range = getZoomModeRange(upperLimit, mode.id, currentCount);
+  if (modeIndex !== 0) {
+    const closerMode = modes[modeIndex - 1];
+    const closerCount = getMinRangeCountIncludingBothDates(topDate, bottomDate, closerMode.id);
+    res[closerMode.id].range = getZoomModeRange(topDate, closerMode.id, closerCount);
+  }
+  if (modeIndex !== zoomIndeces['two_year']) {
+    const fartherMode = modes[modeIndex + 1];
+    const fartherCount = getMinRangeCountIncludingBothDates(topDate, bottomDate, fartherMode.id);
+    res[fartherMode.id].range = getZoomModeRange(topDate, fartherMode.id, fartherCount);
+  }
 }
 
 export default {
