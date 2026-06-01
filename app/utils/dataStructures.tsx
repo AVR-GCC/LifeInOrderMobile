@@ -11,12 +11,19 @@ export const getFinalDayPixels = (navVal: NavigationValues) => {
   return navVal.zoom.current.scale * mode.dayPixels;
 };
 
-export const getLocationDate = (macroMap: MacroMap, navVal: NavigationValues, height: number) => {
+export const getLocationDate = (macroMap: MacroMap, navVal: NavigationValues, height: number, screenLocation: string = 'current') => {
   const modeInfo = getModeInfo(navVal);
   const { range: { end }, offset } = macroMap[modeInfo.id];
   if (!end) return dateString(new Date());
   const scale = getFinalDayPixels(navVal);
-  const distance = navVal.scroll.current.offset + height - (navVal.scroll.current.location ?? 400);
+  let delta = 0;
+  if (screenLocation === 'current') {
+    delta = height - (navVal.scroll.current.location ?? 400);
+  }
+  if (screenLocation === 'top') {
+    delta = height;
+  }
+  const distance = navVal.scroll.current.offset + delta;
   const dayDistance = distance / scale;
   const date = new Date(end);
   date.setDate(date.getDate() - dayDistance - offset);
