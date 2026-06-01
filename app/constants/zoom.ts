@@ -51,7 +51,7 @@ export const getZoomModeRange = (date: string, zoom: ZoomLevel, count = 1) => {
   let start = dateString(todate);
   let end = start;
   const dateObj = new Date(date);
-  dateObj.setDate(1);
+  dateObj.setUTCDate(1);
   const month = dateObj.getMonth();
   switch (zoom) {
     case 'day':
