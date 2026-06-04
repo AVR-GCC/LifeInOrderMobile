@@ -45,6 +45,7 @@ const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(function ValuesScre
         inputRef.current.focus();
       }
     }, 500);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (data === null || date === undefined || habit === undefined) {

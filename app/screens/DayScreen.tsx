@@ -1,9 +1,8 @@
-import { Ionicons, AntDesign } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import moment from 'moment';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { UNFILLED_COLOR } from '../components/DayRow';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Screen from '../components/Screen';
 import TitleBar from '../components/TitleBar';
 import VerticalChevrons from '../components/VerticalChevrons';

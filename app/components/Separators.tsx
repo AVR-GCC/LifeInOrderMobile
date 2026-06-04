@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
-import { MacroMap, NavigationValues, SeparatorData, ZoomLevel } from '../types';
+import { MacroMap, NavigationValues, SeparatorData } from '../types';
 import { modes } from '../constants/zoom';
 
 const SEPARATOR_COLORS: Record<string, string> = {
