@@ -88,7 +88,7 @@ const Separators: React.FC<SeparatorsProps> = React.memo(function Separators({ s
           separator={s}
           navigationValue={navigationValue}
           dayHeight={dayHeight}
-          offset={macroMap[modes[mode].id].offset}
+          offset={macroMap[modes[mode].id]?.offset || 0}
         />
       ))}
     </>

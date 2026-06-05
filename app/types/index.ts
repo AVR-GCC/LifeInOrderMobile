@@ -39,7 +39,7 @@ export interface DayData {
   values: { [habitId: string]: string };
 }
 
-export type DateRange = { start: string | null; end: string | null };
+export type DateRange = { start: string; end: string };
 
 export interface MonthData {
   range: DateRange;
@@ -60,7 +60,7 @@ export type MacroMapEntry = {
   range: DateRange,
   offset: number
 }
-export type MacroMap = Record<ZoomLevel, MacroMapEntry>;
+export type MacroMap = Record<ZoomLevel, MacroMapEntry | null>;
 
 export interface MainProps {
   habits: HabitWithValues[];

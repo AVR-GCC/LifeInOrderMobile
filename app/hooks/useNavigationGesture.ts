@@ -108,9 +108,11 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const newPixelsPerDay = modes[mode].dayPixels;
     const ratio = newPixelsPerDay / curPixelsPerDay;
     const scale = curScale / ratio;
-    const { range: { end: oldEnd }, offset: oldOffset } = macroMap[modes[navigationValue.value.mode].id];
-    const { range: { end: newEnd }, offset: newOffset } = macroMap[modes[mode].id];
-    if (!oldEnd || !newEnd) return;
+    const oldmm = macroMap[modes[navigationValue.value.mode].id]
+    const newmm = macroMap[modes[mode].id];
+    if (!oldmm || !newmm) return;
+    const { range: { end: oldEnd }, offset: oldOffset } = oldmm;
+    const { range: { end: newEnd }, offset: newOffset } = newmm;
     // console.log('oldEnd, newEnd', oldEnd, newEnd);
     // console.log('oldOffset, newOffset', oldOffset, newOffset);
     const endsDayDiff = dateDiffStr(oldEnd, newEnd);
@@ -173,8 +175,9 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   }
 
   const generateMissingDataVars: (mm: MacroMap, nv: NavigationValues) => { zoom?: ZoomLevel, date?: string, count?: number } = (mm, nv) => {
-    const { start, end } = mm[modes[nv.mode].id].range;
-    if (!start || !end) return { zoom: 'day' };
+    const mmm = mm[modes[nv.mode].id];
+    if (!mmm) return { zoom: 'day' };
+    const { start, end } = mmm.range;
     // console.log('useNavigationGesture checkLoadMoreData start, end', start, end);
     const locationDate = getLocationDate(mm, nv, height);
     // console.log('useNavigationGesture checkLoadMoreData locationDate', locationDate);
@@ -212,7 +215,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
         // console.log('loading double');
         useCount = 2;
       }
-      const haveData = fitsInRange(useDate, zoom, useCount, mm[zoom].range);
+      const nmm = mm[zoom];
+      const haveData = !!nmm && fitsInRange(useDate, zoom, useCount, nmm.range);
       // console.log('useNavigationGesture checkLoadMoreData useDate', useDate);
       // console.log('useNavigationGesture checkLoadMoreData useCount', useCount);
       // console.log('useNavigationGesture checkLoadMoreData haveData', haveData);
@@ -262,17 +266,20 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const { macroMap } = dataRef.current;
     const todate = new Date(date);
     const mode = getModeInfo(navigationValue.value);
-    const { end } = macroMap[mode.id].range;
-    if (!end) return;
+    const mm = macroMap[mode.id];
+    if (!mm) return;
+    const { end } = mm.range;
     const daysToLast = dateDiff(new Date(end), todate);
-    const offset = getDayPixels(navigationValue.value) * (daysToLast - macroMap[mode.id].offset) - (height / 2);
+    const offset = getDayPixels(navigationValue.value) * (daysToLast - mm.offset) - (height / 2);
     setNavigationValues({ mode: 0, offset, scale: getScale() });
   };
 
   const zoomToPeriod = (date: string, zoom: ZoomLevel) => {
     if (!data) return;
     const { macroMap } = data;
-    const { range, offset: macroMapDayOffset } = macroMap[zoom];
+    const mm = macroMap[zoom];
+    if (!mm) return;
+    const { range, offset: macroMapDayOffset } = mm;
     const newZoomMonths = zoomMonths[zoom];
     const mode = zoomIndeces[zoom];
     const newZoomDayPixels = modes[mode].dayPixels;

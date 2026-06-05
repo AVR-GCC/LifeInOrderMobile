@@ -13,8 +13,9 @@ export const getFinalDayPixels = (navVal: NavigationValues) => {
 
 export const getLocationDate = (macroMap: MacroMap, navVal: NavigationValues, height: number, screenLocation: string = 'current', deltaAddition: number = 0) => {
   const modeInfo = getModeInfo(navVal);
-  const { range: { end }, offset } = macroMap[modeInfo.id];
-  if (!end) return dateString(new Date());
+  const mm = macroMap[modeInfo.id];
+  if (!mm) return dateString(new Date());
+  const { range: { end }, offset } = mm;
   const scale = getFinalDayPixels(navVal);
   let delta = deltaAddition;
   if (screenLocation === 'current') {
@@ -73,24 +74,18 @@ export const getRequiredMacroMap = (mm: MacroMap, nv: NavigationValues, height: 
   const bottomDate = getLocationDate(mm, nv, height, 'bottom');
   const upperLimit = getLocationDate(mm, nv, height, 'top', (3 / 2) * height);
   const lowerLimit = getLocationDate(mm, nv, height, 'bottom', (-3 / 2) * height);
-  const res: MacroMap = {
-    day: { offset: 0, range: { start: null, end: null } },
-    quarter: { offset: 0, range: { start: null, end: null } },
-    half: { offset: 0, range: { start: null, end: null } },
-    year: { offset: 0, range: { start: null, end: null } },
-    two_year: { offset: 0, range: { start: null, end: null } }
-  };
+  const res: MacroMap = { day: null, quarter: null, half: null, year: null, two_year: null };
   const currentCount = getMinRangeCountIncludingBothDates(upperLimit, lowerLimit, mode.id);
-  res[mode.id].range = getZoomModeRange(upperLimit, mode.id, currentCount);
+  res[mode.id] = { range: getZoomModeRange(upperLimit, mode.id, currentCount), offset: 0 };
   if (modeIndex !== 0) {
     const closerMode = modes[modeIndex - 1];
     const closerCount = getMinRangeCountIncludingBothDates(topDate, bottomDate, closerMode.id);
-    res[closerMode.id].range = getZoomModeRange(topDate, closerMode.id, closerCount);
+    res[closerMode.id] = { range: getZoomModeRange(topDate, closerMode.id, closerCount), offset: 0 };
   }
   if (modeIndex !== zoomIndeces['two_year']) {
     const fartherMode = modes[modeIndex + 1];
     const fartherCount = getMinRangeCountIncludingBothDates(topDate, bottomDate, fartherMode.id);
-    res[fartherMode.id].range = getZoomModeRange(topDate, fartherMode.id, fartherCount);
+    res[fartherMode.id] = { range: getZoomModeRange(topDate, fartherMode.id, fartherCount), offset: 0 };
   }
 }
 
