@@ -1,6 +1,7 @@
 import axios from 'axios';
-import type { Habit, SetDayValueServer, Value, ZoomLevel } from '../types';
+import type { DatesData, Habit, MacroMap, SetDayValueServer, Value, ZoomLevel } from '../types';
 import { getZoomModeRange } from '../constants/zoom';
+import { mapToLoadParams } from '../utils/dataStructures';
 
 // const baseUrl = 'http://10.0.0.6:8080'; // TODO: Make this configurable via environment variables
 // const baseUrl = 'http://192.168.1.174:8080'; // TODO: Make this configurable via environment variables
@@ -43,6 +44,15 @@ const getUserListPure = async (date: string, zoom: ZoomLevel, count: number, wid
   }
 };
 
+export const getUserMapPure = async (map: MacroMap, width: number) => {
+  const inputs = mapToLoadParams(map);
+  const datesData: DatesData = { day: [], quarter: [], half: [], year: [], two_year: [] };
+  await Promise.all(inputs.map(async({ date, zoom, count }) => {
+    datesData[zoom] = await getUserListPure(date, zoom, count, width);
+  }))
+  return datesData;
+};
+
 export const debounce = (func: (...args: any) => any, milis: number) => {
   let deb: ReturnType<typeof setTimeout> | null = null;
   return (...args: any) => new Promise(resolve => {
@@ -50,6 +60,8 @@ export const debounce = (func: (...args: any) => any, milis: number) => {
     deb = setTimeout(() => resolve(func(...args)), milis);
   });
 };
+
+export const getUserMap = debounce(getUserMapPure, 1000);
 
 export const throttleGetUserList = () => {
   const recent: Record<string, number> = {};

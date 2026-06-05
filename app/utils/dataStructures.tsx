@@ -1,6 +1,6 @@
 import { getMinRangeCountIncludingBothDates, getMode, getZoomModeRange, modes, nextDate, zoomIndeces } from "../constants/zoom";
-import { DateRange, MacroMap, NavigationValues, ZoomLevel, ZoomLevelData } from "../types";
-import { dateString } from "./general";
+import { DateRange, DatesData, LoadDataInput, MacroMap, NavigationValues, ZoomLevel, ZoomLevelData } from "../types";
+import { dateDiffStr, dateString } from "./general";
 
 // MacroMap + NavigationValues
 export const getModeInfo = (navVal: NavigationValues) => modes[navVal.mode];
@@ -33,10 +33,10 @@ export const getLocationDate = (macroMap: MacroMap, navVal: NavigationValues, he
 };
 
 export const mergeDateRanges = (baseRange: DateRange, addedRange: DateRange) => {
+  if (!baseRange) return { contiguous: false, range: addedRange };
+  if (!addedRange) return { contiguous: true, range: baseRange };
   const { start: baseStart, end: baseEnd } = baseRange;
   const { start: addedStart, end: addedEnd } = addedRange;
-  if (!baseStart || !baseEnd) return { contiguous: false, range: addedRange };
-  if (!addedStart || !addedEnd) return { contiguous: true, range: baseRange };
   if (addedStart > baseEnd || addedEnd < baseStart) return { contiguous: false, range: addedRange };
   const start = addedStart < baseStart ? addedStart : baseStart;
   const end = addedEnd > baseEnd ? addedEnd : baseEnd;
@@ -86,6 +86,73 @@ export const getRequiredMacroMap = (mm: MacroMap, nv: NavigationValues, height: 
     const fartherCount = getMinRangeCountIncludingBothDates(topDate, bottomDate, fartherMode.id);
     res[fartherMode.id] = { range: getZoomModeRange(topDate, fartherMode.id, fartherCount), offset: 0 };
   }
+  return res;
+}
+
+export const mergeMaps = (existingMap: MacroMap, additionalMap: MacroMap, existingData: DatesData, additionalData: DatesData) => {
+  const macroMap: MacroMap = { day: null, quarter: null, half: null, year: null, two_year: null };
+  const datesData: DatesData = { day: [], quarter: [], half: [], year: [], two_year: [] };
+  let latestDate = '1000-01-01';
+
+  modes.forEach(mode => {
+    const zoom = mode.id;
+    const existing = existingMap[zoom];
+    const additional = additionalMap[zoom];
+    const existingD = existingData[zoom];
+    const additionalD = additionalData[zoom];
+    if (!existing || !additional) {
+      const useExisting = !additional;
+      macroMap[zoom] = useExisting ? existing : additional;
+      datesData[zoom] = useExisting ? existingD : additionalD;
+      return false;
+    }
+    const { range: existingRange } = existing;
+    const { range: additionalRange } = additional;
+    const { contiguous, range } = mergeDateRanges(existingRange, additionalRange);
+    if (!contiguous) {
+      macroMap[zoom] = additional;
+      datesData[zoom] = additionalD;
+      return false;
+    }
+    const nextData = mergeDateData(range, zoom, existingD, additionalD);
+    macroMap[zoom] = { range, offset: 0 };
+    datesData[zoom] = nextData;
+  });
+
+  modes.forEach(mode => {
+    const zoom = mode.id;
+    const mm = macroMap[zoom];
+    if (!mm) return false;
+    latestDate = latestDate > mm.range.end ? latestDate : mm.range.end;
+  });
+
+  modes.forEach(mode => {
+    const zoom = mode.id;
+    const mm = macroMap[zoom];
+    if (!mm) return false;
+    const offset = dateDiffStr(latestDate, mm.range.end);
+    mm.offset = offset;
+  });
+
+  return { macroMap, datesData };
+}
+
+export const mapToLoadParams = (macroMap: MacroMap) => {
+  const res: LoadDataInput[] = [];
+  modes.forEach(mode => {
+    const zoom = mode.id;
+    const mm = macroMap[zoom];
+    if (!mm) return false;
+    const { start, end } = mm.range;
+    let count = 0;
+    let cur = start;
+    while (cur < end) {
+      cur = nextDate(cur, zoom, true);
+      count++;
+    }
+    res.push({ date: start, zoom, count });
+  });
+  return res;
 }
 
 export default {

@@ -94,6 +94,7 @@ export interface NavigationValues {
   mode: number;
 }
   
+export type LoadDataInput = { date: string, zoom: ZoomLevel, count: number };
 
 export type GetDayHabitValue = (dateIndex: number, monthIndex: number, habitIndex: number) => string | null;
 export type SetDayValue = (dateIndex: number, monthIndex: number, habitIndex: number, values: { valueId: string, text: string | null }) => void;
