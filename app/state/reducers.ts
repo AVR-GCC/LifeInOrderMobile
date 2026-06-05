@@ -4,20 +4,20 @@ import { mergeDateData, mergeDateRanges } from '../utils/dataStructures';
 import { dateDiffStr, last } from '../utils/general';
 
 const getZoomLevelDataRange = (zld: ZoomLevelData[]) => {
-  if (zld.length === 0) return { start: null, end: null };
+  if (zld.length === 0) return null;
   const start = zld[0].range.start;
   const end = last(zld).range.end;
   return { start, end };
 }
 
 export const loadInitialDataReducer = () => (dayLevelData: MonthData[], habits: HabitWithValues[]) => {
-  const { start, end } = getZoomLevelDataRange(dayLevelData);
+  const range = getZoomLevelDataRange(dayLevelData);
   const macroMap: MacroMap = {
-    day: { offset: 0, range: { start, end } },
-    quarter: { offset: 0, range: { start: null, end: null } },
-    half: { offset: 0, range: { start: null, end: null } },
-    year: { offset: 0, range: { start: null, end: null } },
-    two_year: { offset: 0, range: { start: null, end: null } }
+    day: range ? { offset: 0, range } : null,
+    quarter: null,
+    half: null,
+    year: null,
+    two_year: null
   };
   const dates: DatesData = {
     day: dayLevelData,
@@ -32,10 +32,12 @@ export const loadInitialDataReducer = () => (dayLevelData: MonthData[], habits: 
 export const loadMoreDataReducer = (data: MainProps) => (zoom: ZoomLevel, newData: ZoomLevelData[]) => {
   const { dates, macroMap } = data;
   const existingData = dates[zoom];
-  let { start, end } = getZoomLevelDataRange(newData)
-  const { start: existingStart, end: existingEnd } = getZoomLevelDataRange(existingData)
+  const newRange = getZoomLevelDataRange(newData)
+  const existingRange = getZoomLevelDataRange(existingData)
+  if (!newRange || !existingRange) return data;
+  const { start, end } = newRange;
+  const { start: existingStart, end: existingEnd } = existingRange;
   const { contiguous, range } = mergeDateRanges({ start: existingStart, end: existingEnd }, { start, end });
-  if (!start || !end || !range.start || !range.end) return data;
   const nextMode = zoomIndeces[zoom];
   if (!contiguous) {
     const nextMacroMap: MacroMap = { ...macroMap, [zoom]: { offset: 0, range } };
@@ -46,7 +48,7 @@ export const loadMoreDataReducer = (data: MainProps) => (zoom: ZoomLevel, newDat
   }
   const nextData = mergeDateData(range, zoom, existingData, newData);
   const nextDates = { ...dates, [zoom]: nextData };
-  const nextOffset = dateDiffStr(range.end, existingEnd) + macroMap[zoom].offset;
+  const nextOffset = dateDiffStr(range.end, existingEnd) + (macroMap[zoom]?.offset || 0);
   const nextMacroMap: MacroMap = { ...macroMap, [zoom]: { offset: nextOffset, range } };
   return { ...data, dates: nextDates, macroMap: nextMacroMap, mode: nextMode };
 };
@@ -64,10 +66,10 @@ export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, 
   newDayZoomData[monthIndex] = newMonth;
   const newMacroMap: MacroMap = {
     day: macroMap.day,
-    quarter: { offset: 0, range: { start: null, end: null } },
-    half: { offset: 0, range: { start: null, end: null } },
-    year: { offset: 0, range: { start: null, end: null } },
-    two_year: { offset: 0, range: { start: null, end: null } }
+    quarter: null,
+    half: null,
+    year: null,
+    two_year: null
   };
   const newDates: DatesData = {
     day: newDayZoomData,

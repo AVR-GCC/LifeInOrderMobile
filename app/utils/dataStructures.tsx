@@ -45,7 +45,6 @@ export const mergeDateRanges = (baseRange: DateRange, addedRange: DateRange) => 
 
 export const mergeDateData = (range: DateRange, zoom: ZoomLevel, baseData: ZoomLevelData[], addedData: ZoomLevelData[]) => {
   const { start, end } = range;
-  if (!start || !end) return [];
   const res = [];
   let curDate = start;
   while (curDate < end) {

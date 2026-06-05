@@ -108,7 +108,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
                 key={`zoom-style-${m.id}`}
                 style={[{
                   position: 'absolute',
-                  bottom: macroMap[m.id].offset * -1 * modes[mode].dayPixels,
+                  bottom: (macroMap[m.id]?.offset || 0) * -1 * modes[mode].dayPixels,
                   left: 0,
                   right: 0
                 }, zoomStyles[m.id]]}
