@@ -82,12 +82,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const today = new Date().toISOString().split('T')[0];
     const lastMonth = nextDate(today, 'day', false);
 
-    const [dates, habits] = await Promise.all([
+    const [dates, months, habits] = await Promise.all([
       getUserList(lastMonth, 'day', 4, 1080),
+      getUserList(lastMonth, 'quarter', 1, 1080),
       getUserConfig()
     ]);
-    if (dates && habits) {
-      setData(loadInitialDataReducer()(dates, habits));
+    if (dates && months && habits) {
+      setData(loadInitialDataReducer()(dates, months, habits));
     }
     loadingDataRef.current = false;
   };
