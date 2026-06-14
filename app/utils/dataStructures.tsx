@@ -161,6 +161,69 @@ export const mapToLoadParams = (macroMap: MacroMap) => {
   return res;
 }
 
+const emptyMacroMap = (): MacroMap => ({ day: null, quarter: null, half: null, year: null, two_year: null });
+
+const isEmptyMacroMap = (mm: MacroMap) => modes.every(mode => !mm[mode.id]);
+
+// subtractMaps takes the existingMap (the data we already have available) and the
+// additionalMap (the data we need for the current scale/scroll, as produced by
+// getRequiredMacroMap) and returns the data that is *missing*, expressed as a list
+// of MacroMaps that can each be fed to mapToLoadParams and fetched.
+//
+// For every zoom level the needed range is compared to the range we already have:
+//  - nothing needed                 -> nothing missing
+//  - nothing existing               -> the whole needed range is missing
+//  - needed range disjoint from have -> the whole needed range is missing
+//  - needed range extends before/after the existing range -> the part(s) sticking
+//    out are missing (there can be a "before" piece and/or an "after" piece)
+//
+// The returned list holds at most two maps: index 0 collects the gaps that sit
+// after (or are standalone relative to) the existing data, index 1 collects the
+// gaps that sit before the existing data. We only keep maps that actually contain
+// something, so the common case returns a single map.
+export const subtractMaps = (existingMap: MacroMap, additionalMap: MacroMap): MacroMap[] => {
+  const afterMap = emptyMacroMap();
+  const beforeMap = emptyMacroMap();
+
+  modes.forEach(mode => {
+    const zoom = mode.id;
+    const needed = additionalMap[zoom];
+    if (!needed) return;
+    const have = existingMap[zoom];
+    const { start: needStart, end: needEnd } = needed.range;
+
+    // Nothing of this zoom is loaded yet -> the whole needed range is missing.
+    if (!have) {
+      afterMap[zoom] = { range: { start: needStart, end: needEnd }, offset: 0 };
+      return;
+    }
+
+    const { start: haveStart, end: haveEnd } = have.range;
+
+    // The needed range does not touch what we have -> fetch all of it as one block.
+    if (needEnd <= haveStart || needStart >= haveEnd) {
+      // Keep it on the side it falls on so it can be merged contiguously later.
+      const target = needEnd <= haveStart ? beforeMap : afterMap;
+      target[zoom] = { range: { start: needStart, end: needEnd }, offset: 0 };
+      return;
+    }
+
+    // Overlapping: capture the piece (if any) that sticks out before the existing
+    // range and the piece (if any) that sticks out after it.
+    if (needStart < haveStart) {
+      beforeMap[zoom] = { range: { start: needStart, end: haveStart }, offset: 0 };
+    }
+    if (needEnd > haveEnd) {
+      afterMap[zoom] = { range: { start: haveEnd, end: needEnd }, offset: 0 };
+    }
+  });
+
+  const res: MacroMap[] = [];
+  if (!isEmptyMacroMap(afterMap)) res.push(afterMap);
+  if (!isEmptyMacroMap(beforeMap)) res.push(beforeMap);
+  return res;
+}
+
 export default {
   getModeInfo,
   getDayPixels,
