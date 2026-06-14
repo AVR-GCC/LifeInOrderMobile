@@ -45,21 +45,27 @@ export const mergeDateRanges = (baseRange: DateRange, addedRange: DateRange) => 
 
 export const mergeDateData = (range: DateRange, zoom: ZoomLevel, baseData: ZoomLevelData[], addedData: ZoomLevelData[]) => {
   const { start, end } = range;
-  const res = [];
+  const res: ZoomLevelData[] = [];
   let curDate = start;
+  // Sections may span more than a single zoom-month (when fetched with count > 1),
+  // so we cannot assume each section starts exactly one `nextDate` step after the
+  // previous one. Instead, whenever we consume a section we advance `curDate` to
+  // that section's actual `range.end`. Added data takes precedence over base data.
   while (curDate < end) {
-    // console.log('curDate', curDate);
     const addedSection = addedData.find(ad => ad.range.start === curDate);
     if (addedSection) {
-      // console.log('found in new');
       res.push(addedSection);
-    } else {
-      const baseSection = baseData.find(bd => bd.range.start === curDate);
-      if (baseSection) {
-        // console.log('found in old');
-        res.push(baseSection);
-      }
+      curDate = addedSection.range.end;
+      continue;
     }
+    const baseSection = baseData.find(bd => bd.range.start === curDate);
+    if (baseSection) {
+      res.push(baseSection);
+      curDate = baseSection.range.end;
+      continue;
+    }
+    // No section begins exactly at curDate (e.g. a gap, or a section that already
+    // spans across curDate). Step forward one zoom-month and try again.
     curDate = nextDate(curDate, zoom, true);
   }
   return res;
