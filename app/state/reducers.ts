@@ -28,11 +28,13 @@ export const loadInitialDataReducer = () => (dayLevelData: MonthData[], quarterL
   const dayRange = getZoomLevelDataRange(dayLevelData);
   const quarterRange = getZoomLevelDataRange(quarterLevelData);
   if (!dayRange || !quarterRange) return { dates, habits, macroMap, mode: 0 };
-  const day = { offset: 0, range: dayRange };
+  const diff = dateDiffStr(dayRange.end, quarterRange.end);
+  const dayOffset = diff < 0 ? -1 * diff : 0;
+  const day = { offset: dayOffset, range: dayRange };
   macroMap.day = day;
   dates.day = dayLevelData;
-  const offset = dateDiffStr(dayRange.end, quarterRange.end);
-  const quarter = { offset, range: quarterRange };
+  const quarterOffset = diff > 0 ? diff : 0;
+  const quarter = { offset: quarterOffset, range: quarterRange };
   macroMap.quarter = quarter;
   dates.quarter = quarterLevelData;
   console.log('initial', macroMap);
