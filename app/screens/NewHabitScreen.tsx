@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ScrollView,
   Animated,
+  Keyboard,
 } from 'react-native';
 import Screen from '../components/Screen';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -138,12 +139,12 @@ export default function NewHabitScreen({ habits, createHabit }: TypeNewHabitsScr
         <TypeCard
           type="color"
           selected={selectedType === 'color'}
-          onPress={() => setSelectedType('color')}
+          onPress={() => { Keyboard.dismiss(); setSelectedType('color'); }}
         />
         <TypeCard
           type="text"
           selected={selectedType === 'text'}
-          onPress={() => setSelectedType('text')}
+          onPress={() => { Keyboard.dismiss(); setSelectedType('text'); }}
         />
       </ScrollView>
 
