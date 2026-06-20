@@ -6,7 +6,7 @@ const Screen: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <View style={styles.container}>
       <View style={styles.topBuffer} />
-      {children}
+      <View style={styles.content}>{children}</View>
       <View style={styles.bottomBuffer} />
     </View>
   );
@@ -23,13 +23,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
     zIndex: 1,
   },
+  content: {
+    flex: 1,
+  },
   bottomBuffer: {
-    position: 'absolute',
-    bottom: 0,
     height: 50,
     width: '100%',
     backgroundColor: '#000000',
-    zIndex: 1,
   },
 });
 
