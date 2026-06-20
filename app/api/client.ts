@@ -3,7 +3,7 @@ import type { DatesData, Habit, MacroMap, SetDayValueServer, Value, ZoomLevel } 
 import { getZoomModeRange } from '../constants/zoom';
 import { mapToLoadParams } from '../utils/dataStructures';
 
-// const baseUrl = 'http://10.0.0.6:8080'; // TODO: Make this configurable via environment variables
+// const baseUrl = 'http://10.0.0.9:8080'; // TODO: Make this configurable via environment variables
 // const baseUrl = 'http://192.168.1.174:8080'; // TODO: Make this configurable via environment variables
 const baseUrl = 'https://lifeinorderbackend.fly.dev';
 
