@@ -120,6 +120,7 @@ export const fitsInRange = (date: string, zoom: ZoomLevel, count: number, range:
 }
 
 export default {
+  getMinRangeCountIncludingBothDates,
   modes,
   getMode,
   zoomIndeces,

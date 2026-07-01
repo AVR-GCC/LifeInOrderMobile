@@ -64,17 +64,27 @@ export const mergeDateData = (range: DateRange, zoom: ZoomLevel, baseData: ZoomL
   return res;
 }
 
-export const getRequiredMacroMap = (mm: MacroMap, nv: NavigationValues, height: number) => {
-  const dayPixels = getFinalDayPixels(nv);
+export const getRequiredMacroMapBase = (centerDate: string, dayPixels: number, height: number) => {
+  const { ceil } = Math;
+  const screenDays = height / dayPixels;
+  const halfScreenDays = ceil(screenDays / 2);
   const modeIndex = getMode(dayPixels);
   const mode = modes[modeIndex];
-  const topDate = getLocationDate(mm, nv, height, 'top');
-  const bottomDate = getLocationDate(mm, nv, height, 'bottom');
-  const upperLimit = getLocationDate(mm, nv, height, 'top', (3 / 2) * height);
-  const lowerLimit = getLocationDate(mm, nv, height, 'bottom', (-3 / 2) * height);
+  const topDateObj = new Date(centerDate);
+  topDateObj.setDate(topDateObj.getDate() - halfScreenDays);
+  const topDate = dateString(topDateObj);
+  const bottomDateObj = new Date(centerDate);
+  bottomDateObj.setDate(bottomDateObj.getDate() + halfScreenDays);
+  const bottomDate = dateString(bottomDateObj);
+  const upperDateObj = new Date(centerDate);
+  upperDateObj.setDate(upperDateObj.getDate() - halfScreenDays * 3);
+  const upperDate = dateString(upperDateObj);
+  const lowerDateObj = new Date(centerDate);
+  lowerDateObj.setDate(lowerDateObj.getDate() + halfScreenDays * 3);
+  const lowerDate = dateString(lowerDateObj);
   const res: MacroMap = { day: null, quarter: null, half: null, year: null, two_year: null };
-  const currentCount = getMinRangeCountIncludingBothDates(upperLimit, lowerLimit, mode.id);
-  res[mode.id] = { range: getZoomModeRange(upperLimit, mode.id, currentCount), offset: 0 };
+  const currentCount = getMinRangeCountIncludingBothDates(upperDate, lowerDate, mode.id);
+  res[mode.id] = { range: getZoomModeRange(upperDate, mode.id, currentCount), offset: 0 };
   if (modeIndex !== 0) {
     const closerMode = modes[modeIndex - 1];
     const closerCount = getMinRangeCountIncludingBothDates(topDate, bottomDate, closerMode.id);
@@ -86,6 +96,12 @@ export const getRequiredMacroMap = (mm: MacroMap, nv: NavigationValues, height: 
     res[fartherMode.id] = { range: getZoomModeRange(topDate, fartherMode.id, fartherCount), offset: 0 };
   }
   return res;
+}
+
+export const getRequiredMacroMap = (mm: MacroMap, nv: NavigationValues, height: number) => {
+  const dayPixels = getFinalDayPixels(nv);
+  const centerDate = getLocationDate(mm, nv, height);
+  return getRequiredMacroMapBase(centerDate, dayPixels, height);
 }
 
 export const mergeMaps = (existingMap: MacroMap, additionalMap: MacroMap, existingData: DatesData, additionalData: DatesData) => {
