@@ -8,7 +8,6 @@ import { fitsInRange, getMode, getZoomModeRange, modes, nextDate, zoomIndeces, z
 import { useEffect, useRef } from 'react';
 import { getDayPixels, getFinalDayPixels, getLocationDate, getModeInfo, mergeDateRanges } from '../utils/dataStructures';
 import { dateDiff, dateDiffStr, dateString } from '../utils/general';
-import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
 
 const DECELERATION = 0.998;
 const MIN_VELOCITY = 0.01;
@@ -31,7 +30,7 @@ interface UseNavigationGestureResult {
 
 export const useNavigationGesture = (data: MainProps | null): UseNavigationGestureResult => {
   const { loadMoreData, getScale, setScale, setScroll, getScroll, setMode } = useAppContext();
-  const { height, width } = useWindowDimensions();
+  const { height } = useWindowDimensions();
   const dataRef = useRef(data);
   const loading = useRef(false);
   const isPanning = useRef(false);
@@ -247,7 +246,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       setMode(zoomIndeces[zoom]);
     } else {
       loading.current = true;
-      loadMoreData(date, zoom, count, width - LEFT_BAR_WIDTH);
+      loadMoreData(date, zoom, count);
     }
   };
 
@@ -308,7 +307,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     } else {
       pendingModeTransitions.current = { mode, offset, scale };
       loading.current = true;
-      loadMoreData(earliestLoadedDateStr, zoom, 3, width - LEFT_BAR_WIDTH);
+      loadMoreData(earliestLoadedDateStr, zoom, 3);
     }
   };
 

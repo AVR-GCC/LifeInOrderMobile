@@ -29,6 +29,9 @@ import {
 import { getDayHabitValueSelector } from '../state/selectors';
 import type { CreateHabit, DeleteValue, Habit, MainProps, SetDayValue, Value, ZoomLevel } from '../types';
 import { nextDate } from '../constants/zoom';
+import { getRequiredMacroMapBase, mapToLoadParams } from '../utils/dataStructures';
+import { useWindowDimensions } from 'react-native';
+import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
 
 interface AppContextType {
   data: MainProps | null;
@@ -42,7 +45,7 @@ interface AppContextType {
   switchValues: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
-  loadMoreData: (date: string, zoom: ZoomLevel, count: number, width: number) => Promise<void>;
+  loadMoreData: (date: string, zoom: ZoomLevel, count: number) => Promise<void>;
   setScale: (newScale: number) => void;
   getScale: () => number;
   setScroll: (newScroll: number) => void;
@@ -53,6 +56,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | null>(null);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { height, width } = useWindowDimensions();
   const [data, setData] = useState<MainProps | null>(null);
   const dataRef = useRef(data);
   useEffect(() => {
@@ -79,13 +83,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const loadInitialData = async () => {
     if (loadingDataRef.current) return;
     loadingDataRef.current = true;
+    const userConfigPromise = getUserConfig();
     const today = new Date().toISOString().split('T')[0];
-    const lastMonth = nextDate(today, 'day', false);
 
+    const rmmb = getRequiredMacroMapBase(today, 24, height);
+    const loadParams = mapToLoadParams(rmmb);
+    const loadPromises = loadParams.map(({ date, zoom, count }) => getUserList(date, zoom, count, width));
     const [dates, months, habits] = await Promise.all([
-      getUserList(lastMonth, 'day', 4, 1080),
-      getUserList(lastMonth, 'quarter', 1, 1080),
-      getUserConfig()
+      ...loadPromises,
+      userConfigPromise
     ]);
     if (dates && months && habits) {
       setData(loadInitialDataReducer()(dates, months, habits));
@@ -95,13 +101,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     loadInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadMoreData = async (date: string, zoom: ZoomLevel, count: number, width: number) => {
+  const loadMoreData = async (date: string, zoom: ZoomLevel, count: number) => {
     if (dataRef.current === null) return;
     if (loadingDataRef.current) return;
     loadingDataRef.current = true;
-    const res = await getUserList(date, zoom, count, width);
+    const res = await getUserList(date, zoom, count, width - LEFT_BAR_WIDTH);
     if (res) {
       const newData = loadMoreDataReducer(dataRef.current)(zoom, res);
       setData(newData);
