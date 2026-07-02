@@ -64,25 +64,36 @@ export const mergeDateData = (range: DateRange, zoom: ZoomLevel, baseData: ZoomL
   return res;
 }
 
+const shiftDate = (date: string, days: number) => {
+  const obj = new Date(date);
+  obj.setDate(obj.getDate() + days);
+  return dateString(obj);
+};
+
+// The zoom-period-aligned range needed to cover the screen (centered on
+// centerDate) at the given scale, for the given zoom level.
+export const getVisibleModeRange = (centerDate: string, dayPixels: number, height: number, zoom: ZoomLevel): DateRange => {
+  const halfScreenDays = Math.ceil(height / dayPixels / 2);
+  const topDate = shiftDate(centerDate, -halfScreenDays);
+  const bottomDate = shiftDate(centerDate, halfScreenDays);
+  const count = getMinRangeCountIncludingBothDates(topDate, bottomDate, zoom);
+  return getZoomModeRange(topDate, zoom, count);
+};
+
+export const isRangeCovered = (needed: DateRange, have: DateRange | null | undefined) =>
+  !!have && have.start <= needed.start && needed.end <= have.end;
+
 export const getRequiredMacroMapBase = (centerDate: string, dayPixels: number, height: number) => {
   const { ceil } = Math;
   const screenDays = height / dayPixels;
   const halfScreenDays = ceil(screenDays / 2);
   const modeIndex = getMode(dayPixels);
   const mode = modes[modeIndex];
-  const topDateObj = new Date(centerDate);
-  topDateObj.setDate(topDateObj.getDate() - halfScreenDays);
-  const topDate = dateString(topDateObj);
-  const bottomDateObj = new Date(centerDate);
-  bottomDateObj.setDate(bottomDateObj.getDate() + halfScreenDays);
-  const bottomDate = dateString(bottomDateObj);
-  const upperDateObj = new Date(centerDate);
-  upperDateObj.setDate(upperDateObj.getDate() - halfScreenDays * 3);
-  const upperDate = dateString(upperDateObj);
-  const lowerDateObj = new Date(centerDate);
-  lowerDateObj.setDate(lowerDateObj.getDate() + halfScreenDays * 3);
-  const lowerDate = dateString(lowerDateObj);
-  const res: MacroMap = { day: null, quarter: null, half: null, year: null, two_year: null };
+  const topDate = shiftDate(centerDate, -halfScreenDays);
+  const bottomDate = shiftDate(centerDate, halfScreenDays);
+  const upperDate = shiftDate(centerDate, -halfScreenDays * 3);
+  const lowerDate = shiftDate(centerDate, halfScreenDays * 3);
+  const res: MacroMap = emptyMacroMap();
   const currentCount = getMinRangeCountIncludingBothDates(upperDate, lowerDate, mode.id);
   res[mode.id] = { range: getZoomModeRange(upperDate, mode.id, currentCount), offset: 0 };
   if (modeIndex !== 0) {
@@ -104,9 +115,15 @@ export const getRequiredMacroMap = (mm: MacroMap, nv: NavigationValues, height: 
   return getRequiredMacroMapBase(centerDate, dayPixels, height);
 }
 
+export const emptyMacroMap = (): MacroMap => ({ day: null, quarter: null, half: null, year: null, two_year: null });
+
+export const emptyDatesData = (): DatesData => ({ day: [], quarter: [], half: [], year: [], two_year: [] });
+
+export const isEmptyMacroMap = (mm: MacroMap) => modes.every(mode => !mm[mode.id]);
+
 export const mergeMaps = (existingMap: MacroMap, additionalMap: MacroMap, existingData: DatesData, additionalData: DatesData) => {
-  const macroMap: MacroMap = { day: null, quarter: null, half: null, year: null, two_year: null };
-  const datesData: DatesData = { day: [], quarter: [], half: [], year: [], two_year: [] };
+  const macroMap: MacroMap = emptyMacroMap();
+  const datesData: DatesData = emptyDatesData();
   let latestDate = '1000-01-01';
 
   modes.forEach(mode => {
@@ -117,7 +134,10 @@ export const mergeMaps = (existingMap: MacroMap, additionalMap: MacroMap, existi
     const additionalD = additionalData[zoom];
     if (!existing || !additional) {
       const useExisting = !additional;
-      macroMap[zoom] = useExisting ? existing : additional;
+      const picked = useExisting ? existing : additional;
+      // Clone the entry: the offset is recomputed below and we must not mutate
+      // entries still referenced by the previous state.
+      macroMap[zoom] = picked ? { range: { ...picked.range }, offset: picked.offset } : null;
       datesData[zoom] = useExisting ? existingD : additionalD;
       return false;
     }
@@ -125,7 +145,7 @@ export const mergeMaps = (existingMap: MacroMap, additionalMap: MacroMap, existi
     const { range: additionalRange } = additional;
     const { contiguous, range } = mergeDateRanges(existingRange, additionalRange);
     if (!contiguous) {
-      macroMap[zoom] = additional;
+      macroMap[zoom] = { range: { ...additional.range }, offset: additional.offset };
       datesData[zoom] = additionalD;
       return false;
     }
@@ -169,10 +189,6 @@ export const mapToLoadParams = (macroMap: MacroMap) => {
   });
   return res;
 }
-
-const emptyMacroMap = (): MacroMap => ({ day: null, quarter: null, half: null, year: null, two_year: null });
-
-const isEmptyMacroMap = (mm: MacroMap) => modes.every(mode => !mm[mode.id]);
 
 // subtractMaps takes the existingMap (the data we already have available) and the
 // additionalMap (the data we need for the current scale/scroll, as produced by
