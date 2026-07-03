@@ -122,9 +122,8 @@ export const emptyDatesData = (): DatesData => ({ day: [], quarter: [], half: []
 export const isEmptyMacroMap = (mm: MacroMap) => modes.every(mode => !mm[mode.id]);
 
 export const mergeMaps = (existingMap: MacroMap, additionalMap: MacroMap, existingData: DatesData, additionalData: DatesData) => {
-  const macroMap: MacroMap = emptyMacroMap();
+  const macroMapRaw: MacroMap = emptyMacroMap();
   const datesData: DatesData = emptyDatesData();
-  let latestDate = '1000-01-01';
 
   modes.forEach(mode => {
     const zoom = mode.id;
@@ -137,7 +136,7 @@ export const mergeMaps = (existingMap: MacroMap, additionalMap: MacroMap, existi
       const picked = useExisting ? existing : additional;
       // Clone the entry: the offset is recomputed below and we must not mutate
       // entries still referenced by the previous state.
-      macroMap[zoom] = picked ? { range: { ...picked.range }, offset: picked.offset } : null;
+      macroMapRaw[zoom] = picked ? { range: { ...picked.range }, offset: 0 } : null;
       datesData[zoom] = useExisting ? existingD : additionalD;
       return false;
     }
@@ -145,29 +144,16 @@ export const mergeMaps = (existingMap: MacroMap, additionalMap: MacroMap, existi
     const { range: additionalRange } = additional;
     const { contiguous, range } = mergeDateRanges(existingRange, additionalRange);
     if (!contiguous) {
-      macroMap[zoom] = { range: { ...additional.range }, offset: additional.offset };
+      macroMapRaw[zoom] = { range: { ...additional.range }, offset: 0 };
       datesData[zoom] = additionalD;
       return false;
     }
     const nextData = mergeDateData(range, zoom, existingD, additionalD);
-    macroMap[zoom] = { range, offset: 0 };
+    macroMapRaw[zoom] = { range, offset: 0 };
     datesData[zoom] = nextData;
   });
 
-  modes.forEach(mode => {
-    const zoom = mode.id;
-    const mm = macroMap[zoom];
-    if (!mm) return false;
-    latestDate = latestDate > mm.range.end ? latestDate : mm.range.end;
-  });
-
-  modes.forEach(mode => {
-    const zoom = mode.id;
-    const mm = macroMap[zoom];
-    if (!mm) return false;
-    const offset = dateDiffStr(latestDate, mm.range.end);
-    mm.offset = offset;
-  });
+  const macroMap = alignOffsets(macroMapRaw);
 
   return { macroMap, datesData };
 }
@@ -246,6 +232,27 @@ export const subtractMaps = (existingMap: MacroMap, additionalMap: MacroMap): Ma
   const res: MacroMap[] = [];
   if (!isEmptyMacroMap(afterMap)) res.push(afterMap);
   if (!isEmptyMacroMap(beforeMap)) res.push(beforeMap);
+  return res;
+}
+
+export const alignOffsets = (mm: MacroMap) => {
+  let maxEnd: string | null = null;
+  modes.forEach(mode => {
+    const zoom = mode.id;
+    const map = mm[zoom];
+    if (!map) return true;
+    const { end } = map.range;
+    maxEnd = maxEnd ? (maxEnd > end ? maxEnd : end) : end;
+  });
+  const res = emptyMacroMap();
+  modes.forEach(mode => {
+    const zoom = mode.id;
+    const map = mm[zoom];
+    if (!map || !maxEnd) return true;
+    const { end } = map.range;
+    const offset = dateDiffStr(end, maxEnd);
+    res[zoom] = { offset, range: map.range };
+  });
   return res;
 }
 

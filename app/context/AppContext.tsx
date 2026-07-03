@@ -28,7 +28,6 @@ import {
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
 import type { CreateHabit, DeleteValue, Habit, MainProps, SetDayValue, Value, ZoomLevel } from '../types';
-import { nextDate } from '../constants/zoom';
 import { getRequiredMacroMapBase, mapToLoadParams } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';

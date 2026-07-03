@@ -1,5 +1,5 @@
 import { zoomIndeces } from '../constants/zoom';
-import { mergeDateData, mergeDateRanges } from '../utils/dataStructures';
+import { emptyDatesData, emptyMacroMap, mergeDateData, mergeDateRanges } from '../utils/dataStructures';
 import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, ZoomLevel, ZoomLevelData, MacroMap, TimePeriodData } from '../types';
 import { dateDiffStr, last } from '../utils/general';
 
@@ -11,20 +11,9 @@ const getZoomLevelDataRange = (zld: ZoomLevelData[]) => {
 }
 
 export const loadInitialDataReducer = () => (dayLevelData: MonthData[], quarterLevelData: TimePeriodData[], habits: HabitWithValues[]) => {
-  const macroMap: MacroMap = {
-    day: null,
-    quarter: null,
-    half: null,
-    year: null,
-    two_year: null
-  };
-  const dates: DatesData = {
-    day: [],
-    quarter: [],
-    half: [],
-    year: [],
-    two_year: []
-  };
+  const macroMap = emptyMacroMap();
+  const loadingMap = emptyMacroMap();
+  const dates = emptyDatesData();
   const dayRange = getZoomLevelDataRange(dayLevelData);
   const quarterRange = getZoomLevelDataRange(quarterLevelData);
   if (!dayRange || !quarterRange) return { dates, habits, macroMap, mode: 0 };
