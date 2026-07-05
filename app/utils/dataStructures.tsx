@@ -229,10 +229,7 @@ export const subtractMaps = (existingMap: MacroMap, additionalMap: MacroMap): Ma
     }
   });
 
-  const res: MacroMap[] = [];
-  if (!isEmptyMacroMap(afterMap)) res.push(afterMap);
-  if (!isEmptyMacroMap(beforeMap)) res.push(beforeMap);
-  return res;
+  return [beforeMap, afterMap];
 }
 
 export const alignOffsets = (mm: MacroMap) => {
