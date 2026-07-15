@@ -22,7 +22,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   const { date } = useLocalSearchParams();
 
   const separators = useSeparators(data);
-  const { gesture, animatedListStyle, navigationValue, zoomToPeriod, zoomStyles, executePendingModeTransitions, scrollToDate, isPanning } = useNavigationGesture(data);
+  const { gesture, animatedListStyle, navigationValue, zoomToPeriod, zoomStyles, scrollToDate, isPanning } = useNavigationGesture(data);
 
   useEffect(() => {
     if (!loaded.current && data !== null) {
@@ -82,7 +82,6 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
             <ImageRowItem
               key={key}
               item={item}
-              onLoad={executePendingModeTransitions}
               navigationValue={navigationValue}
               onPress={(targetDate, currentZoom) => {
                 if (isPanning.current) return;

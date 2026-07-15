@@ -9,7 +9,7 @@ import Animated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated
 
 interface ImageRowItemProps {
   item: TimePeriodData;
-  onLoad: () => void;
+  onLoad?: () => void;
   navigationValue: SharedValue<NavigationValues>;
   onPress: (targetDate: string, currentZoom: ZoomLevel) => void;
 }

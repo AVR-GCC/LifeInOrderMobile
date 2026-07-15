@@ -4,7 +4,7 @@ import { SharedValue, useAnimatedStyle, useFrameCallback, useSharedValue } from 
 import { scheduleOnRN } from 'react-native-worklets';
 import { useAppContext } from '../context/AppContext';
 import { MacroMap, MainProps, NavigationValues, ZoomLevel } from '../types';
-import { fitsInRange, getMode, modes, zoomIndeces, zoomMonths } from '../constants/zoom';
+import { getMode, modes, zoomIndeces, zoomMonths } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
 import { getDayPixels, getFinalDayPixels, getModeInfo, getRequiredMacroMap, mergeDateRanges } from '../utils/dataStructures';
 import { dateDiff, dateDiffStr, dateString } from '../utils/general';
@@ -22,19 +22,16 @@ interface UseNavigationGestureResult {
   animatedListStyle: ViewStyle;
   navigationValue: SharedValue<NavigationValues>;
   zoomStyles: Record<ZoomLevel, ViewStyle>;
-  executePendingModeTransitions: () => void;
   scrollToDate: (date: string) => void;
   zoomToPeriod: (date: string, zoom: ZoomLevel) => void;
   isPanning: React.RefObject<boolean>;
 }
 
 export const useNavigationGesture = (data: MainProps | null): UseNavigationGestureResult => {
-  const { loadMoreData, loadMoreDataIfNeeded, getScale, setScale, setScroll, getScroll, setMode } = useAppContext();
+  const { loadMoreDataIfNeeded, getScale, setScale, setScroll, getScroll, setMode } = useAppContext();
   const { height } = useWindowDimensions();
   const dataRef = useRef(data);
-  const loading = useRef(false);
   const isPanning = useRef(false);
-  const pendingModeTransitions = useRef<SetNavigationValuesInput>(null);
 
   const navigationValue = useSharedValue<NavigationValues>({
     scroll: {
@@ -95,10 +92,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   };
 
   useEffect(() => {
-    if (JSON.stringify(data?.macroMap) !== JSON.stringify(dataRef.current?.macroMap)) {
-      loading.current = false;
-    }
     dataRef.current = data;
+    console.log(data?.macroMap);
   }, [data])
 
   const getModeTransitionValues = (macroMap: MacroMap, mode: number) => {
@@ -147,13 +142,6 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     ],
   }));
 
-  const executePendingModeTransitions = () => {
-    if (pendingModeTransitions.current) {
-      setNavigationValues(pendingModeTransitions.current);
-      pendingModeTransitions.current = null;
-    }
-  }
-
   const checkLoadMoreDataInLocation = (mm: MacroMap, nv: NavigationValues) => {
     const rmm = getRequiredMacroMap(mm, nv, height);
     loadMoreDataIfNeeded(rmm);
@@ -166,7 +154,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   };
 
   const checkLoadMoreData = () => {
-    if (loading.current || dataRef.current === null) {
+    if (dataRef.current === null) {
       return;
     }
     const { macroMap } = dataRef.current;
@@ -174,7 +162,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   };
 
   const scrollToDate = (date: string) => {
-    if (loading.current || dataRef.current === null) {
+    if (dataRef.current === null) {
       return;
     }
     const { macroMap } = dataRef.current;
@@ -186,6 +174,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const daysToLast = dateDiff(new Date(end), todate);
     const offset = getDayPixels(navigationValue.value) * (daysToLast - mm.offset) - (height / 2);
     setNavigationValues({ mode: 0, offset, scale: getScale() });
+    checkLoadMoreDataInLocation(macroMap, navigationValue.value);
   };
 
   const zoomToPeriod = (date: string, zoom: ZoomLevel) => {
@@ -216,14 +205,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const macroMapDayOffsetFinal = contiguous ? macroMapDayOffset + dateDiffStr(lastDateInNewRange, range.end) : 0;
     const dayOffset = dateDiffStr(lastDateInNewRange, latestVisibleDateStr) - macroMapDayOffsetFinal;
     const offset = dayOffset * scale * newZoomDayPixels;
-    const haveData = fitsInRange(earliestLoadedDateStr, zoom, 3, range);
-    if (haveData) {
-      setNavigationValues({ mode, offset, scale });
-    } else {
-      pendingModeTransitions.current = { mode, offset, scale };
-      loading.current = true;
-      loadMoreData(earliestLoadedDateStr, zoom, 3);
-    }
+    setNavigationValues({ mode, offset, scale });
+    checkLoadMoreDataInLocation(macroMap, navigationValue.value);
   };
 
   useFrameCallback((frameInfo) => {
@@ -437,7 +420,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     .onTouchesUp(onTouchesUp)
     .onTouchesCancelled(onTouchesUp);
 
-  return { gesture, animatedListStyle, navigationValue, zoomStyles, executePendingModeTransitions, scrollToDate, zoomToPeriod, isPanning };
+  return { gesture, animatedListStyle, navigationValue, zoomStyles, scrollToDate, zoomToPeriod, isPanning };
 };
 
 export default { useNavigationGesture };
