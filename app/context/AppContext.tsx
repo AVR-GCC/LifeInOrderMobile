@@ -6,6 +6,7 @@ import {
   deleteValueServer,
   getUserConfig,
   getUserList,
+  getUserMapPure,
   reorderHabitsServer,
   reorderValuesServer,
   setDayValueServer,
@@ -20,15 +21,17 @@ import {
   deleteValueReducer,
   loadInitialDataReducer,
   loadMoreDataReducer,
+  receiveMoreDataReducer,
   setDayHabitValueReducer,
   switchHabitsReducer,
   switchValuesReducer,
   updateHabitReducer,
+  updateLoadingMap,
   updateValueReducer
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
-import type { CreateHabit, DeleteValue, Habit, MainProps, SetDayValue, Value, ZoomLevel } from '../types';
-import { getRequiredMacroMapBase, mapToLoadParams } from '../utils/dataStructures';
+import type { CreateHabit, DeleteValue, Habit, MacroMap, MainProps, SetDayValue, Value, ZoomLevel } from '../types';
+import { emptyDatesData, emptyMacroMap, getRequiredMacroMapBase, isEmptyMacroMap, mapToLoadParams, mergeMaps, subtractMaps } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
 
@@ -45,6 +48,7 @@ interface AppContextType {
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
   loadMoreData: (date: string, zoom: ZoomLevel, count: number) => Promise<void>;
+  loadMoreDataIfNeeded: (rmm: MacroMap) => Promise<void>;
   setScale: (newScale: number) => void;
   getScale: () => number;
   setScroll: (newScroll: number) => void;
@@ -58,6 +62,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const { height, width } = useWindowDimensions();
   const [data, setData] = useState<MainProps | null>(null);
   const dataRef = useRef(data);
+  const running = useRef(false);
+  const loadingMap = useRef(emptyMacroMap());
   useEffect(() => {
     dataRef.current = data;
   }, [data]);
@@ -102,6 +108,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadInitialData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const loadMoreDataIfNeeded = async (rmm: MacroMap) => {
+    if (running.current || data === null || dataRef.current === null) return;
+    running.current = true;
+    // console.log('required', rmm.day ? rmm.day.range : 'null');
+    const { macroMap } = dataRef.current;
+    const emptyDates = emptyDatesData();
+    const { macroMap: merged } = mergeMaps(macroMap, loadingMap.current, emptyDates, emptyDates);
+    // console.log('available', macroMap.day ? macroMap.day.range : 'null');
+    // console.log('loading', loadingMap.current.day ? loadingMap.current.day.range : 'null');
+    const [before, after] = subtractMaps(merged, rmm);
+    // console.log('before', before.day ? before.day.range : 'null');
+    // console.log('after', after.day ? after.day.range : 'null');
+    if (isEmptyMacroMap(before) && isEmptyMacroMap(after)) {
+      running.current = false;
+      return;
+    }
+    const { macroMap: withAfter } = mergeMaps(after, loadingMap.current, emptyDates, emptyDates);
+    const { macroMap: newLoading } = mergeMaps(before, withAfter, emptyDates, emptyDates);
+    // console.log('newLoading', newLoading.day ? newLoading.day.range : 'null');
+    loadingMap.current = newLoading;
+    const promises = [before, after].map((map, i) => getUserMapPure(map, i === 0, width));
+    running.current = false;
+    Promise.all(promises).then(responses => {
+      if (data === null) return;
+      const newData = receiveMoreDataReducer(data)(responses);
+      setData(newData);
+      for (let i = 0; i < responses.length; i++) {
+        const { map, isBefore } = responses[i];
+        const [before, after] = subtractMaps(loadingMap.current, map);
+        loadingMap.current = isBefore ? after : before;
+      }
+    });
+  };
 
   const loadMoreData = async (date: string, zoom: ZoomLevel, count: number) => {
     if (dataRef.current === null) return;
@@ -236,6 +276,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateValue,
         deleteValue,
         loadMoreData,
+        loadMoreDataIfNeeded,
         setScale,
         getScale,
         setScroll,

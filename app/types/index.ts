@@ -69,6 +69,12 @@ export interface MainProps {
   mode: number;
 }
 
+export interface GetUserMapPureResponse {
+  map: MacroMap;
+  datesData: DatesData;
+  isBefore: boolean;
+}
+
 export interface NavigationValues {
   zoom: {
     start: {

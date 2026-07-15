@@ -1,6 +1,6 @@
 import { zoomIndeces } from '../constants/zoom';
-import { emptyDatesData, emptyMacroMap, mergeDateData, mergeDateRanges } from '../utils/dataStructures';
-import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, ZoomLevel, ZoomLevelData, MacroMap, TimePeriodData } from '../types';
+import { emptyDatesData, emptyMacroMap, mergeDateData, mergeDateRanges, mergeMaps } from '../utils/dataStructures';
+import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, ZoomLevel, ZoomLevelData, MacroMap, TimePeriodData, GetUserMapPureResponse } from '../types';
 import { dateDiffStr, last } from '../utils/general';
 
 const getZoomLevelDataRange = (zld: ZoomLevelData[]) => {
@@ -12,7 +12,6 @@ const getZoomLevelDataRange = (zld: ZoomLevelData[]) => {
 
 export const loadInitialDataReducer = () => (dayLevelData: MonthData[], quarterLevelData: TimePeriodData[], habits: HabitWithValues[]) => {
   const macroMap = emptyMacroMap();
-  const loadingMap = emptyMacroMap();
   const dates = emptyDatesData();
   const dayRange = getZoomLevelDataRange(dayLevelData);
   const quarterRange = getZoomLevelDataRange(quarterLevelData);
@@ -26,7 +25,6 @@ export const loadInitialDataReducer = () => (dayLevelData: MonthData[], quarterL
   const quarter = { offset: quarterOffset, range: quarterRange };
   macroMap.quarter = quarter;
   dates.quarter = quarterLevelData;
-  console.log('initial', macroMap);
   return { dates, habits, macroMap, mode: 0 };
 };
 
@@ -52,6 +50,19 @@ export const loadMoreDataReducer = (data: MainProps) => (zoom: ZoomLevel, newDat
   const nextOffset = dateDiffStr(range.end, existingEnd) + (macroMap[zoom]?.offset || 0);
   const nextMacroMap: MacroMap = { ...macroMap, [zoom]: { offset: nextOffset, range } };
   return { ...data, dates: nextDates, macroMap: nextMacroMap, mode: nextMode };
+};
+
+export const receiveMoreDataReducer = (data: MainProps) => (responses: GetUserMapPureResponse[]) => {
+  const { dates: oldDates, macroMap: oldMacroMap } = data;
+  let dates = oldDates, macroMap = oldMacroMap;
+  responses.forEach(({ map, datesData }) => {
+    // console.log('response', map.day ? map.day.range : 'null');
+    const mapMerge = mergeMaps(macroMap, map, dates, datesData);
+    dates = mapMerge.datesData;
+    macroMap = mapMerge.macroMap;
+  });
+  // console.log('new state', macroMap.day ? macroMap.day.range : 'null');
+  return { ...data, dates, macroMap };
 };
 
 export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, monthIndex: number, habitIndex: number, values: { valueId: string, text: string | null }) => {

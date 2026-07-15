@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { DatesData, Habit, MacroMap, SetDayValueServer, Value, ZoomLevel } from '../types';
+import type { DatesData, GetUserMapPureResponse, Habit, MacroMap, SetDayValueServer, Value, ZoomLevel } from '../types';
 import { getZoomModeRange } from '../constants/zoom';
 import { mapToLoadParams } from '../utils/dataStructures';
 
@@ -44,13 +44,14 @@ const getUserListPure = async (date: string, zoom: ZoomLevel, count: number, wid
   }
 };
 
-export const getUserMapPure = async (map: MacroMap, width: number) => {
+export const getUserMapPure = async (map: MacroMap, isBefore: boolean, width: number) => {
   const inputs = mapToLoadParams(map);
   const datesData: DatesData = { day: [], quarter: [], half: [], year: [], two_year: [] };
   await Promise.all(inputs.map(async({ date, zoom, count }) => {
     datesData[zoom] = await getUserListPure(date, zoom, count, width);
-  }))
-  return datesData;
+  }));
+  const res: GetUserMapPureResponse = { map, datesData, isBefore };
+  return res;
 };
 
 export const debounce = (func: (...args: any) => any, milis: number) => {
