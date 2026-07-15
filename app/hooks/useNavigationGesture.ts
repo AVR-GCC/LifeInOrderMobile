@@ -163,7 +163,6 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const modeTransitionValues = getModeTransitionValues(mm, newMode);
     if (!modeTransitionValues) return;
     setNavigationValues(modeTransitionValues);
-    setMode(newMode);
   };
 
   const checkLoadMoreData = () => {

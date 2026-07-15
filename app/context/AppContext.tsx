@@ -26,7 +26,6 @@ import {
   switchHabitsReducer,
   switchValuesReducer,
   updateHabitReducer,
-  updateLoadingMap,
   updateValueReducer
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
