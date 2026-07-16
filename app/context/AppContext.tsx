@@ -92,7 +92,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const rmmb = getRequiredMacroMapBase(today, 24, height);
     const loadParams = mapToLoadParams(rmmb);
-    const loadPromises = loadParams.map(({ date, zoom, count }) => getUserList(date, zoom, count, width));
+    const loadPromises = loadParams.map(({ date, zoom, count }) => getUserList(date, zoom, count, width - LEFT_BAR_WIDTH));
     const [dates, months, habits] = await Promise.all([
       ...loadPromises,
       userConfigPromise
@@ -136,7 +136,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         map: before,
         id: loadingMap.current.nextId
       };
-      beforePromise = getUserMap(before, true, loadingMap.current.nextId, width);
+      beforePromise = getUserMap(before, true, loadingMap.current.nextId, width - LEFT_BAR_WIDTH);
       loadingMap.current.nextId++;
       loadingMap.current.entries.push(entry);
     }
