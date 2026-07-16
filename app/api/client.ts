@@ -1,7 +1,7 @@
 import axios from 'axios';
-import type { DatesData, GetUserMapPureResponse, Habit, MacroMap, SetDayValueServer, Value, ZoomLevel } from '../types';
+import type { GetUserMapPureResponse, Habit, MacroMap, SetDayValueServer, Value, ZoomLevel } from '../types';
 import { getZoomModeRange } from '../constants/zoom';
-import { mapToLoadParams } from '../utils/dataStructures';
+import { emptyDatesData, mapToLoadParams } from '../utils/dataStructures';
 
 // const baseUrl = 'http://10.0.0.9:8080'; // TODO: Make this configurable via environment variables
 // const baseUrl = 'http://192.168.1.174:8080'; // TODO: Make this configurable via environment variables
@@ -21,21 +21,21 @@ export const getUserConfig = async () => {
   }
 };
 
-const getUserListPure = async (date: string, zoom: ZoomLevel, count: number, width: number) => {
+export const getUserList = async (date: string, zoom: ZoomLevel, count: number, width: number) => {
   try {
-    // console.log('getUserListPure date, zoom, count', date, zoom, count);
+    // console.log('getUserList date, zoom, count', date, zoom, count);
     const route = `${baseUrl}/users/1/list?date=${date}&zoom=${zoom}&count=${count}&width=${width}`;
     const config = zoom !== 'day' ? { responseType: 'arraybuffer' as const } : {};
     const res = await axios.get(route, config);
-    // console.log('getUserListPure', date);
+    // console.log('getUserList', date);
     if (res.data?.length) {
-      // console.log('getUserListPure res.data', JSON.stringify(res.data, null, 2));
+      // console.log('getUserList res.data', JSON.stringify(res.data, null, 2));
       return res.data;
     } else {
       const base64String = res.request._response;
       const image = `data:image/webp;base64,${base64String}`;
       const range = getZoomModeRange(date, zoom, count);
-      // console.log('getUserListPure range', range);
+      // console.log('getUserList range', range);
       return [{ range, image, zoom }];
     }
   } catch (error) {
@@ -44,13 +44,14 @@ const getUserListPure = async (date: string, zoom: ZoomLevel, count: number, wid
   }
 };
 
-export const getUserMapPure = async (map: MacroMap, isBefore: boolean, width: number) => {
+export const getUserMap = async (map: MacroMap, isBefore: boolean, id: number, width: number) => {
+  console.log('getUserMap', map, isBefore);
   const inputs = mapToLoadParams(map);
-  const datesData: DatesData = { day: [], quarter: [], half: [], year: [], two_year: [] };
+  const datesData = emptyDatesData();
   await Promise.all(inputs.map(async({ date, zoom, count }) => {
-    datesData[zoom] = await getUserListPure(date, zoom, count, width);
+    datesData[zoom] = await getUserList(date, zoom, count, width);
   }));
-  const res: GetUserMapPureResponse = { map, datesData, isBefore };
+  const res: GetUserMapPureResponse = { id, map, datesData, isBefore };
   return res;
 };
 
@@ -61,23 +62,6 @@ export const debounce = (func: (...args: any) => any, milis: number) => {
     deb = setTimeout(() => resolve(func(...args)), milis);
   });
 };
-
-export const getUserMap = debounce(getUserMapPure, 1000);
-
-export const throttleGetUserList = () => {
-  const recent: Record<string, number> = {};
-  const fun = async(date: string, zoom: ZoomLevel, count: number, width: number) => {
-    const now = Date.now();
-    const key = `${zoom}-${date}`;
-    const expiration = (recent[key] || 0) + 2000;
-    if (expiration > now) return;
-    recent[key] = now;
-    return getUserListPure(date, zoom, count, width);
-  };
-  return fun;
-}
-
-export const getUserList = throttleGetUserList();
 
 export const setDayValueServer: SetDayValueServer = (() => {
   const throttles: { [key: string]: ReturnType<typeof setTimeout> } = {};

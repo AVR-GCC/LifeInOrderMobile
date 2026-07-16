@@ -6,7 +6,7 @@ import {
   deleteValueServer,
   getUserConfig,
   getUserList,
-  getUserMapPure,
+  getUserMap,
   reorderHabitsServer,
   reorderValuesServer,
   setDayValueServer,
@@ -29,7 +29,7 @@ import {
   updateValueReducer
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
-import type { CreateHabit, DeleteValue, Habit, MacroMap, MainProps, SetDayValue, Value, ZoomLevel } from '../types';
+import type { CreateHabit, DeleteValue, Habit, LoadingMap, MacroMap, MainProps, SetDayValue, Value, ZoomLevel } from '../types';
 import { emptyDatesData, emptyMacroMap, getRequiredMacroMapBase, isEmptyMacroMap, mapToLoadParams, mergeMaps, subtractMaps } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
@@ -62,7 +62,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [data, setData] = useState<MainProps | null>(null);
   const dataRef = useRef(data);
   const running = useRef(false);
-  const loadingMap = useRef(emptyMacroMap());
+  const loadingMap = useRef<LoadingMap>({ nextId: 1, entries: [] });
   useEffect(() => {
     dataRef.current = data;
   }, [data]);
@@ -114,30 +114,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // console.log('required', rmm.day ? rmm.day.range : 'null');
     const { macroMap } = dataRef.current;
     const emptyDates = emptyDatesData();
-    const { macroMap: merged } = mergeMaps(macroMap, loadingMap.current, emptyDates, emptyDates);
+    let merged = macroMap;
+    for (let i = 0; i < loadingMap.current.entries.length; i++) {
+      const res = mergeMaps(merged, loadingMap.current.entries[i].map, emptyDates, emptyDates);
+      merged = res.macroMap;
+    }
     // console.log('available', macroMap.day ? macroMap.day.range : 'null');
     // console.log('loading', loadingMap.current.day ? loadingMap.current.day.range : 'null');
     const [before, after] = subtractMaps(merged, rmm);
     // console.log('before', before.day ? before.day.range : 'null');
     // console.log('after', after.day ? after.day.range : 'null');
-    if (isEmptyMacroMap(before) && isEmptyMacroMap(after)) {
+    const beforeEmpty = isEmptyMacroMap(before);
+    const afterEmpty = isEmptyMacroMap(after);
+    if (beforeEmpty && afterEmpty) {
       running.current = false;
       return;
     }
-    const { macroMap: withAfter } = mergeMaps(after, loadingMap.current, emptyDates, emptyDates);
-    const { macroMap: newLoading } = mergeMaps(before, withAfter, emptyDates, emptyDates);
-    // console.log('newLoading', newLoading.day ? newLoading.day.range : 'null');
-    loadingMap.current = newLoading;
-    const promises = [before, after].map((map, i) => getUserMapPure(map, i === 0, width));
+    let beforePromise = null;
+    if (!beforeEmpty) {
+      const entry = {
+        map: before,
+        id: loadingMap.current.nextId
+      };
+      beforePromise = getUserMap(before, true, loadingMap.current.nextId, width);
+      loadingMap.current.nextId++;
+      loadingMap.current.entries.push(entry);
+    }
+    let afterPromise = null;
+    if (!afterEmpty) {
+      const entry = {
+        map: after,
+        id: loadingMap.current.nextId
+      };
+      afterPromise = getUserMap(after, false, loadingMap.current.nextId, width);
+      loadingMap.current.nextId++;
+      loadingMap.current.entries.push(entry);
+    }
+    const promises = [beforePromise, afterPromise].filter(pr => !!pr);
+    console.log('promises', promises.length);
     running.current = false;
     Promise.all(promises).then(responses => {
       if (data === null) return;
       const newData = receiveMoreDataReducer(data)(responses);
       setData(newData);
       for (let i = 0; i < responses.length; i++) {
-        const { map, isBefore } = responses[i];
-        const [before, after] = subtractMaps(loadingMap.current, map);
-        loadingMap.current = isBefore ? after : before;
+        const { id } = responses[i];
+        const loadingIndex = loadingMap.current.entries.findIndex(lme => lme.id === id);
+        loadingMap.current.entries.splice(loadingIndex);
       }
     });
   };

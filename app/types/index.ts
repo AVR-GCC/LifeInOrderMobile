@@ -62,6 +62,16 @@ export type MacroMapEntry = {
 }
 export type MacroMap = Record<ZoomLevel, MacroMapEntry | null>;
 
+export type LoadingMapEntry = {
+  map: MacroMap,
+  id: number
+};
+
+export type LoadingMap = {
+  entries: LoadingMapEntry[],
+  nextId: number
+};
+
 export interface MainProps {
   habits: HabitWithValues[];
   dates: DatesData;
@@ -70,6 +80,7 @@ export interface MainProps {
 }
 
 export interface GetUserMapPureResponse {
+  id: number;
   map: MacroMap;
   datesData: DatesData;
   isBefore: boolean;
