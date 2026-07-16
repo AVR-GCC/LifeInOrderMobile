@@ -8,7 +8,7 @@ import Loading from '../components/Loading';
 import Screen from '../components/Screen';
 import Separators from '../components/Separators';
 import TopBar from '../components/TopBar';
-import { modes } from '../constants/zoom';
+import { modes, zoomIndeces } from '../constants/zoom';
 import { useNavigationGesture } from '../hooks/useNavigationGesture';
 import { useSeparators } from '../hooks/useSeparators';
 import { MainScreenProps, ZoomLevelData } from '../types';
@@ -107,7 +107,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
                 key={`zoom-style-${m.id}`}
                 style={[{
                   position: 'absolute',
-                  bottom: (macroMap[m.id]?.offset || 0) * -1 * modes[mode].dayPixels,
+                  bottom: (macroMap[m.id]?.offset || 0) * -1 * modes[zoomIndeces[m.id]].dayPixels,
                   left: 0,
                   right: 0
                 }, zoomStyles[m.id]]}
