@@ -63,9 +63,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const dataRef = useRef(data);
   const running = useRef(false);
   const loadingMap = useRef<LoadingMap>({ nextId: 1, entries: [] });
-  useEffect(() => {
-    dataRef.current = data;
-  }, [data]);
+
+  const updateData = (newData: MainProps | null) => {
+    dataRef.current = newData;
+    setData(newData);
+  };
 
   const loadingDataRef = useRef(false);
   const scaleRef = useRef(1);
@@ -98,7 +100,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       userConfigPromise
     ]);
     if (dates && months && habits) {
-      setData(loadInitialDataReducer()(dates, months, habits));
+      updateData(loadInitialDataReducer()(dates, months, habits));
     }
     loadingDataRef.current = false;
   };
@@ -154,9 +156,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     console.log('promises', promises.length);
     running.current = false;
     Promise.all(promises).then(responses => {
-      if (data === null) return;
-      const newData = receiveMoreDataReducer(data)(responses);
-      setData(newData);
+      if (dataRef.current === null) return;
+      updateData(receiveMoreDataReducer(dataRef.current)(responses));
       for (let i = 0; i < responses.length; i++) {
         const { id } = responses[i];
         const loadingIndex = loadingMap.current.entries.findIndex(lme => lme.id === id);
@@ -171,28 +172,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadingDataRef.current = true;
     const res = await getUserList(date, zoom, count, width - LEFT_BAR_WIDTH);
     if (res) {
-      const newData = loadMoreDataReducer(dataRef.current)(zoom, res);
-      setData(newData);
+      updateData(loadMoreDataReducer(dataRef.current)(zoom, res));
     }
     loadingDataRef.current = false;
   };
 
   const setDayHabitValue: SetDayValue = (dateIndex, monthIndex, habitIndex, values) => {
-    if (data === null) return;
-    const { dates, habits } = data;
+    if (dataRef.current === null) return;
+    const { dates, habits } = dataRef.current;
     const month = dates.day[monthIndex];
     if ('image' in month) return;
     setDayValueServer(month.days[dateIndex].date, habits[habitIndex].habit.id, values);
-    setData(setDayHabitValueReducer(data)(dateIndex, monthIndex, habitIndex, values));
+    updateData(setDayHabitValueReducer(dataRef.current)(dateIndex, monthIndex, habitIndex, values));
   };
 
   const getDayHabitValue = (dateIndex: number, monthIndex: number, habitIndex: number) => {
-    if (data === null) return null;
-    return getDayHabitValueSelector(data)(dateIndex, monthIndex, habitIndex);
+    if (dataRef.current === null) return null;
+    return getDayHabitValueSelector(dataRef.current)(dateIndex, monthIndex, habitIndex);
   };
 
   const createHabit: CreateHabit = async (sequence, type = 'color', name = '') => {
-    if (data === null) return null;
+    if (dataRef.current === null) return null;
     const newHabit = {
       name,
       weight: 1,
@@ -212,38 +212,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const newValueValues = await createValueServer(newValue);
       values.push(newValueValues);
     }
-    setData(addHabitReducer(data)(newHabitValue, values));
+    updateData(addHabitReducer(dataRef.current)(newHabitValue, values));
   }
 
   const updateHabit = (habitIndex: number, newHabitValues: Partial<Value>) => {
-    if (data === null) return;
-    const newData = updateHabitReducer(data)(habitIndex, newHabitValues);
-    setData(newData);
+    if (dataRef.current === null) return;
+    const newData = updateHabitReducer(dataRef.current)(habitIndex, newHabitValues);
+    updateData(newData);
     const { habits } = newData;
     updateHabitServer(habits[habitIndex].habit);
   };
 
   const deleteHabit = (index: number) => {
-    if (data === null) return;
-    const { habits } = data;
+    if (dataRef.current === null) return;
+    const { habits } = dataRef.current;
     deleteHabitServer(habits[index].habit.id);
-    setData(deleteHabitReducer(data)(index));
+    updateData(deleteHabitReducer(dataRef.current)(index));
   };
 
   const switchHabits = (isDown: boolean, index: number) => {
-    if (data === null) return;
-    const { habits } = data;
+    if (dataRef.current === null) return;
+    const { habits } = dataRef.current;
     const otherIndex = index + (isDown ? 1 : -1);
     const ids = habits.map(h => h.habit.id);
     ids[index] = habits[otherIndex].habit.id;
     ids[otherIndex] = habits[index].habit.id;
-    setData(switchHabitsReducer(data)(isDown, index));
     reorderHabitsServer(ids);
+    updateData(switchHabitsReducer(dataRef.current)(isDown, index));
   };
 
   const createValue = async (habitIndex: number, sequence: number) => {
-    if (data === null) return null;
-    const { habits } = data;
+    if (dataRef.current === null) return null;
+    const { habits } = dataRef.current;
     const newValue = {
       label: '',
       color: colorOptions[0],
@@ -252,35 +252,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       created_at: 'new'
     };
     const newValueValues = await createValueServer(newValue);
-    setData(addValueReducer(data)(habitIndex, newValueValues));
+    updateData(addValueReducer(dataRef.current)(habitIndex, newValueValues));
   };
 
   const switchValues = (isDown: boolean, habitIndex: number, valueIndex: number) => {
-    if (data === null) return;
-    const { habits } = data;
+    if (dataRef.current === null) return;
+    const { habits } = dataRef.current;
     const otherIndex = valueIndex + (isDown ? 1 : -1);
     const values = habits[habitIndex].values;
     const ids = values.map(v => v.id);
     ids[valueIndex] = values[otherIndex].id;
     ids[otherIndex] = values[valueIndex].id;
-    setData(switchValuesReducer(data)(isDown, habitIndex, valueIndex));
     reorderValuesServer(ids);
+    updateData(switchValuesReducer(dataRef.current)(isDown, habitIndex, valueIndex));
   };
 
   const updateValue = (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => {
-    if (data === null) return;
-    setData(updateValueReducer(data)(habitIndex, valueIndex, newValueValues));
-    const { habits } = data;
+    if (dataRef.current === null) return;
+    const { habits } = dataRef.current;
     const oldValue = habits[habitIndex].values[valueIndex];
     const newValue = { ...oldValue, ...newValueValues };
     updateValueServer(newValue);
+    updateData(updateValueReducer(dataRef.current)(habitIndex, valueIndex, newValueValues));
   };
 
   const deleteValue = (habitIndex: number, valueIndex: number) => {
-    if (data === null) return;
-    const { habits } = data;
+    if (dataRef.current === null) return;
+    const { habits } = dataRef.current;
     deleteValueServer(habits[habitIndex].values[valueIndex].id);
-    setData(deleteValueReducer(data)(habitIndex, valueIndex));
+    updateData(deleteValueReducer(dataRef.current)(habitIndex, valueIndex));
   };
 
   return (
