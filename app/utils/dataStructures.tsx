@@ -253,7 +253,20 @@ export const alignOffsets = (mm: MacroMap) => {
   return res;
 }
 
+export const printMacroMap = (mm: MacroMap | undefined) => {
+  if (!mm || isEmptyMacroMap(mm)) return;
+  console.log('{');
+  modes.forEach(mode => {
+    const zoom = mode.id;
+    const map = mm[zoom];
+    if (!map) return true;
+    console.log('    ', mode.name, map.range.start, '->', map.range.end, map.offset);
+  });
+  console.log('}');
+}
+
 export default {
+  printMacroMap,
   getModeInfo,
   getDayPixels,
   getFinalDayPixels,
