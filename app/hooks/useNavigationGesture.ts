@@ -15,7 +15,7 @@ const PAN_THRESHOLD = 5;
 
 type SetNavigationValuesInput = { mode: number, offset: number, scale: number };
 type FabNavigationValues = (params: SetNavigationValuesInput) => NavigationValues;
-type SetNavigationValues = (params: SetNavigationValuesInput) => void;
+type SetNavigationValues = (params: SetNavigationValuesInput) => NavigationValues;
 
 interface UseNavigationGestureResult {
   gesture: GestureType;
@@ -85,10 +85,12 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   const setNavigationValues: SetNavigationValues = ({ mode, offset, scale }) => {
     // const curVals = { mode: navigationValue.value.mode, offset: navigationValue.value.scroll.current.offset, scale: navigationValue.value.zoom.current.scale };
     // console.log(curVals, '=>', { mode, offset, scale });
-    navigationValue.value = fabNavigationValue({ mode, offset, scale });
+    const newNav = fabNavigationValue({ mode, offset, scale });
+    navigationValue.value = newNav;
     if (offset !== getScroll()) setScroll(offset);
     if (scale !== getScale()) setScale(scale);
     if (mode !== dataRef.current?.mode) setMode(mode);
+    return newNav;
   };
 
   useEffect(() => {
@@ -147,7 +149,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     loadMoreDataIfNeeded(rmm);
     const dayPixels = getFinalDayPixels(nv);
     const newMode = getMode(dayPixels);
-    if (newMode === navigationValue.value.mode) return;
+    if (newMode === nv.mode) return;
     const modeTransitionValues = getModeTransitionValues(mm, newMode);
     if (!modeTransitionValues) return;
     setNavigationValues(modeTransitionValues);
@@ -173,8 +175,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const { end } = mm.range;
     const daysToLast = dateDiff(new Date(end), todate);
     const offset = getDayPixels(navigationValue.value) * (daysToLast - mm.offset) - (height / 2);
-    setNavigationValues({ mode: 0, offset, scale: getScale() });
-    checkLoadMoreDataInLocation(macroMap, navigationValue.value);
+    const newNav = setNavigationValues({ mode: 0, offset, scale: getScale() });
+    checkLoadMoreDataInLocation(macroMap, newNav);
   };
 
   const zoomToPeriod = (date: string, zoom: ZoomLevel) => {
@@ -205,8 +207,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const macroMapDayOffsetFinal = contiguous ? macroMapDayOffset + dateDiffStr(lastDateInNewRange, range.end) : 0;
     const dayOffset = dateDiffStr(lastDateInNewRange, latestVisibleDateStr) - macroMapDayOffsetFinal;
     const offset = dayOffset * scale * newZoomDayPixels;
-    setNavigationValues({ mode, offset, scale });
-    checkLoadMoreDataInLocation(macroMap, navigationValue.value);
+    const newNav = setNavigationValues({ mode, offset, scale });
+    checkLoadMoreDataInLocation(macroMap, newNav);
   };
 
   useFrameCallback((frameInfo) => {
