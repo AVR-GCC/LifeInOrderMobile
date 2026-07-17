@@ -2,10 +2,10 @@ import { DateRange, ModeInfo, ZoomLevel } from "../types";
 import { dateString } from "../utils/general";
 
 export const modes: ModeInfo[] = [
-  {id: 'day', name: 'Day', dayPixels: 24, minPixels: 13.856},
-  {id: 'quarter', name: 'Week', dayPixels: 8, minPixels: 5.657, maxPixels: 13.856},
-  {id: 'half', name: 'Month', dayPixels: 4, minPixels: 2.828, maxPixels: 5.657},
-  {id: 'year', name: 'Year', dayPixels: 2, minPixels: 1.414, maxPixels: 2.828},
+  {id: 'day',      name: 'Day      ', dayPixels: 24, minPixels: 13.856},
+  {id: 'quarter',  name: 'Quarter  ', dayPixels: 8, minPixels: 5.657, maxPixels: 13.856},
+  {id: 'half',     name: 'Half     ', dayPixels: 4, minPixels: 2.828, maxPixels: 5.657},
+  {id: 'year',     name: 'Year     ', dayPixels: 2, minPixels: 1.414, maxPixels: 2.828},
   {id: 'two_year', name: 'Two Years', dayPixels: 1, maxPixels: 1.414}
 ];
 
