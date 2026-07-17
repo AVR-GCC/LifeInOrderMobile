@@ -83,7 +83,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const setMode = (mode: number) => {
     if (!dataRef.current) return;
-    setData({ ...dataRef.current, mode });
+    updateData({ ...dataRef.current, mode });
   }
 
   const loadInitialData = async () => {
