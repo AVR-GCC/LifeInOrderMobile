@@ -148,7 +148,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         map: after,
         id: loadingMap.current.nextId
       };
-      afterPromise = getUserMap(after, false, loadingMap.current.nextId, width);
+      afterPromise = getUserMap(after, false, loadingMap.current.nextId, width - LEFT_BAR_WIDTH);
       loadingMap.current.nextId++;
       loadingMap.current.entries.push(entry);
     }
