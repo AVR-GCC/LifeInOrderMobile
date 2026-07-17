@@ -115,9 +115,9 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
                 <View id={m.id}>
                   {list(dates[m.id])}
                 </View>
+                <Separators separators={separators[m.id]} navigationValue={navigationValue} mode={zoomIndeces[m.id]} macroMap={macroMap} />
               </Animated.View>
             ))}
-            <Separators separators={separators} navigationValue={navigationValue} mode={mode} macroMap={macroMap} />
           </Animated.View>
         </GestureDetector>
       </View>
