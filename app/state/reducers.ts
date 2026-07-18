@@ -62,6 +62,8 @@ export const receiveMoreDataReducer = (data: MainProps) => (responses: GetUserMa
     macroMap = mapMerge.macroMap;
   });
   // console.log('new state', macroMap.day ? macroMap.day.range : 'null');
+  // console.log('receiveMoreDataReducer');
+  // printMacroMap(macroMap);
   return { ...data, dates, macroMap };
 };
 

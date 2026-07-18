@@ -30,7 +30,7 @@ import {
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
 import type { CreateHabit, DeleteValue, Habit, LoadingMap, MacroMap, MainProps, SetDayValue, Value, ZoomLevel } from '../types';
-import { emptyDatesData, emptyMacroMap, getRequiredMacroMapBase, isEmptyMacroMap, mapToLoadParams, mergeMaps, subtractMaps } from '../utils/dataStructures';
+import { emptyDatesData, getRequiredMacroMapBase, isEmptyMacroMap, mapToLoadParams, mergeMaps, subtractMaps } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
 
@@ -132,6 +132,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       running.current = false;
       return;
     }
+    // console.log('loadMoreDataIfNeeded');
+    // console.log('before:');
+    // printMacroMap(before);
+    // console.log('after:');
+    // printMacroMap(after);
     let beforePromise = null;
     if (!beforeEmpty) {
       const entry = {
@@ -153,7 +158,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       loadingMap.current.entries.push(entry);
     }
     const promises = [beforePromise, afterPromise].filter(pr => !!pr);
-    console.log('promises', promises.length);
     running.current = false;
     Promise.all(promises).then(responses => {
       if (dataRef.current === null) return;

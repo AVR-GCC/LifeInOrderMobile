@@ -95,7 +95,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
 
   useEffect(() => {
     dataRef.current = data;
-    console.log(data?.macroMap);
+    // console.log('state');
+    // printMacroMap(data?.macroMap);
   }, [data])
 
   const getModeTransitionValues = (macroMap: MacroMap, mode: number) => {

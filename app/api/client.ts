@@ -45,7 +45,8 @@ export const getUserList = async (date: string, zoom: ZoomLevel, count: number, 
 };
 
 export const getUserMap = async (map: MacroMap, isBefore: boolean, id: number, width: number) => {
-  console.log('getUserMap', map, isBefore);
+  // console.log('getUserMap', width, isBefore ? 'before' : 'after');
+  // printMacroMap(map);
   const inputs = mapToLoadParams(map);
   const datesData = emptyDatesData();
   await Promise.all(inputs.map(async({ date, zoom, count }) => {
