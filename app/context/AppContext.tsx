@@ -159,7 +159,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     running.current = false;
     Promise.all(promises).then(responses => {
       if (dataRef.current === null) return;
-      updateData(receiveMoreDataReducer(dataRef.current)(responses));
+      updateData(receiveMoreDataReducer(dataRef.current)(responses, rmm));
       for (let i = 0; i < responses.length; i++) {
         const { id } = responses[i];
         const loadingIndex = loadingMap.current.entries.findIndex(lme => lme.id === id);
