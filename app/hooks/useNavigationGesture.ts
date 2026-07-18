@@ -6,7 +6,7 @@ import { useAppContext } from '../context/AppContext';
 import { MacroMap, MainProps, NavigationValues, ZoomLevel } from '../types';
 import { getMode, modes, zoomIndeces, zoomMonths } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
-import { getDayPixels, getFinalDayPixels, getModeInfo, getRequiredMacroMap, mergeDateRanges } from '../utils/dataStructures';
+import { getDayPixels, getFinalDayPixels, getModeInfo, getSurroundingMacroMap, mergeDateRanges } from '../utils/dataStructures';
 import { dateDiff, dateDiffStr, dateString } from '../utils/general';
 
 const DECELERATION = 0.998;
@@ -146,7 +146,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   }));
 
   const checkLoadMoreDataInLocation = (mm: MacroMap, nv: NavigationValues) => {
-    const rmm = getRequiredMacroMap(mm, nv, height);
+    const rmm = getSurroundingMacroMap(mm, nv, 1, height);
     loadMoreDataIfNeeded(rmm);
     const dayPixels = getFinalDayPixels(nv);
     const newMode = getMode(dayPixels);

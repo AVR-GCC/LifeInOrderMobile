@@ -1,4 +1,4 @@
-import { getMinRangeCountIncludingBothDates, getMode, getZoomModeRange, modes, nextDate, zoomIndeces } from "../constants/zoom";
+import { getMinRangeCountIncludingBothDates, getMode, getZoomModeRange, modes, nextDate } from "../constants/zoom";
 import { DateRange, DatesData, LoadDataInput, MacroMap, NavigationValues, ZoomLevel, ZoomLevelData } from "../types";
 import { dateDiffStr, dateString } from "./general";
 
@@ -83,37 +83,51 @@ export const getVisibleModeRange = (centerDate: string, dayPixels: number, heigh
 export const isRangeCovered = (needed: DateRange, have: DateRange | null | undefined) =>
   !!have && have.start <= needed.start && needed.end <= have.end;
 
-export const getRequiredMacroMapBase = (centerDate: string, dayPixels: number, height: number) => {
+const getRangesAround: (centerDate: string, halfScreenDays: number, units: number) => DateRange[] = (centerDate, halfScreenDays, units) => {
+  const dist = halfScreenDays * (2 * units + 1);
+  const start = shiftDate(centerDate, -dist);
+  const end = shiftDate(centerDate, dist);
+  let res: DateRange[] = [];
+  if (units) {
+    res = getRangesAround(centerDate, halfScreenDays, units - 1);
+  }
+  res.unshift({ start, end });
+  return res;
+};
+
+const getSurroundingRangeForMode = (baseRange: DateRange, zoom: ZoomLevel) => {
+  const count = getMinRangeCountIncludingBothDates(baseRange.start, baseRange.end, zoom);
+  return getZoomModeRange(baseRange.start, zoom, count);
+};
+
+export const getSurroundingMacroMapBase = (centerDate: string, dayPixels: number, radius: number, height: number) => {
   const { ceil } = Math;
   const screenDays = height / dayPixels;
   const halfScreenDays = ceil(screenDays / 2);
+  const ranges = getRangesAround(centerDate, halfScreenDays, radius);
   const modeIndex = getMode(dayPixels);
-  const mode = modes[modeIndex];
-  const topDate = shiftDate(centerDate, -halfScreenDays);
-  const bottomDate = shiftDate(centerDate, halfScreenDays);
-  const upperDate = shiftDate(centerDate, -halfScreenDays * 3);
-  const lowerDate = shiftDate(centerDate, halfScreenDays * 3);
   const res: MacroMap = emptyMacroMap();
-  const currentCount = getMinRangeCountIncludingBothDates(upperDate, lowerDate, mode.id);
-  res[mode.id] = { range: getZoomModeRange(upperDate, mode.id, currentCount), offset: 0 };
-  if (modeIndex !== 0) {
-    const closerMode = modes[modeIndex - 1];
-    const closerCount = getMinRangeCountIncludingBothDates(topDate, bottomDate, closerMode.id);
-    res[closerMode.id] = { range: getZoomModeRange(topDate, closerMode.id, closerCount), offset: 0 };
-  }
-  if (modeIndex !== zoomIndeces['two_year']) {
-    const fartherMode = modes[modeIndex + 1];
-    const fartherCount = getMinRangeCountIncludingBothDates(topDate, bottomDate, fartherMode.id);
-    res[fartherMode.id] = { range: getZoomModeRange(topDate, fartherMode.id, fartherCount), offset: 0 };
+  for (let i = 0; i < ranges.length; i++) {
+    const range = ranges[i];
+    const lowerMode = modeIndex - i;
+    if (lowerMode >= 0) {
+      const mode = modes[lowerMode];
+      res[mode.id] = { range: getSurroundingRangeForMode(range, mode.id), offset: 0 };
+    }
+    const upperMode = modeIndex + i;
+    if (i !== 0 && upperMode < modes.length) {
+      const mode = modes[upperMode];
+      res[mode.id] = { range: getSurroundingRangeForMode(range, mode.id), offset: 0 };
+    }
   }
   return res;
 }
 
-export const getRequiredMacroMap = (mm: MacroMap, nv: NavigationValues, height: number) => {
+export const getSurroundingMacroMap = (mm: MacroMap, nv: NavigationValues, radius: number, height: number) => {
   const dayPixels = getFinalDayPixels(nv);
   const centerDate = getLocationDate(mm, nv, height);
-  return getRequiredMacroMapBase(centerDate, dayPixels, height);
-}
+  return getSurroundingMacroMapBase(centerDate, dayPixels, radius, height);
+};
 
 export const emptyMacroMap = (): MacroMap => ({ day: null, quarter: null, half: null, year: null, two_year: null });
 
