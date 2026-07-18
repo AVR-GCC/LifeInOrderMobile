@@ -20,7 +20,6 @@ import {
   deleteHabitReducer,
   deleteValueReducer,
   loadInitialDataReducer,
-  loadMoreDataReducer,
   receiveMoreDataReducer,
   setDayHabitValueReducer,
   switchHabitsReducer,
@@ -29,7 +28,7 @@ import {
   updateValueReducer
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
-import type { CreateHabit, DeleteValue, Habit, LoadingMap, MacroMap, MainProps, SetDayValue, Value, ZoomLevel } from '../types';
+import type { CreateHabit, DeleteValue, Habit, LoadingMap, MacroMap, MainProps, SetDayValue, Value } from '../types';
 import { emptyDatesData, getRequiredMacroMapBase, isEmptyMacroMap, mapToLoadParams, mergeMaps, subtractMaps } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
@@ -46,7 +45,6 @@ interface AppContextType {
   switchValues: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
-  loadMoreData: (date: string, zoom: ZoomLevel, count: number) => Promise<void>;
   loadMoreDataIfNeeded: (rmm: MacroMap) => Promise<void>;
   setScale: (newScale: number) => void;
   getScale: () => number;
@@ -170,17 +168,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  const loadMoreData = async (date: string, zoom: ZoomLevel, count: number) => {
-    if (dataRef.current === null) return;
-    if (loadingDataRef.current) return;
-    loadingDataRef.current = true;
-    const res = await getUserList(date, zoom, count, width - LEFT_BAR_WIDTH);
-    if (res) {
-      updateData(loadMoreDataReducer(dataRef.current)(zoom, res));
-    }
-    loadingDataRef.current = false;
-  };
-
   const setDayHabitValue: SetDayValue = (dateIndex, monthIndex, habitIndex, values) => {
     if (dataRef.current === null) return;
     const { dates, habits } = dataRef.current;
@@ -301,7 +288,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         switchValues,
         updateValue,
         deleteValue,
-        loadMoreData,
         loadMoreDataIfNeeded,
         setScale,
         getScale,

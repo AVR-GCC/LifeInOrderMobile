@@ -44,7 +44,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
     return <Loading />;
   }
 
-  const { dates, habits, mode, macroMap } = data;
+  const { dates, habits, macroMap } = data;
 
   if (!dates) {
     return <Loading />;

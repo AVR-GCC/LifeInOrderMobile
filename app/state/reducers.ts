@@ -1,6 +1,5 @@
-import { zoomIndeces } from '../constants/zoom';
-import { emptyDatesData, emptyMacroMap, mergeDateData, mergeDateRanges, mergeMaps } from '../utils/dataStructures';
-import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, ZoomLevel, ZoomLevelData, MacroMap, TimePeriodData, GetUserMapPureResponse } from '../types';
+import { emptyDatesData, emptyMacroMap, mergeMaps } from '../utils/dataStructures';
+import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, ZoomLevelData, MacroMap, TimePeriodData, GetUserMapPureResponse } from '../types';
 import { dateDiffStr, last } from '../utils/general';
 
 const getZoomLevelDataRange = (zld: ZoomLevelData[]) => {
@@ -26,30 +25,6 @@ export const loadInitialDataReducer = () => (dayLevelData: MonthData[], quarterL
   macroMap.quarter = quarter;
   dates.quarter = quarterLevelData;
   return { dates, habits, macroMap, mode: 0 };
-};
-
-export const loadMoreDataReducer = (data: MainProps) => (zoom: ZoomLevel, newData: ZoomLevelData[]) => {
-  const { dates, macroMap } = data;
-  const existingData = dates[zoom];
-  const newRange = getZoomLevelDataRange(newData)
-  const existingRange = getZoomLevelDataRange(existingData)
-  if (!newRange || !existingRange) return data;
-  const { start, end } = newRange;
-  const { start: existingStart, end: existingEnd } = existingRange;
-  const { contiguous, range } = mergeDateRanges({ start: existingStart, end: existingEnd }, { start, end });
-  const nextMode = zoomIndeces[zoom];
-  if (!contiguous) {
-    const nextMacroMap: MacroMap = { ...macroMap, [zoom]: { offset: 0, range } };
-    const nextDates = { ...dates, [zoom]: newData };
-    // console.log('range', range);
-    // console.log('newData', JSON.stringify(newData, null, 2));
-    return { ...data, dates: nextDates, macroMap: nextMacroMap, mode: nextMode };
-  }
-  const nextData = mergeDateData(range, zoom, existingData, newData);
-  const nextDates = { ...dates, [zoom]: nextData };
-  const nextOffset = dateDiffStr(range.end, existingEnd) + (macroMap[zoom]?.offset || 0);
-  const nextMacroMap: MacroMap = { ...macroMap, [zoom]: { offset: nextOffset, range } };
-  return { ...data, dates: nextDates, macroMap: nextMacroMap, mode: nextMode };
 };
 
 export const receiveMoreDataReducer = (data: MainProps) => (responses: GetUserMapPureResponse[]) => {
@@ -179,7 +154,6 @@ export const addValueReducer = (data: MainProps) => (habitIndex: number, value: 
 
 export default {
   loadInitialDataReducer,
-  loadMoreDataReducer,
   setDayHabitValueReducer,
   addHabitReducer,
   updateHabitReducer,
