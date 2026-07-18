@@ -122,12 +122,18 @@ export const emptyDatesData = (): DatesData => ({ day: [], quarter: [], half: []
 export const isEmptyMacroMap = (mm: MacroMap) => modes.every(mode => !mm[mode.id]);
 
 export const mergeMaps = (existingMap: MacroMap, additionalMap: MacroMap, existingData: DatesData, additionalData: DatesData) => {
+  let anchorDate: string | null = null;
   const macroMapRaw: MacroMap = emptyMacroMap();
   const datesData: DatesData = emptyDatesData();
 
   modes.forEach(mode => {
     const zoom = mode.id;
     const existing = existingMap[zoom];
+    if (existing && !anchorDate) {
+      const endDate = new Date(existing.range.end);
+      endDate.setUTCDate(endDate.getUTCDate() - existing.offset);
+      anchorDate = dateString(endDate);
+    }
     const additional = additionalMap[zoom];
     const existingD = existingData[zoom];
     const additionalD = additionalData[zoom];
@@ -153,7 +159,10 @@ export const mergeMaps = (existingMap: MacroMap, additionalMap: MacroMap, existi
     datesData[zoom] = nextData;
   });
 
-  const macroMap = alignOffsets(macroMapRaw);
+  if (!anchorDate) {
+    return { macroMap: macroMapRaw, datesData };
+  }
+  const macroMap = alignOffsets(macroMapRaw, anchorDate);
 
   return { macroMap, datesData };
 }
@@ -232,22 +241,14 @@ export const subtractMaps = (existingMap: MacroMap, additionalMap: MacroMap): Ma
   return [beforeMap, afterMap];
 }
 
-export const alignOffsets = (mm: MacroMap) => {
-  let maxEnd: string | null = null;
+export const alignOffsets = (mm: MacroMap, anchorDate: string) => {
+  const res = emptyMacroMap();
   modes.forEach(mode => {
     const zoom = mode.id;
     const map = mm[zoom];
     if (!map) return true;
     const { end } = map.range;
-    maxEnd = maxEnd ? (maxEnd > end ? maxEnd : end) : end;
-  });
-  const res = emptyMacroMap();
-  modes.forEach(mode => {
-    const zoom = mode.id;
-    const map = mm[zoom];
-    if (!map || !maxEnd) return true;
-    const { end } = map.range;
-    const offset = dateDiffStr(end, maxEnd);
+    const offset = dateDiffStr(end, anchorDate);
     res[zoom] = { offset, range: map.range };
   });
   return res;
