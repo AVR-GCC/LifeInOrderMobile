@@ -146,7 +146,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   }));
 
   const checkLoadMoreDataInLocation = (mm: MacroMap, nv: NavigationValues) => {
-    const rmm = getSurroundingMacroMap(mm, nv, 1, height);
+    const rmm = getSurroundingMacroMap(mm, nv, 2, height);
     loadMoreDataIfNeeded(rmm);
     const dayPixels = getFinalDayPixels(nv);
     const newMode = getMode(dayPixels);

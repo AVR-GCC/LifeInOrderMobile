@@ -90,7 +90,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const userConfigPromise = getUserConfig();
     const today = new Date().toISOString().split('T')[0];
 
-    const rmmb = getSurroundingMacroMapBase(today, 24, 1, height);
+    const rmmb = getSurroundingMacroMapBase(today, 24, 2, height);
     const loadParams = mapToLoadParams(rmmb);
     const loadPromises = loadParams.map(({ date, zoom, count }) => getUserList(date, zoom, count, width - LEFT_BAR_WIDTH));
     const [dates, months, habits] = await Promise.all([
