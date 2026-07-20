@@ -123,12 +123,6 @@ export const getSurroundingMacroMapBase = (centerDate: string, dayPixels: number
   return res;
 }
 
-export const getSurroundingMacroMap = (mm: MacroMap, nv: NavigationValues, radius: number, height: number) => {
-  const dayPixels = getFinalDayPixels(nv);
-  const centerDate = getLocationDate(mm, nv, height);
-  return getSurroundingMacroMapBase(centerDate, dayPixels, radius, height);
-};
-
 export const emptyMacroMap = (): MacroMap => ({ day: null, quarter: null, half: null, year: null, two_year: null });
 
 export const emptyDatesData = (): DatesData => ({ day: [], quarter: [], half: [], year: [], two_year: [] });
