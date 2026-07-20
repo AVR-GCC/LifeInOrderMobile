@@ -55,7 +55,7 @@ const removeDataIfNeeded = (macroMap: MacroMap, dates: DatesData, rmm: MacroMap)
   return { macroMap: newMacroMap, dates: newData };
 };
 
-export const receiveMoreDataReducer = (data: MainProps) => (responses: GetUserMapPureResponse[], rmm: MacroMap) => {
+export const receiveMoreDataReducer = (data: MainProps) => (responses: GetUserMapPureResponse[], rmm: MacroMap, removeDataOutsideMap: boolean) => {
   const { dates: oldDates, macroMap: oldMacroMap } = data;
   let addedDates = oldDates, addedMacroMap = oldMacroMap;
   responses.forEach(({ map, datesData }) => {
@@ -67,7 +67,9 @@ export const receiveMoreDataReducer = (data: MainProps) => (responses: GetUserMa
   // console.log('new state', macroMap.day ? macroMap.day.range : 'null');
   // console.log('receiveMoreDataReducer');
   // printMacroMap(macroMap);
-  const { macroMap, dates } = removeDataIfNeeded(addedMacroMap, addedDates, rmm);
+  const { macroMap, dates } = removeDataOutsideMap ?
+    removeDataIfNeeded(addedMacroMap, addedDates, rmm)
+    : { macroMap: addedMacroMap, dates: addedDates };
   return { ...data, dates, macroMap };
 };
 

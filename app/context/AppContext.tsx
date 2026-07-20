@@ -105,6 +105,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const loadMoreDataIfNeeded = async (rmm: MacroMap) => {
+  const loadMoreDataIfNeeded = (rmm: MacroMap, removeDataOutsideMap: boolean) => {
     if (running.current || data === null || dataRef.current === null) return;
     running.current = true;
     // console.log('required', rmm.day ? rmm.day.range : 'null');
@@ -156,6 +157,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     Promise.all(promises).then(responses => {
       if (dataRef.current === null) return;
       updateData(receiveMoreDataReducer(dataRef.current)(responses, rmm));
+      updateData(receiveMoreDataReducer(dataRef.current)(responses, rmm, removeDataOutsideMap));
       for (let i = 0; i < responses.length; i++) {
         const { id } = responses[i];
         const loadingIndex = loadingMap.current.entries.findIndex(lme => lme.id === id);
