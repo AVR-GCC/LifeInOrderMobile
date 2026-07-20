@@ -46,6 +46,7 @@ interface AppContextType {
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
   loadMoreDataIfNeeded: (rmm: MacroMap) => Promise<void>;
+  twoPulse: (date: string, dayPixels: number) => void;
   setScale: (newScale: number) => void;
   getScale: () => number;
   setScroll: (newScroll: number) => void;
@@ -87,7 +88,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const userConfigPromise = getUserConfig();
     const today = new Date().toISOString().split('T')[0];
 
-    const rmmb = getSurroundingMacroMapBase(today, 24, 2, height);
+    const rmmb = getSurroundingMacroMapBase(today, 24, 1, height);
     const loadParams = mapToLoadParams(rmmb);
     const loadPromises = loadParams.map(({ date, zoom, count }) => getUserList(date, zoom, count, width - LEFT_BAR_WIDTH));
     const [dates, months, habits] = await Promise.all([
@@ -96,6 +97,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ]);
     if (dates && months && habits) {
       updateData(loadInitialDataReducer()(dates, months, habits));
+      const rmm2 = getSurroundingMacroMapBase(today, 24, 2, height);
+      loadMoreDataIfNeeded(rmm2, true);
     }
   };
 
@@ -104,7 +107,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadMoreDataIfNeeded = async (rmm: MacroMap) => {
+  const twoPulse = (date: string, dayPixels: number) => {
+    const closeMap = getSurroundingMacroMapBase(date, dayPixels, 1, height);
+    loadMoreDataIfNeeded(closeMap, false);
+    const farMap = getSurroundingMacroMapBase(date, dayPixels, 2, height);
+    loadMoreDataIfNeeded(farMap, true);
+  }
+
   const loadMoreDataIfNeeded = (rmm: MacroMap, removeDataOutsideMap: boolean) => {
     if (running.current || data === null || dataRef.current === null) return;
     running.current = true;
@@ -156,7 +165,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     running.current = false;
     Promise.all(promises).then(responses => {
       if (dataRef.current === null) return;
-      updateData(receiveMoreDataReducer(dataRef.current)(responses, rmm));
       updateData(receiveMoreDataReducer(dataRef.current)(responses, rmm, removeDataOutsideMap));
       for (let i = 0; i < responses.length; i++) {
         const { id } = responses[i];
@@ -287,6 +295,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateValue,
         deleteValue,
         loadMoreDataIfNeeded,
+        twoPulse,
         setScale,
         getScale,
         setScroll,

@@ -6,7 +6,7 @@ import { useAppContext } from '../context/AppContext';
 import { MacroMap, MainProps, NavigationValues, ZoomLevel } from '../types';
 import { getMode, modes, zoomIndeces, zoomMonths } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
-import { getDayPixels, getFinalDayPixels, getModeInfo, getSurroundingMacroMap, mergeDateRanges } from '../utils/dataStructures';
+import { getDayPixels, getFinalDayPixels, getLocationDate, getModeInfo, getSurroundingMacroMap, mergeDateRanges } from '../utils/dataStructures';
 import { dateDiff, dateDiffStr, dateString } from '../utils/general';
 
 const DECELERATION = 0.998;
@@ -28,7 +28,7 @@ interface UseNavigationGestureResult {
 }
 
 export const useNavigationGesture = (data: MainProps | null): UseNavigationGestureResult => {
-  const { loadMoreDataIfNeeded, getScale, setScale, setScroll, getScroll, setMode } = useAppContext();
+  const { twoPulse, getScale, setScale, setScroll, getScroll, setMode } = useAppContext();
   const { height } = useWindowDimensions();
   const dataRef = useRef(data);
   const isPanning = useRef(false);
@@ -146,9 +146,9 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   }));
 
   const checkLoadMoreDataInLocation = (mm: MacroMap, nv: NavigationValues) => {
-    const rmm = getSurroundingMacroMap(mm, nv, 2, height);
-    loadMoreDataIfNeeded(rmm);
     const dayPixels = getFinalDayPixels(nv);
+    const centerDate = getLocationDate(mm, nv, height);
+    twoPulse(centerDate, dayPixels);
     const newMode = getMode(dayPixels);
     if (newMode === nv.mode) return;
     const modeTransitionValues = getModeTransitionValues(mm, newMode);
