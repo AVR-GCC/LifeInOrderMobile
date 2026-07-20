@@ -31,12 +31,6 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
 
   const habit = data?.habits[habitIndex];
   const currentValue = getDayHabitValue(dateIndex, monthIndex, habitIndex) || '';
-  const [text, setText] = useState(currentValue);
-
-  // Sync local state when the underlying value changes (e.g. on mount)
-  useEffect(() => {
-    setText(currentValue);
-  }, [currentValue]);
 
   // Auto-focus the input when the screen mounts
   useEffect(() => {
@@ -66,7 +60,6 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
         prevHeight.current = height;
       });
     }
-    setText(newText);
     setDayHabitValue(dateIndex, monthIndex, habitIndex, {
       valueId: habit.values[0].id,
       text: newText,
@@ -93,7 +86,7 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
           style={styles.textInput}
           placeholder="Type something..."
           placeholderTextColor={COLORS.muted}
-          value={text}
+          value={currentValue}
           onChangeText={handleChangeText}
           onPressIn={(e) => {
             const { locationY } = e.nativeEvent;
