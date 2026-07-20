@@ -115,7 +115,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }
 
   const loadMoreDataIfNeeded = (rmm: MacroMap, removeDataOutsideMap: boolean) => {
-    if (running.current || data === null || dataRef.current === null) return;
+    if (running.current || dataRef.current === null) return;
     running.current = true;
     // console.log('required', rmm.day ? rmm.day.range : 'null');
     const { macroMap } = dataRef.current;
