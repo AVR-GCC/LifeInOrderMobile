@@ -67,7 +67,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setData(newData);
   };
 
-  const loadingDataRef = useRef(false);
   const scaleRef = useRef(1);
   const getScale = () => scaleRef.current;
   const setScale = (newScale: number) => {
@@ -85,8 +84,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }
 
   const loadInitialData = async () => {
-    if (loadingDataRef.current) return;
-    loadingDataRef.current = true;
     const userConfigPromise = getUserConfig();
     const today = new Date().toISOString().split('T')[0];
 
@@ -100,7 +97,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (dates && months && habits) {
       updateData(loadInitialDataReducer()(dates, months, habits));
     }
-    loadingDataRef.current = false;
   };
 
   useEffect(() => {
