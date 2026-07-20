@@ -100,7 +100,7 @@ const getSurroundingRangeForMode = (baseRange: DateRange, zoom: ZoomLevel) => {
   return getZoomModeRange(baseRange.start, zoom, count);
 };
 
-export const getSurroundingMacroMapBase = (centerDate: string, dayPixels: number, radius: number, height: number) => {
+export const getSurroundingMacroMap = (centerDate: string, dayPixels: number, radius: number, height: number) => {
   const { ceil } = Math;
   const screenDays = height / dayPixels;
   const halfScreenDays = ceil(screenDays / 2);

@@ -29,7 +29,7 @@ import {
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
 import type { CreateHabit, DeleteValue, Habit, LoadingMap, MacroMap, MainProps, SetDayValue, Value } from '../types';
-import { emptyDatesData, getSurroundingMacroMapBase, isEmptyMacroMap, mapToLoadParams, mergeMaps, subtractMaps } from '../utils/dataStructures';
+import { emptyDatesData, getSurroundingMacroMap, isEmptyMacroMap, mapToLoadParams, mergeMaps, subtractMaps } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
 
@@ -46,7 +46,7 @@ interface AppContextType {
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
   loadMoreDataIfNeeded: (rmm: MacroMap) => Promise<void>;
-  twoPulse: (date: string, dayPixels: number) => void;
+  loadAndPrefetch: (date: string, dayPixels: number) => void;
   setScale: (newScale: number) => void;
   getScale: () => number;
   setScroll: (newScroll: number) => void;
@@ -88,7 +88,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const userConfigPromise = getUserConfig();
     const today = new Date().toISOString().split('T')[0];
 
-    const rmmb = getSurroundingMacroMapBase(today, 24, 1, height);
+    const rmmb = getSurroundingMacroMap(today, 24, 1, height);
     const loadParams = mapToLoadParams(rmmb);
     const loadPromises = loadParams.map(({ date, zoom, count }) => getUserList(date, zoom, count, width - LEFT_BAR_WIDTH));
     const [dates, months, habits] = await Promise.all([
@@ -97,7 +97,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ]);
     if (dates && months && habits) {
       updateData(loadInitialDataReducer()(dates, months, habits));
-      const rmm2 = getSurroundingMacroMapBase(today, 24, 2, height);
+      const rmm2 = getSurroundingMacroMap(today, 24, 2, height);
       loadMoreDataIfNeeded(rmm2, true);
     }
   };
@@ -107,10 +107,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const twoPulse = (date: string, dayPixels: number) => {
-    const closeMap = getSurroundingMacroMapBase(date, dayPixels, 1, height);
+  const loadAndPrefetch = (date: string, dayPixels: number) => {
+    const closeMap = getSurroundingMacroMap(date, dayPixels, 1, height);
     loadMoreDataIfNeeded(closeMap, false);
-    const farMap = getSurroundingMacroMapBase(date, dayPixels, 2, height);
+    const farMap = getSurroundingMacroMap(date, dayPixels, 2, height);
     loadMoreDataIfNeeded(farMap, true);
   }
 
@@ -295,7 +295,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateValue,
         deleteValue,
         loadMoreDataIfNeeded,
-        twoPulse,
+        loadAndPrefetch,
         setScale,
         getScale,
         setScroll,

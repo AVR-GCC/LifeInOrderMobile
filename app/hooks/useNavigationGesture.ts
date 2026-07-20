@@ -28,7 +28,7 @@ interface UseNavigationGestureResult {
 }
 
 export const useNavigationGesture = (data: MainProps | null): UseNavigationGestureResult => {
-  const { twoPulse, getScale, setScale, setScroll, getScroll, setMode } = useAppContext();
+  const { loadAndPrefetch, getScale, setScale, setScroll, getScroll, setMode } = useAppContext();
   const { height } = useWindowDimensions();
   const dataRef = useRef(data);
   const isPanning = useRef(false);
@@ -148,7 +148,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   const checkLoadMoreDataInLocation = (mm: MacroMap, nv: NavigationValues) => {
     const dayPixels = getFinalDayPixels(nv);
     const centerDate = getLocationDate(mm, nv, height);
-    twoPulse(centerDate, dayPixels);
+    loadAndPrefetch(centerDate, dayPixels);
     const newMode = getMode(dayPixels);
     if (newMode === nv.mode) return;
     const modeTransitionValues = getModeTransitionValues(mm, newMode);
