@@ -45,7 +45,7 @@ interface AppContextType {
   switchValues: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
-  loadMoreDataIfNeeded: (rmm: MacroMap) => Promise<void>;
+  loadMoreDataIfNeeded: (rmm: MacroMap, removeDataOutsideMap: boolean) => void;
   loadAndPrefetch: (date: string, dayPixels: number) => void;
   setScale: (newScale: number) => void;
   getScale: () => number;
