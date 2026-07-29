@@ -107,13 +107,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadAndPrefetch = (date: string, dayPixels: number) => {
-    const closeMap = getSurroundingMacroMap(date, dayPixels, 1, height);
-    loadMoreDataIfNeeded(closeMap, false);
-    const farMap = getSurroundingMacroMap(date, dayPixels, 2, height);
-    loadMoreDataIfNeeded(farMap, true);
-  }
-
   const loadMoreDataIfNeeded = (rmm: MacroMap, removeDataOutsideMap: boolean) => {
     if (running.current || dataRef.current === null) return;
     running.current = true;
@@ -173,6 +166,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     });
   };
+
+  const loadAndPrefetch = (date: string, dayPixels: number) => {
+    const closeMap = getSurroundingMacroMap(date, dayPixels, 1, height);
+    loadMoreDataIfNeeded(closeMap, false);
+    const farMap = getSurroundingMacroMap(date, dayPixels, 2, height);
+    loadMoreDataIfNeeded(farMap, true);
+  }
 
   const setDayHabitValue: SetDayValue = (dateIndex, monthIndex, habitIndex, values) => {
     if (dataRef.current === null) return;
