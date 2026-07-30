@@ -1,5 +1,5 @@
-import { emptyDatesData, emptyMacroMap, mergeMaps } from '../utils/dataStructures';
-import type { DatesData, Habit, HabitWithValues, MainProps, MonthData, Value, ZoomLevelData, MacroMap, TimePeriodData, GetUserMapPureResponse } from '../types';
+import { createDatesLookup, emptyDatesData, emptyMacroMap, mergeMaps } from '../utils/dataStructures';
+import type { DatesData, Habit, MainProps, Value, ZoomLevelData, MacroMap, GetUserMapPureResponse, InitialDataReducer } from '../types';
 import { dateDiffStr, last } from '../utils/general';
 import { modes } from '../constants/zoom';
 
@@ -10,7 +10,7 @@ const getZoomLevelDataRange = (zld: ZoomLevelData[]) => {
   return { start, end };
 }
 
-export const loadInitialDataReducer = () => (dayLevelData: MonthData[], quarterLevelData: TimePeriodData[], habits: HabitWithValues[]) => {
+export const loadInitialDataReducer: InitialDataReducer = () => (dayLevelData, quarterLevelData, habits) => {
   const macroMap = emptyMacroMap();
   const dates = emptyDatesData();
   const dayRange = getZoomLevelDataRange(dayLevelData);
@@ -25,7 +25,8 @@ export const loadInitialDataReducer = () => (dayLevelData: MonthData[], quarterL
   const quarter = { offset: quarterOffset, range: quarterRange };
   macroMap.quarter = quarter;
   dates.quarter = quarterLevelData;
-  return { dates, habits, macroMap, mode: 0 };
+  const datesLookup = createDatesLookup(dayLevelData);
+  return { dates, datesLookup, habits, macroMap, mode: 0 };
 };
 
 const removeDataIfNeeded = (macroMap: MacroMap, dates: DatesData, rmm: MacroMap) => {
@@ -70,18 +71,25 @@ export const receiveMoreDataReducer = (data: MainProps) => (responses: GetUserMa
   const { macroMap, dates } = removeDataOutsideMap ?
     removeDataIfNeeded(addedMacroMap, addedDates, rmm)
     : { macroMap: addedMacroMap, dates: addedDates };
-  return { ...data, dates, macroMap };
+  const datesLookup = createDatesLookup(dates.day);
+  return { ...data, datesLookup, dates, macroMap };
 };
 
-export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, monthIndex: number, habitIndex: number, values: { valueId: string, text: string | null }) => {
-  const { dates, macroMap } = data;
-  const newDayZoomData = [...dates.day];
+export const setDayHabitValueReducer = (data: MainProps) => (date: string, habitIndex: number, values: { valueId: string, text: string | null }) => {
+  const { dates, datesLookup, macroMap } = data;
+  const newDayZoomData = [...dates.day]
+  const { dateIndex, monthIndex } = datesLookup[date];
   const newMonth = { ...newDayZoomData[monthIndex] };
   if ('image' in newMonth) return data;
   const newDate = { ...newMonth.days[dateIndex] };
   const habit = data.habits[habitIndex].habit;
   const { valueId, text } = values;
   newDate.values = { ...newDate.values, [habit.id]: habit.habit_type === 'color' || text === null ? valueId : text };
+  datesLookup[date] = {
+    dateIndex,
+    monthIndex,
+    dayData: newDate
+  };
   newMonth.days[dateIndex] = newDate;
   newDayZoomData[monthIndex] = newMonth;
   const newMacroMap: MacroMap = {
@@ -99,7 +107,7 @@ export const setDayHabitValueReducer = (data: MainProps) => (dateIndex: number, 
     two_year: []
   };
   dates.day = newDayZoomData;
-  return { ...data, dates: newDates, macroMap: newMacroMap };
+  return { ...data, datesLookup, dates: newDates, macroMap: newMacroMap };
 };
 
 export const addHabitReducer = (data: MainProps) => (habit: Habit, values: Value[]) => {
@@ -165,12 +173,12 @@ export const updateValueReducer = (data: MainProps) => (habitIndex: number, valu
 };
 
 export const deleteValueReducer = (data: MainProps) => (habitIndex: number, valueIndex: number) => {
-    const { habits } = data;
-    const newHabits = [...habits];
-    const newValues = [...newHabits[habitIndex].values];
-    newValues.splice(valueIndex, 1);
-    newHabits[habitIndex].values = newValues;
-    return { ...data, habits: newHabits };
+  const { habits } = data;
+  const newHabits = [...habits];
+  const newValues = [...newHabits[habitIndex].values];
+  newValues.splice(valueIndex, 1);
+  newHabits[habitIndex].values = newValues;
+  return { ...data, habits: newHabits };
 }
 
 export const addValueReducer = (data: MainProps) => (habitIndex: number, value: Value) => {

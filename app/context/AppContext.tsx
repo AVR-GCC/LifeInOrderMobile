@@ -36,7 +36,7 @@ import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
 interface AppContextType {
   data: MainProps | null;
   setDayHabitValue: SetDayValue;
-  getDayHabitValue: (dateIndex: number, monthIndex: number, habitIndex: number) => string | null;
+  getDayHabitValue: (date: string, habitIndex: number) => string | null;
   createHabit: CreateHabit;
   updateHabit: (habitIndex: number, newHabitValues: Partial<Habit>) => void;
   deleteHabit: (index: number) => void;
@@ -174,18 +174,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadMoreDataIfNeeded(farMap, true);
   }
 
-  const setDayHabitValue: SetDayValue = (dateIndex, monthIndex, habitIndex, values) => {
+  const setDayHabitValue: SetDayValue = (date, habitIndex, values) => {
     if (dataRef.current === null) return;
-    const { dates, habits } = dataRef.current;
-    const month = dates.day[monthIndex];
-    if ('image' in month) return;
-    setDayValueServer(month.days[dateIndex].date, habits[habitIndex].habit.id, values);
-    updateData(setDayHabitValueReducer(dataRef.current)(dateIndex, monthIndex, habitIndex, values));
+    const { habits } = dataRef.current;
+    setDayValueServer(date, habits[habitIndex].habit.id, values);
+    updateData(setDayHabitValueReducer(dataRef.current)(date, habitIndex, values));
   };
 
-  const getDayHabitValue = (dateIndex: number, monthIndex: number, habitIndex: number) => {
+  const getDayHabitValue = (date: string, habitIndex: number) => {
     if (dataRef.current === null) return null;
-    return getDayHabitValueSelector(dataRef.current)(dateIndex, monthIndex, habitIndex);
+    return getDayHabitValueSelector(dataRef.current)(date, habitIndex);
   };
 
   const createHabit: CreateHabit = async (sequence, type = 'color', name = '') => {

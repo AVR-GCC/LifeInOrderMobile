@@ -7,10 +7,11 @@ import Screen from '../components/Screen';
 import TitleBar from '../components/TitleBar';
 import VerticalChevrons from '../components/VerticalChevrons';
 import { COLORS } from '../constants/theme';
-import type { GetDayHabitValue, HabitWithValues, MainProps, MonthData, SetDayValue } from '../types';
+import type { GetDayHabitValue, HabitWithValues, MainProps, SetDayValue } from '../types';
 import BackArrow from '../components/BackArrow';
 import DayHabitCard from '../components/DayHabitCard';
 import useKeyboardScroll from '../hooks/useKeyboardScroll';
+import { shiftDate } from '../utils/dataStructures';
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -21,15 +22,12 @@ interface DayScreenProps {
 }
 
 const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data, getDayHabitValue, setDayHabitValue }) {
-  const { date } = useLocalSearchParams();
-  const [dayIndexString, monthIndexString] = Array.isArray(date) ? date : date.split('-');
-  const dayIndex = parseInt(dayIndexString, 10);
-  const monthIndex = parseInt(monthIndexString, 10);
+  const { date: dateStrs } = useLocalSearchParams();
   const router = useRouter();
 
   const { KeyboardScrollView, setTargetY } = useKeyboardScroll();
 
-  if (data === null || date === undefined) {
+  if (data === null || dateStrs === undefined) {
     return (
       <Screen>
         <Text style={styles.text}>Loading...</Text>
@@ -37,87 +35,63 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data
     );
   }
 
-  const dateIndex = parseInt(date.toString(), 10);
-  const { dates, habits } = data;
+  const date = Array.isArray(dateStrs) ? dateStrs[0] : dateStrs;
+  const { datesLookup, habits } = data;
 
-  if (!dates.day[monthIndex]) {
+  const entry = datesLookup[date];
+
+  if (!entry) {
     return <Screen />;
   }
 
-  if ('image' in dates.day[monthIndex]) {
-    return <Screen />;
-  }
-
-  const currentMonth = dates.day[monthIndex] as MonthData;
+  const prevDate = shiftDate(date, 1);
+  const nextDate = shiftDate(date, -1);
 
   const handleChevronPress = (isDown: boolean) => {
-    let newDateIndex = dateIndex + (isDown ? 1 : -1);
-    let newMonthIndex = monthIndex;
-    let newMonth = dates.day[newMonthIndex];
-    if ('image' in newMonth) {
-      return;
-    }
-    if (newDateIndex < 0) {
-      newMonthIndex -= 1;
-      newMonth = dates.day[newMonthIndex];
-      if ('image' in newMonth) {
-        return;
-      }
-      newDateIndex = newMonth.days.length - 1;
-    }
-    if (newDateIndex === newMonth.days.length) {
-      newMonthIndex += 1;
-      newMonth = dates.day[newMonthIndex];
-      if ('image' in newMonth) {
-        return;
-      }
-      newDateIndex = 0;
-    }
-    router.replace(`/day/${newDateIndex}-${newMonthIndex}`);
+    router.replace(`/day/${isDown ? prevDate : nextDate}`);
   };
 
-  const titleText = `${dayNames[moment(currentMonth.days[dayIndex].date).day()]}, ${moment(currentMonth.days[dayIndex].date).format('MMMM DD, YYYY')}`;
+  const dateMoment = moment(date);
+
+  const titleText = `${dayNames[dateMoment.day()]}, ${dateMoment.format('MMMM DD, YYYY')}`;
 
   const _titleBar = () => (
-      <TitleBar>
+    <TitleBar>
+      <TouchableOpacity
+        style={styles.backArrowContainer}
+        onPress={() => {
+          router.replace(`/main?date=${date}`);
+        }}
+      >
+        <BackArrow />
+      </TouchableOpacity>
+      <Text style={styles.dayTitle}>
+        {titleText}
+      </Text>
+      <View style={styles.rightIcons}>
         <TouchableOpacity
-          style={styles.backArrowContainer}
-          onPress={() => {
-            if ('image' in dates.day[monthIndex]) return;
-            const date = currentMonth.days[dayIndex].date;
-            router.replace(`/main?date=${date}`);
-          }}
+          style={styles.settingsButtonContainer}
+          onPress={() => router.replace(`/day/${date}/habits`)}
         >
-          <BackArrow />
+          <Ionicons name="settings-outline" size={30} color={COLORS.text} />
         </TouchableOpacity>
-        <Text style={styles.dayTitle}>
-          {titleText}
-        </Text>
-        <View style={styles.rightIcons}>
-          <TouchableOpacity
-            style={styles.settingsButtonContainer}
-            onPress={() => router.replace(`/day/${date}/habits`)}
-          >
-            <Ionicons name="settings-outline" size={30} color={COLORS.text} />
-          </TouchableOpacity>
-          <View style={styles.verticalChevronsContainer}>
-            <VerticalChevrons
-              onPress={handleChevronPress}
-              upDisabled={dateIndex === 0 && monthIndex === 0}
-              downDisabled={dateIndex === currentMonth.days.length - 1 && monthIndex === dates.day.length - 1}
-            />
-          </View>
+        <View style={styles.verticalChevronsContainer}>
+          <VerticalChevrons
+            onPress={handleChevronPress}
+            upDisabled={!datesLookup[prevDate]}
+            downDisabled={!datesLookup[nextDate]}
+          />
         </View>
-      </TitleBar>
+      </View>
+    </TitleBar>
   );
 
   const _habitCard = (h: HabitWithValues, habitIndex: number) => (
     <DayHabitCard
       key={h.habit.id}
+      date={date}
       habit={h}
       habitIndex={habitIndex}
-      monthIndex={monthIndex}
-      dateIndex={dateIndex}
       onInputFocused={setTargetY}
       getDayHabitValue={getDayHabitValue}
       setDayHabitValue={setDayHabitValue}

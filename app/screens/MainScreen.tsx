@@ -56,20 +56,17 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
 
   const list = (dateItems: ZoomLevelData[]) => (
     <View style={{ display: 'flex', flexDirection: 'column' }}>
-      {dateItems.map((item, index) => {
+      {dateItems.map(item => {
         if ('days' in item) {
-          return item.days.map((_day, dayIndex) => {
-            const key = `${dayIndex}-${index}`;
+          return item.days.map(day => {
             return (
               <DayRowItem
-                key={key}
-                dayIndex={dayIndex}
-                monthIndex={index}
-                monthData={item}
+                key={day.date}
+                date={day.date}
                 habits={habits}
                 onPress={() => {
                   if (isPanning.current) return;
-                  router.replace(`/day/${key}`);
+                  router.replace(`/day/${day.date}`);
                 }}
                 getDayHabitValue={getDayHabitValue}
               />

@@ -6,8 +6,7 @@ import { UNFILLED_COLOR } from './DayRow';
 import { GetDayHabitValue, HabitWithValues, SetDayValue } from '../types';
 
 interface DayHabitCardProps {
-  dateIndex: number;
-  monthIndex: number;
+  date: string;
   habitIndex: number;
   getDayHabitValue: GetDayHabitValue;
   setDayHabitValue: SetDayValue;
@@ -16,14 +15,14 @@ interface DayHabitCardProps {
 }
 
 const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCard({
-  dateIndex, monthIndex, habitIndex, getDayHabitValue, setDayHabitValue, habit, onInputFocused
+  date, habitIndex, getDayHabitValue, setDayHabitValue, habit, onInputFocused
 }) {
     const [focused, setFocused] = useState(false);
     const inputRef = useRef<TextInput>(null);
     const router = useRouter();
 
     if (habit.habit.habit_type === 'color') {
-      const valueId = getDayHabitValue(dateIndex, monthIndex, habitIndex);
+      const valueId = getDayHabitValue(date, habitIndex);
       const selectedIndex = valueId === null ? null : habit.values_hashmap[valueId];
       const selectedValue = selectedIndex === null ? null : habit.values[selectedIndex];
       return (
@@ -34,7 +33,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
           onPress={() => {
             const nextIndex = selectedIndex === null ? 0 : (selectedIndex + 1) % habit.values.length;
             const nextValue = habit.values[nextIndex];
-            if (nextValue) setDayHabitValue(dateIndex, monthIndex, habitIndex, { valueId: nextValue.id, text: null });
+            if (nextValue) setDayHabitValue(date, habitIndex, { valueId: nextValue.id, text: null });
           }}
         >
           <View style={styles.habitHeaderRow}>
@@ -55,7 +54,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
                       : { backgroundColor: '#3a4a5a', borderColor: '#3a4a5a' },
                   ]}
                   onPress={() => {
-                    setDayHabitValue(dateIndex, monthIndex, habitIndex, { valueId: v.id, text: null });
+                    setDayHabitValue(date, habitIndex, { valueId: v.id, text: null });
                   }}
                 >
                   <View style={[styles.pillDot, { backgroundColor: isSelected ? COLORS.colorOne : v.color }]} />
@@ -75,7 +74,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
         </TouchableOpacity>
       );
     }
-    const value = getDayHabitValue(dateIndex, monthIndex, habitIndex) || '';
+    const value = getDayHabitValue(date, habitIndex) || '';
     const borderColor = focused ? COLORS.text : value.length > 0 ? COLORS.text : COLORS.border;
 
     const onFocus = () => {
@@ -96,7 +95,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
         <View style={styles.cardHeader}>
           <Text style={styles.cardName}>{habit.habit.name}</Text>
           <TouchableOpacity
-            onPress={() => router.replace(`/day/${dateIndex}-${monthIndex}/text-value?habitIndex=${habitIndex}`)}
+            onPress={() => router.replace(`/day/${date}/text-value?habitIndex=${habitIndex}`)}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Text style={styles.textHabitIcon}>✏️</Text>
@@ -109,7 +108,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
           placeholderTextColor={COLORS.muted}
           value={value}
           onChangeText={arg => {
-            setDayHabitValue(dateIndex, monthIndex, habitIndex, { valueId: habit.values[0].id, text: arg });
+            setDayHabitValue(date, habitIndex, { valueId: habit.values[0].id, text: arg });
           }}
           onFocus={onFocus}
           onBlur={() => setFocused(false)}

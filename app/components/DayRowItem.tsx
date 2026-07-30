@@ -3,30 +3,25 @@ import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import DayRow from './DayRow';
 import { BASE_DAY_HEIGHT, LEFT_BAR_WIDTH } from '../constants/mainScreen';
 import { COLORS } from '../constants/theme';
-import { GetDayHabitValue, HabitWithValues, MonthData } from '../types';
+import { GetDayHabitValue, HabitWithValues } from '../types';
 
 interface DayRowItemProps {
-  dayIndex: number;
-  monthIndex: number;
-  monthData: MonthData;
+  date: string;
   habits: HabitWithValues[];
   onPress: () => void;
   getDayHabitValue: GetDayHabitValue;
 }
 
 const DayRowItem: React.FC<DayRowItemProps> = React.memo(function DayRowItem({
-  dayIndex,
-  monthIndex,
-  monthData,
+  date,
   habits,
   onPress,
   getDayHabitValue,
 }) {
-  const dayDateStr = monthData.days[dayIndex]?.date ?? null;
-  const dayDate = new Date(dayDateStr + 'T00:00:00');
-  const dayOfWeek = dayDateStr ? dayDate.getDay() : null;
+  const dayDate = new Date(date + 'T00:00:00');
+  const dayOfWeek = date ? dayDate.getDay() : null;
   const isWeekend = dayOfWeek === 5 || dayOfWeek === 6;
-  const date = dayDate.getDate();
+  const dateNum = dayDate.getDate();
 
   return (
     <TouchableOpacity
@@ -37,14 +32,13 @@ const DayRowItem: React.FC<DayRowItemProps> = React.memo(function DayRowItem({
       <View style={[styles.leftBar, isWeekend && styles.weekendRow]}>
         <View style={styles.dayMarker}>
           <View style={styles.dateContainer}>
-            <Text style={styles.dateText}>{date}</Text>
+            <Text style={styles.dateText}>{dateNum}</Text>
           </View>
         </View>
       </View>
       <View style={styles.dayContainer}>
         <DayRow
-          dayIndex={dayIndex}
-          monthIndex={monthIndex}
+          date={date}
           habits={habits}
           getDayHabitValue={getDayHabitValue}
         />

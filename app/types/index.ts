@@ -72,9 +72,18 @@ export type LoadingMap = {
   nextId: number
 };
 
+export type DatesLookupEntry = {
+  dateIndex: number,
+  monthIndex: number,
+  dayData: DayData
+};
+
+export type DatesLookup = Record<string, DatesLookupEntry>;
+
 export interface MainProps {
   habits: HabitWithValues[];
   dates: DatesData;
+  datesLookup: DatesLookup;
   macroMap: MacroMap;
   mode: number;
 }
@@ -113,8 +122,8 @@ export interface NavigationValues {
   
 export type LoadDataInput = { date: string, zoom: ZoomLevel, count: number };
 
-export type GetDayHabitValue = (dateIndex: number, monthIndex: number, habitIndex: number) => string | null;
-export type SetDayValue = (dateIndex: number, monthIndex: number, habitIndex: number, values: { valueId: string, text: string | null }) => void;
+export type GetDayHabitValue = (date: string, habitIndex: number) => string | null;
+export type SetDayValue = (date: string, habitIndex: number, values: { valueId: string, text: string | null }) => void;
 export type SetDayValueServer = (date: string, habitId: string, values: { valueId: string, text: string | null }) => void;
 export type CreateHabit = (sequence: number, type: HabitType, name: string) => Promise<null | undefined>;
 export type UpdateHabit = (habitIndex: number, newValueValues: Partial<Habit>) => void;
@@ -124,6 +133,10 @@ export type CreateValue = (habitIndex: number, sequence: number) => Promise<null
 export type DeleteValue = (habitIndex: number, valueIndex: number) => void;
 export type SwitchValues = (isDown: boolean, habitIndex: number, valueIndex: number) => void;
 export type UpdateValue = (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
+
+export type CreateDatesLookup = (days: ZoomLevelData[]) => DatesLookup;
+
+export type InitialDataReducer = () => ((dayLevelData: MonthData[], quarterLevelData: TimePeriodData[], habits: HabitWithValues[]) => MainProps);
 
 export type SeparatorType = 'today' | 'month' | 'year';
 

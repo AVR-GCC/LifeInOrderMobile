@@ -1,5 +1,5 @@
 import { getMinRangeCountIncludingBothDates, getMode, getZoomModeRange, modes, nextDate } from "../constants/zoom";
-import { DateRange, DatesData, LoadDataInput, MacroMap, NavigationValues, ZoomLevel, ZoomLevelData } from "../types";
+import { CreateDatesLookup, DateRange, DatesData, DatesLookup, LoadDataInput, MacroMap, NavigationValues, ZoomLevel, ZoomLevelData } from "../types";
 import { dateDiffStr, dateString } from "./general";
 
 // MacroMap + NavigationValues
@@ -64,7 +64,7 @@ export const mergeDateData = (range: DateRange, zoom: ZoomLevel, baseData: ZoomL
   return res;
 }
 
-const shiftDate = (date: string, days: number) => {
+export const shiftDate = (date: string, days: number) => {
   const obj = new Date(date);
   obj.setDate(obj.getDate() + days);
   return dateString(obj);
@@ -272,6 +272,22 @@ export const printMacroMap = (mm: MacroMap | undefined) => {
     console.log('    ', mode.name, map.range.start, '->', map.range.end, map.offset);
   });
   console.log('}');
+}
+
+export const createDatesLookup: CreateDatesLookup = (days) => {
+  const datesLookup: DatesLookup = {};
+  days.forEach((monthData, monthIndex) => {
+    if ('image' in monthData) return true;
+    monthData.days.forEach((dayData, dateIndex) => {
+      const entry = {
+        dayData,
+        monthIndex,
+        dateIndex
+      }
+      datesLookup[dayData.date] = entry;
+    });
+  });
+  return datesLookup;
 }
 
 export default {

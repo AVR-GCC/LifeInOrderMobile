@@ -17,20 +17,18 @@ interface TextValueScreenProps {
 const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function TextValueScreen({
   data, getDayHabitValue, setDayHabitValue,
 }) {
-  const { date, habitIndex: habitIndexParam } = useLocalSearchParams();
+  const { date: dateStrs, habitIndex: habitIndexParam } = useLocalSearchParams();
+  const date = Array.isArray(dateStrs) ? dateStrs[0] : dateStrs;
   const router = useRouter();
   const inputRef = useRef<TextInput>(null);
   const prevHeight = useRef<number | null>(null);
 
   const { KeyboardScrollView, setTargetY, scrollDelta } = useKeyboardScroll();
 
-  const [dayIndexString, monthIndexString] = Array.isArray(date) ? date : (date ?? '').split('-');
-  const dateIndex = parseInt(dayIndexString, 10);
-  const monthIndex = parseInt(monthIndexString, 10);
   const habitIndex = parseInt(Array.isArray(habitIndexParam) ? habitIndexParam[0] : habitIndexParam ?? '0', 10);
 
   const habit = data?.habits[habitIndex];
-  const currentValue = getDayHabitValue(dateIndex, monthIndex, habitIndex) || '';
+  const currentValue = getDayHabitValue(date, habitIndex) || '';
 
   // Auto-focus the input when the screen mounts
   useEffect(() => {
@@ -60,7 +58,7 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
         prevHeight.current = height;
       });
     }
-    setDayHabitValue(dateIndex, monthIndex, habitIndex, {
+    setDayHabitValue(date, habitIndex, {
       valueId: habit.values[0].id,
       text: newText,
     });
