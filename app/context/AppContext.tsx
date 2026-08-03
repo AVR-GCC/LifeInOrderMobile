@@ -57,6 +57,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | null>(null);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const userId = 1;
   const { height, width } = useWindowDimensions();
   const [data, setData] = useState<MainProps | null>(null);
   const dataRef = useRef(data);
@@ -177,7 +178,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setDayHabitValue: SetDayValue = (date, habitIndex, values) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
-    setDayValueServer(date, habits[habitIndex].habit.id, values);
+    setDayValueServer(userId, date, habits[habitIndex].habit.id, values);
     updateData(setDayHabitValueReducer(dataRef.current)(date, habitIndex, values));
   };
 

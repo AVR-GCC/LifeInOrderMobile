@@ -4,8 +4,8 @@ import { getZoomModeRange } from '../constants/zoom';
 import { emptyDatesData, mapToLoadParams } from '../utils/dataStructures';
 
 // const baseUrl = 'http://10.0.0.9:8080'; // TODO: Make this configurable via environment variables
-const baseUrl = 'http://192.168.1.88:8080'; // TODO: Make this configurable via environment variables
-// const baseUrl = 'https://lifeinorderbackend.fly.dev';
+// const baseUrl = 'http://192.168.1.88:8080'; // TODO: Make this configurable via environment variables
+const baseUrl = 'https://lifeinorderbackend.fly.dev';
 
 export const getUserConfig = async () => {
   try {
@@ -66,9 +66,9 @@ export const debounce = (func: (...args: any) => any, milis: number) => {
 
 export const setDayValueServer: SetDayValueServer = (() => {
   const throttles: { [key: string]: ReturnType<typeof setTimeout> } = {};
-  const func: SetDayValueServer = async (date, habitId, { valueId, text }) => {
+  const func: SetDayValueServer = async (userId, date, habitId, { valueId, text }) => {
     try {
-      await axios.post(`${baseUrl}/day_values`, {
+      await axios.post(`${baseUrl}/day_values/${userId}`, {
         value_id: valueId,
         habit_id: habitId,
         date,
@@ -80,10 +80,10 @@ export const setDayValueServer: SetDayValueServer = (() => {
     }
   };
   
-  const throttled: SetDayValueServer = (date, habitId, values) => {
+  const throttled: SetDayValueServer = (userId, date, habitId, values) => {
     const key = `${date}-${habitId}`;
     if (throttles[key]) clearTimeout(throttles[key]);
-    throttles[key] = setTimeout(() => func(date, habitId, values), 1000);
+    throttles[key] = setTimeout(() => func(userId, date, habitId, values), 1000);
   };
   return throttled;
 })();
