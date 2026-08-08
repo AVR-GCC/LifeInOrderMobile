@@ -7,7 +7,7 @@ export interface Value {
   created_at: string;
 }
 
-export type HabitType = 'color' | 'text';
+export type HabitType = 'Color' | 'Text';
 
 export interface Habit {
   id: string;

@@ -17,7 +17,7 @@ import { COLORS } from '../constants/theme';
 import { CreateHabit, HabitType, HabitWithValues } from '../types';
 
 interface TypeCardProps {
-  type: 'color' | 'text';
+  type: 'Color' | 'Text';
   selected: boolean;
   onPress: () => void;
 }
@@ -35,7 +35,7 @@ function TypeCard({ type, selected, onPress }: TypeCardProps) {
   const handlePressOut = () =>
     Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 50 }).start();
 
-  const isColor = type === 'color';
+  const isColor = type === 'Color';
 
   return (
     <TouchableOpacity
@@ -96,7 +96,7 @@ export default function NewHabitScreen({ habits, createHabit }: TypeNewHabitsScr
     if (!isReady) return;
     const seq = habits[habits.length - 1]?.habit?.sequence + 1 || 1;
     await createHabit(seq, selectedType, name);
-    if (selectedType === 'color') {
+    if (selectedType === 'Color') {
       router.replace(`/day/${date}/habits/${habits.length}?name=${name}`)
     } else {
       router.replace(`/day/${date}/habits`)
@@ -105,7 +105,7 @@ export default function NewHabitScreen({ habits, createHabit }: TypeNewHabitsScr
 
   const buttonLabel = !selectedType
     ? 'Select a type'
-    : selectedType === 'color'
+    : selectedType === 'Color'
     ? 'Configure values →'
     : 'Create Habit +';
 
@@ -137,14 +137,14 @@ export default function NewHabitScreen({ habits, createHabit }: TypeNewHabitsScr
         {/* Type selection */}
         <Text style={[styles.sectionLabel, { marginTop: 24 }]}>Choose type</Text>
         <TypeCard
-          type="color"
-          selected={selectedType === 'color'}
-          onPress={() => { Keyboard.dismiss(); setSelectedType('color'); }}
+          type="Color"
+          selected={selectedType === 'Color'}
+          onPress={() => { Keyboard.dismiss(); setSelectedType('Color'); }}
         />
         <TypeCard
-          type="text"
-          selected={selectedType === 'text'}
-          onPress={() => { Keyboard.dismiss(); setSelectedType('text'); }}
+          type="Text"
+          selected={selectedType === 'Text'}
+          onPress={() => { Keyboard.dismiss(); setSelectedType('Text'); }}
         />
       </ScrollView>
 

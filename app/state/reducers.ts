@@ -84,7 +84,7 @@ export const setDayHabitValueReducer = (data: MainProps) => (date: string, habit
   const newDate = { ...newMonth.days[dateIndex] };
   const habit = data.habits[habitIndex].habit;
   const { valueId, text } = values;
-  newDate.values = { ...newDate.values, [habit.id]: habit.habit_type === 'color' || text === null ? valueId : text };
+  newDate.values = { ...newDate.values, [habit.id]: habit.habit_type === 'Color' || text === null ? valueId : text };
   datesLookup[date] = {
     dateIndex,
     monthIndex,

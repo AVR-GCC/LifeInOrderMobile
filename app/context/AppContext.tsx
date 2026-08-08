@@ -187,7 +187,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return getDayHabitValueSelector(dataRef.current)(date, habitIndex);
   };
 
-  const createHabit: CreateHabit = async (sequence, type = 'color', name = '') => {
+  const createHabit: CreateHabit = async (sequence, type = 'Color', name = '') => {
     if (dataRef.current === null) return null;
     const newHabit = {
       name,
@@ -197,7 +197,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     const newHabitValue = await createHabitServer(newHabit);
     const values = [];
-    if (type === 'text') {
+    if (type === 'Text') {
       const newValue = {
         label: newHabit.name,
         color: colorOptions[0],

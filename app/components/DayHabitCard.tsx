@@ -21,7 +21,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
     const inputRef = useRef<TextInput>(null);
     const router = useRouter();
 
-    if (habit.habit.habit_type === 'color') {
+    if (habit.habit.habit_type === 'Color') {
       const valueId = getDayHabitValue(date, habitIndex);
       const selectedIndex = valueId === null ? null : habit.values_hashmap[valueId];
       const selectedValue = selectedIndex === null ? null : habit.values[selectedIndex];
