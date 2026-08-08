@@ -90,7 +90,7 @@ export const setDayValueServer: SetDayValueServer = (() => {
 
 export const createHabitServer = async (newHabit: Partial<Habit>) => {
   try {
-    const route = `${baseUrl}/user_habits`;
+    const route = `${baseUrl}/habits`;
     const withUserId = { user_id: 1, ...newHabit };
     const res = await axios.post(route, withUserId);
     return res.data;
@@ -102,7 +102,7 @@ export const createHabitServer = async (newHabit: Partial<Habit>) => {
 
 export const deleteHabitServer = async (id: string) => {
   try {
-    const route = `${baseUrl}/user_habits/${parseInt(id, 10)}`;
+    const route = `${baseUrl}/habits/${parseInt(id, 10)}`;
     const res = await axios.delete(route);
     return res.status === 200;
   } catch (error) {
@@ -124,12 +124,12 @@ const reorderGeneralServerUndebounced = async (route: string, ids: string[]) => 
 };
 
 export const reorderHabitsServerUndebounced = async (ids: string[]) => {
-  const route = `${baseUrl}/user_habits/reorder`;
+  const route = `${baseUrl}/habits/reorder`;
   return reorderGeneralServerUndebounced(route, ids);
 };
 
 export const reorderValuesServerUndebounced = async (ids: string[]) => {
-  const route = `${baseUrl}/habit_values/reorder`;
+  const route = `${baseUrl}/options/reorder`;
   return reorderGeneralServerUndebounced(route, ids);
 };
 
@@ -139,7 +139,7 @@ export const reorderValuesServer = debounce(reorderValuesServerUndebounced, 1000
 
 export const deleteValueServer = async (id: string) => {
   try {
-    const route = `${baseUrl}/habit_values/${parseInt(id, 10)}`;
+    const route = `${baseUrl}/options/${parseInt(id, 10)}`;
     const res = await axios.delete(route);
     return res.status === 200;
   } catch (error) {
@@ -150,7 +150,7 @@ export const deleteValueServer = async (id: string) => {
 
 export const createValueServer = async (newValue: Partial<Value>) => {
   try {
-    const route = `${baseUrl}/habit_values`;
+    const route = `${baseUrl}/options`;
     const res = await axios.post(route, newValue);
     return res.data;
   } catch (error) {
@@ -161,7 +161,7 @@ export const createValueServer = async (newValue: Partial<Value>) => {
 
 const updateValueServerUndebounced = async (newValue: Value) => {
   try {
-    const route = `${baseUrl}/habit_values`;
+    const route = `${baseUrl}/options`;
     const res = await axios.put(route, newValue);
     return res.status === 200;
   } catch (error) {
@@ -172,7 +172,7 @@ const updateValueServerUndebounced = async (newValue: Value) => {
 
 export const updateHabitServerUndebounced = async (newHabit: Habit) => {
   try {
-    const route = `${baseUrl}/user_habits`;
+    const route = `${baseUrl}/habits`;
     const res = await axios.put(route, newHabit);
     return res.status === 200;
   } catch (error) {
