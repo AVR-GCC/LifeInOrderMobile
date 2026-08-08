@@ -15,7 +15,7 @@ export const loadInitialDataReducer: InitialDataReducer = () => (dayLevelData, q
   const dates = emptyDatesData();
   const dayRange = getZoomLevelDataRange(dayLevelData);
   const quarterRange = getZoomLevelDataRange(quarterLevelData);
-  if (!dayRange || !quarterRange) return { dates, habits, macroMap, mode: 0 };
+  if (!dayRange || !quarterRange) return { dates, datesLookup: {}, habits, macroMap, mode: 0 };
   const diff = dateDiffStr(dayRange.end, quarterRange.end);
   const dayOffset = diff < 0 ? -1 * diff : 0;
   const day = { offset: dayOffset, range: dayRange };
