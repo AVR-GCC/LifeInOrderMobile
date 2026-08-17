@@ -124,7 +124,7 @@ export type LoadDataInput = { date: string, zoom: ZoomLevel, count: number };
 
 export type GetDayHabitValue = (date: string, habitIndex: number) => string | null;
 export type SetDayValue = (date: string, habitIndex: number, values: { valueId: string, text: string | null }) => void;
-export type SetDayValueServer = (userId: number, date: string, habitId: string, values: { valueId: string, text: string | null }) => void;
+export type SetDayValueServer = (date: string, habitId: string, values: { valueId: string, text: string | null }) => void;
 export type CreateHabit = (sequence: number, type: HabitType, name: string) => Promise<null | undefined>;
 export type UpdateHabit = (habitIndex: number, newValueValues: Partial<Habit>) => void;
 export type DeleteHabit = (index: number) => void;
