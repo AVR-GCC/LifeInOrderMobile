@@ -38,6 +38,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "52060ddc-dd60-43b5-8ba3-ed140b9ff3dd"
+      }
+    },
+    "owner": "ogoun-apps"
   }
 }
