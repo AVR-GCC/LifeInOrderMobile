@@ -66,7 +66,7 @@ const SeparatorLine: React.FC<SeparatorLineProps> = React.memo(function Separato
         ]}
         numberOfLines={1}
       >
-        {label}
+        D{label}
       </Animated.Text>
     </View>
   );
