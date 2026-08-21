@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.lifeinorder.app"
+      "bundleIdentifier": "com.lifeinorder.app",
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +20,8 @@
         "backgroundColor": "#213448"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.lifeinorder.app"
+      "package": "com.lifeinorder.app",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "bundler": "metro",
@@ -45,6 +49,9 @@
         "projectId": "52060ddc-dd60-43b5-8ba3-ed140b9ff3dd"
       }
     },
-    "owner": "ogoun-apps"
+    "owner": "ogoun-apps",
+    "updates": {
+      "url": "https://u.expo.dev/52060ddc-dd60-43b5-8ba3-ed140b9ff3dd"
+    }
   }
 }
