@@ -2,6 +2,7 @@ import axios from 'axios';
 import type { GetUserMapPureResponse, Habit, MacroMap, SetDayValueServer, Value, ZoomLevel } from '../types';
 import { getZoomModeRange } from '../constants/zoom';
 import { emptyDatesData, mapToLoadParams } from '../utils/dataStructures';
+import { debounce } from '../utils/API';
 
 // const baseUrl = 'http://10.0.0.9:8080'; // TODO: Make this configurable via environment variables
 // const baseUrl = 'http://192.168.1.88:8080'; // TODO: Make this configurable via environment variables
@@ -56,16 +57,7 @@ export const getUserMap = async (map: MacroMap, isBefore: boolean, id: number, w
   return res;
 };
 
-export const debounce = (func: (...args: any) => any, milis: number) => {
-  let deb: ReturnType<typeof setTimeout> | null = null;
-  return (...args: any) => new Promise(resolve => {
-    if (deb) clearTimeout(deb);
-    deb = setTimeout(() => resolve(func(...args)), milis);
-  });
-};
-
 export const setDayValueServer: SetDayValueServer = (() => {
-  const throttles: { [key: string]: ReturnType<typeof setTimeout> } = {};
   const func: SetDayValueServer = async (date, habitId, { valueId, text }) => {
     try {
       await axios.post(`${baseUrl}/values`, {
@@ -79,13 +71,7 @@ export const setDayValueServer: SetDayValueServer = (() => {
       console.error('Error setting day value:', error);
     }
   };
-  
-  const throttled: SetDayValueServer = (date, habitId, values) => {
-    const key = `${date}-${habitId}`;
-    if (throttles[key]) clearTimeout(throttles[key]);
-    throttles[key] = setTimeout(() => func(date, habitId, values), 1000);
-  };
-  return throttled;
+  return debounce((date, habitId) => `${date}-${habitId}`, func, 1000);
 })();
 
 export const createHabitServer = async (newHabit: Partial<Habit>) => {
@@ -111,7 +97,7 @@ export const deleteHabitServer = async (id: string) => {
   }
 };
 
-const reorderGeneralServerUndebounced = async (route: string, ids: string[]) => {
+const reorderGeneralServer = async (route: string, ids: string[]) => {
   try {
     const res = await axios.post(route, {
       ordered_ids: ids
@@ -123,19 +109,21 @@ const reorderGeneralServerUndebounced = async (route: string, ids: string[]) => 
   }
 };
 
-export const reorderHabitsServerUndebounced = async (ids: string[]) => {
-  const route = `${baseUrl}/habits/reorder`;
-  return reorderGeneralServerUndebounced(route, ids);
-};
+export const reorderHabitsServer = (() => {
+  const func = async (ids: string[]) => {
+    const route = `${baseUrl}/habits/reorder`;
+    return reorderGeneralServer(route, ids);
+  };
+  return debounce(() => 'any', func, 1000);
+})();
 
-export const reorderValuesServerUndebounced = async (ids: string[]) => {
-  const route = `${baseUrl}/options/reorder`;
-  return reorderGeneralServerUndebounced(route, ids);
-};
-
-export const reorderHabitsServer = debounce(reorderHabitsServerUndebounced, 1000);
-
-export const reorderValuesServer = debounce(reorderValuesServerUndebounced, 1000);
+export const reorderValuesServer =  (() => {
+  const func = async (ids: string[]) => {
+    const route = `${baseUrl}/options/reorder`;
+    return reorderGeneralServer(route, ids);
+  };
+  return debounce(() => 'any', func, 1000);
+})();
 
 export const deleteValueServer = async (id: string) => {
   try {
@@ -159,30 +147,33 @@ export const createValueServer = async (newValue: Partial<Value>) => {
   }
 };
 
-const updateValueServerUndebounced = async (newValue: Value) => {
-  try {
-    const route = `${baseUrl}/options`;
-    const res = await axios.put(route, newValue);
-    return res.status === 200;
-  } catch (error) {
-    console.error('Error updating value:', error);
-    return false;
-  }
-};
+export const updateValueServer = (() => {
+  const func = async (newValue: Value) => {
+    try {
+      const route = `${baseUrl}/options`;
+      const res = await axios.put(route, newValue);
+      return res.status === 200;
+    } catch (error) {
+      console.error('Error updating value:', error);
+      return false;
+    }
+  };
+  return debounce(() => 'any', func, 1000);
+})();
 
-export const updateHabitServerUndebounced = async (newHabit: Habit) => {
-  try {
-    const route = `${baseUrl}/habits`;
-    const res = await axios.put(route, newHabit);
-    return res.status === 200;
-  } catch (error) {
-    console.error('Error updating habit:', error);
-    return false;
-  }
-};
-
-export const updateValueServer = debounce(updateValueServerUndebounced, 1000);
-export const updateHabitServer = debounce(updateHabitServerUndebounced, 1000);
+export const updateHabitServer = (() => {
+  const func = async (newHabit: Habit) => {
+    try {
+      const route = `${baseUrl}/habits`;
+      const res = await axios.put(route, newHabit);
+      return res.status === 200;
+    } catch (error) {
+      console.error('Error updating habit:', error);
+      return false;
+    }
+  };
+  return debounce(() => 'any', func, 1000);
+})();
 
 export default {
   getUserList,
