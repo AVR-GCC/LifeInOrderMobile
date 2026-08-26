@@ -16,6 +16,8 @@ jobs:
   submit_android:
     name: Submit to Google Play
     needs: [build_android]
+    env:
+      EXPO_DEBUG: "1"
     type: submit
     params:
       profile: production
