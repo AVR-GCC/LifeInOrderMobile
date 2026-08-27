@@ -41,7 +41,7 @@ export const HabitsScreen: React.FC<HabitsScreenProps> = ({ data, switchHabits, 
         >
           <BackArrow />
         </TouchableOpacity>
-        <Text style={styles.title}>Habitat</Text>
+        <Text style={styles.title}>Habitatas</Text>
       </TitleBar>
       <View style={styles.dayContainer}>
         <ScrollView style={styles.scrollContainer}>
