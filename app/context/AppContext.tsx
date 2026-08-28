@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
-import {
+import client, {
   createHabitServer,
   createValueServer,
   deleteHabitServer,
@@ -9,7 +9,6 @@ import {
   getUserMap,
   reorderHabitsServer,
   reorderValuesServer,
-  setDayValueServer,
   updateHabitServer,
   updateValueServer
 } from '../api/client';
@@ -104,6 +103,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   useEffect(() => {
+    client.connect();
     loadInitialData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -178,7 +178,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setDayHabitValue: SetDayValue = (date, habitIndex, values) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
-    setDayValueServer(date, habits[habitIndex].habit.id, values);
+    client.setValue(date, habits[habitIndex].habit.id, values);
     updateData(setDayHabitValueReducer(dataRef.current)(date, habitIndex, values));
   };
 

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as Crypto from 'expo-crypto';
 import type { GetUserMapPureResponse, Habit, MacroMap, SetDayValueServer, Value, ZoomLevel } from '../types';
 import { getZoomModeRange } from '../constants/zoom';
 import { emptyDatesData, mapToLoadParams } from '../utils/dataStructures';
@@ -9,6 +10,110 @@ const baseAddress = 'lifeinorderbackend.fly.dev';
 // const baseAddress = '10.168.243.108:8080'; // TODO: Make this configurable via environment variables
 
 const baseUrl = `http://${baseAddress}`;
+const WS_URL = `ws://${baseAddress}/ws`;
+
+type PendingRequest<T = unknown> = {
+  resolve: (value: T) => void;
+  reject: (reason: string) => void;
+};
+
+interface SocketMessage<T = unknown> {
+  id: string;
+  data?: T;
+  error?: string;
+}
+
+interface SocketRequestPayload<TParams = unknown> {
+  id: string;
+  route: string;
+  params: TParams;
+}
+
+interface RNMessageEvent {
+  data: string;
+}
+
+// socketClient.js
+class SocketClient {
+  private socket: WebSocket | null = null;
+  private pending: Map<string, PendingRequest> = new Map();
+
+  constructor() {
+    this.socket = null;
+    this.pending = new Map(); // requestId -> { resolve, reject }
+  }
+
+  connect() {
+    this.socket = new WebSocket(WS_URL);
+    this.socket.onopen = () => {
+      console.log('connected');
+    }
+    this.socket.onclose = () => {
+      console.log('disconnected');
+    }
+    this.socket.onerror = (e) => {
+      // this.connected = false;
+      console.log('WS error:', e);
+    };
+    this.socket.onmessage = (e) => this.handleMessage(e);
+  }
+
+  private handleMessage(event: RNMessageEvent): void {
+    let message: SocketMessage;
+    try {
+      message = JSON.parse(event.data);
+    } catch {
+      console.log('malformed: ', event.data);
+      return; // ignore malformed frames
+    }
+
+    const { id, data, error } = message;
+    const req = this.pending.get(id);
+    if (!req) return; // no one is waiting on this response (or it already timed out)
+
+    if (error) {
+      req.reject(error);
+    } else {
+      req.resolve(data);
+    }
+    this.pending.delete(id);
+  }
+
+  request<T = unknown>(route: string, params: object, resolveTyped: (data: T) => void, reject: (reason: string) => void) {
+    const id = Crypto.randomUUID();
+    this.pending.set(id, { resolve: resolveTyped as (data: unknown) => void, reject });
+    if (this.socket) {
+      const srp: SocketRequestPayload = { id, route, params };
+      this.socket.send(JSON.stringify(srp));
+    }
+  }
+
+  setValue: SetDayValueServer = (() => {
+    const func: SetDayValueServer = async (date, habitId, { valueId, text }) => {
+      try {
+        const route = 'values';
+        const params = {
+          value_id: valueId,
+          habit_id: habitId,
+          date,
+          text,
+          number: null
+        };
+        const resolve = (data: Value) => {
+          console.log(data, 'has been set, remove from local storage');
+        }
+        const reject = (reason: string) => {
+          console.log('Error setting value:', date, habitId, { valueId, text }, reason);
+        }
+        this.request(route, params, resolve, reject);
+      } catch (error) {
+        console.error('Error setting day value:', error);
+      }
+    };
+    return debounce((date, habitId) => `${date}-${habitId}`, func, 1000);
+  })();
+}
+
 export const getUserConfig = async () => {
   try {
     const route = `${baseUrl}/users/1/config`;
@@ -176,13 +281,4 @@ export const updateHabitServer = (() => {
   return debounce(() => 'any', func, 1000);
 })();
 
-export default {
-  getUserList,
-  setDayValueServer,
-  updateHabitServer,
-  deleteHabitServer,
-  reorderHabitsServer,
-  reorderValuesServer,
-  updateValueServer,
-  deleteValueServer
-}; 
+export default new SocketClient();
