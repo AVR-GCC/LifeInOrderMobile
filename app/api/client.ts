@@ -4,10 +4,11 @@ import { getZoomModeRange } from '../constants/zoom';
 import { emptyDatesData, mapToLoadParams } from '../utils/dataStructures';
 import { debounce } from '../utils/API';
 
-// const baseUrl = 'http://10.0.0.9:8080'; // TODO: Make this configurable via environment variables
-// const baseUrl = 'http://192.168.1.88:8080'; // TODO: Make this configurable via environment variables
-const baseUrl = 'https://lifeinorderbackend.fly.dev';
+const baseAddress = 'lifeinorderbackend.fly.dev';
+// const baseAddress = '192.168.1.88:8080'; // TODO: Make this configurable via environment variables
+// const baseAddress = '10.168.243.108:8080'; // TODO: Make this configurable via environment variables
 
+const baseUrl = `http://${baseAddress}`;
 export const getUserConfig = async () => {
   try {
     const route = `${baseUrl}/users/1/config`;
