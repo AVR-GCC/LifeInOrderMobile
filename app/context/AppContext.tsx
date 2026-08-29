@@ -26,7 +26,7 @@ import {
   updateHabitReducer,
   updateValueReducer
 } from '../state/reducers';
-import { getDayHabitValueSelector } from '../state/selectors';
+import { getValueSelector } from '../state/selectors';
 import type { CreateHabit, DeleteOption, GetValue, Habit, LoadingMap, MacroMap, MainProps, SetValue, Value } from '../types';
 import { emptyDatesData, getSurroundingMacroMap, isEmptyMacroMap, mapToLoadParams, mergeMaps, subtractMaps } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
@@ -184,7 +184,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const getValue: GetValue = (date, habitIndex) => {
     if (dataRef.current === null) return null;
-    return getDayHabitValueSelector(dataRef.current)(date, habitIndex);
+    return getValueSelector(dataRef.current)(date, habitIndex);
   };
 
   const createHabit: CreateHabit = async (sequence, type = 'Color', name = '') => {
