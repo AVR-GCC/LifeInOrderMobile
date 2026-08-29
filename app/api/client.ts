@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as Crypto from 'expo-crypto';
-import type { GetUserMapPureResponse, Habit, MacroMap, SetDayValueServer, Value, ZoomLevel } from '../types';
+import type { GetUserMapPureResponse, Habit, MacroMap, SetValueSocket, Value, ZoomLevel } from '../types';
 import { getZoomModeRange } from '../constants/zoom';
 import { emptyDatesData, mapToLoadParams } from '../utils/dataStructures';
 import { debounce } from '../utils/API';
@@ -88,8 +88,8 @@ class SocketClient {
     }
   }
 
-  setValue: SetDayValueServer = (() => {
-    const func: SetDayValueServer = async (date, habitId, { valueId, text }) => {
+  setValue: SetValueSocket = (() => {
+    const func: SetValueSocket = async (date, habitId, { valueId, text }) => {
       try {
         const route = 'values';
         const params = {
@@ -163,8 +163,8 @@ export const getUserMap = async (map: MacroMap, isBefore: boolean, id: number, w
   return res;
 };
 
-export const setDayValueServer: SetDayValueServer = (() => {
-  const func: SetDayValueServer = async (date, habitId, { valueId, text }) => {
+export const setDayValueServer: SetValueSocket = (() => {
+  const func: SetValueSocket = async (date, habitId, { valueId, text }) => {
     try {
       await axios.post(`${baseUrl}/values`, {
         value_id: valueId,
