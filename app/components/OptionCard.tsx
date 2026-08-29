@@ -64,7 +64,7 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
         onPress={createOption}
       >
         <AntDesign name="plus" size={18} color={COLORS.text} />
-        <Text style={styles.newOptionText}>Create Value</Text>
+        <Text style={styles.newOptionText}>Create Option</Text>
       </TouchableOpacity>
     );
   }

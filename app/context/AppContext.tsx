@@ -260,15 +260,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const createOption: CreateOption = async (habitIndex, sequence) => {
     if (dataRef.current === null) return null;
     const { habits } = dataRef.current;
-    const newValue = {
+    const newOption = {
       label: '',
       color: colorOptions[0],
       habit_id: parseInt(habits[habitIndex].habit.id, 10),
       sequence,
       created_at: 'new'
     };
-    const newValueValues = await createValueServer(newValue);
-    updateData(addValueReducer(dataRef.current)(habitIndex, newValueValues));
+    const newOptionValues = await createValueServer(newOption);
+    updateData(addValueReducer(dataRef.current)(habitIndex, newOptionValues));
   };
 
   const switchOptions: SwitchOptions = (isDown, habitIndex, valueIndex) => {
