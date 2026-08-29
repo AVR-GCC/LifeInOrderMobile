@@ -129,7 +129,7 @@ export type CreateHabit = (sequence: number, type: HabitType, name: string) => P
 export type UpdateHabit = (habitIndex: number, newValueValues: Partial<Habit>) => void;
 export type DeleteHabit = (index: number) => void;
 export type SwitchHabits = (isDown: boolean, index: number) => void;
-export type CreateValue = (habitIndex: number, sequence: number) => Promise<null | undefined>;
+export type CreateOption = (habitIndex: number, sequence: number) => Promise<null | undefined>;
 export type DeleteValue = (habitIndex: number, valueIndex: number) => void;
 export type SwitchValues = (isDown: boolean, habitIndex: number, valueIndex: number) => void;
 export type UpdateValue = (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;

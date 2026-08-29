@@ -31,7 +31,7 @@ interface OptionCardProps {
   updateValue: UpdateValue;
   openPallete: () => void;
   palleteOpen: boolean;
-  createValue: () => void;
+  createOption: () => void;
   onInputFocused: (targetY: number) => void;
   setFocusLastCardRef: (func: () => void) => void;
 }
@@ -46,7 +46,7 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
   updateValue,
   openPallete,
   palleteOpen,
-  createValue,
+  createOption,
   onInputFocused,
   setFocusLastCardRef
 }) {
@@ -61,7 +61,7 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
     return (
       <TouchableOpacity
         style={[styles.optionCard, styles.newOption]}
-        onPress={createValue}
+        onPress={createOption}
       >
         <AntDesign name="plus" size={18} color={COLORS.text} />
         <Text style={styles.newOptionText}>Create Value</Text>

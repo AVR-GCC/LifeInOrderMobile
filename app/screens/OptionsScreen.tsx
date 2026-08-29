@@ -6,7 +6,7 @@ import TitleBar from '../components/TitleBar';
 import OptionCard from '../components/OptionCard';
 import VerticalChevrons from '../components/VerticalChevrons';
 import { COLORS } from '../constants/theme';
-import type { CreateValue, DeleteValue, MainProps, SwitchValues, UpdateHabit, UpdateValue } from '../types';
+import type { CreateOption, DeleteValue, MainProps, SwitchValues, UpdateHabit, UpdateValue } from '../types';
 import BackArrow from '../components/BackArrow';
 import useKeyboardScroll from '../hooks/useKeyboardScroll';
 
@@ -16,7 +16,7 @@ interface OptionsScreenProps {
   deleteValue: DeleteValue;
   updateValue: UpdateValue;
   updateHabit: UpdateHabit;
-  createValue: CreateValue;
+  createOption: CreateOption;
 }
 
 const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function ValuesScreen({
@@ -25,7 +25,7 @@ const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function ValuesSc
   switchValues,
   deleteValue,
   updateValue,
-  createValue
+  createOption
 }) {
   const { date, habit, name } = useLocalSearchParams();
   const router = useRouter();
@@ -59,10 +59,10 @@ const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function ValuesSc
   const habitIndex = parseInt(habit.toString(), 10);
   const { habits } = data;
 
-  const createValueLocal = async () => {
+  const handleCreateOption = async () => {
     const thisHabitValues = habits[habitIndex].values;
     const sequence = thisHabitValues?.[thisHabitValues.length - 1]?.sequence || 1;
-    await createValue(habitIndex, sequence + 1);
+    await createOption(habitIndex, sequence + 1);
     setTimeout(() => {
       focusLastCardRef.current?.();
     }, 500);
@@ -132,7 +132,7 @@ const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function ValuesSc
           switchValues={switchValues}
           deleteValue={deleteValue}
           updateValue={updateValue}
-          createValue={createValueLocal}
+          createOption={handleCreateOption}
           palleteOpen={false}
           openPallete={() => {}}
           onInputFocused={setTargetY}
@@ -149,7 +149,7 @@ const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function ValuesSc
               switchValues={switchValues}
               deleteValue={deleteValue}
               updateValue={updateValue}
-              createValue={createValueLocal}
+              createOption={handleCreateOption}
               palleteOpen={openPallete === v.id}
               openPallete={() => {
                 setOpenPallete(openPallete === v.id ? null : v.id);

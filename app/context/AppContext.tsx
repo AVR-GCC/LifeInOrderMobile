@@ -40,7 +40,7 @@ interface AppContextType {
   updateHabit: (habitIndex: number, newHabitValues: Partial<Habit>) => void;
   deleteHabit: (index: number) => void;
   switchHabits: (isDown: boolean, index: number) => void;
-  createValue: (habitIndex: number, sequence: number) => Promise<null | undefined>;
+  createOption: (habitIndex: number, sequence: number) => Promise<null | undefined>;
   switchValues: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteValue: DeleteValue;
@@ -237,7 +237,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateData(switchHabitsReducer(dataRef.current)(isDown, index));
   };
 
-  const createValue = async (habitIndex: number, sequence: number) => {
+  const createOption = async (habitIndex: number, sequence: number) => {
     if (dataRef.current === null) return null;
     const { habits } = dataRef.current;
     const newValue = {
@@ -289,7 +289,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateHabit,
         deleteHabit,
         switchHabits,
-        createValue,
+        createOption,
         switchValues,
         updateValue,
         deleteValue,
