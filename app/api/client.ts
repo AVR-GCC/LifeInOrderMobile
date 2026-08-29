@@ -46,10 +46,10 @@ class SocketClient {
   connect() {
     this.socket = new WebSocket(WS_URL);
     this.socket.onopen = () => {
-      console.log('connected');
+      console.log('socket connected');
     }
     this.socket.onclose = () => {
-      console.log('disconnected');
+      console.log('socket disconnected');
     }
     this.socket.onerror = (e) => {
       // this.connected = false;

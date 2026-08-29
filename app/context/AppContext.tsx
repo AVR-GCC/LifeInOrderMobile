@@ -15,16 +15,16 @@ import client, {
 import { colorOptions } from '../components/OptionCard';
 import {
   addHabitReducer,
-  addValueReducer,
+  addOptionReducer,
   deleteHabitReducer,
-  deleteValueReducer,
+  deleteOptionReducer,
   loadInitialDataReducer,
   receiveMoreDataReducer,
   setValueReducer,
   switchHabitsReducer,
-  switchValuesReducer,
+  switchOptionsReducer,
   updateHabitReducer,
-  updateValueReducer
+  updateOptionReducer
 } from '../state/reducers';
 import { getValueSelector } from '../state/selectors';
 import type {
@@ -268,7 +268,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       created_at: 'new'
     };
     const newOptionValues = await createValueServer(newOption);
-    updateData(addValueReducer(dataRef.current)(habitIndex, newOptionValues));
+    updateData(addOptionReducer(dataRef.current)(habitIndex, newOptionValues));
   };
 
   const switchOptions: SwitchOptions = (isDown, habitIndex, valueIndex) => {
@@ -280,7 +280,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ids[valueIndex] = values[otherIndex].id;
     ids[otherIndex] = values[valueIndex].id;
     reorderValuesServer(ids);
-    updateData(switchValuesReducer(dataRef.current)(isDown, habitIndex, valueIndex));
+    updateData(switchOptionsReducer(dataRef.current)(isDown, habitIndex, valueIndex));
   };
 
   const updateOption: UpdateOption = (habitIndex, valueIndex, newValueValues) => {
@@ -289,14 +289,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const oldValue = habits[habitIndex].values[valueIndex];
     const newValue = { ...oldValue, ...newValueValues };
     updateValueServer(newValue);
-    updateData(updateValueReducer(dataRef.current)(habitIndex, valueIndex, newValueValues));
+    updateData(updateOptionReducer(dataRef.current)(habitIndex, valueIndex, newValueValues));
   };
 
   const deleteOption: DeleteOption = (habitIndex, valueIndex) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
     deleteValueServer(habits[habitIndex].values[valueIndex].id);
-    updateData(deleteValueReducer(dataRef.current)(habitIndex, valueIndex));
+    updateData(deleteOptionReducer(dataRef.current)(habitIndex, valueIndex));
   };
 
   return (

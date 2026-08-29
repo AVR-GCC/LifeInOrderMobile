@@ -122,6 +122,7 @@ export interface NavigationValues {
   
 export type LoadDataInput = { date: string, zoom: ZoomLevel, count: number };
 
+// AppContext
 export type GetValue = (date: string, habitIndex: number) => string | null;
 export type SetValue = (date: string, habitIndex: number, values: { valueId: string, text: string | null }) => void;
 export type SetValueSocket = (date: string, habitId: string, values: { valueId: string, text: string | null }) => void;
@@ -142,9 +143,22 @@ export type SetScroll = (newScroll: number) => void;
 export type GetScroll = () => number;
 export type SetMode = (mode: number) => void;
 
+
 export type CreateDatesLookup = (days: ZoomLevelData[]) => DatesLookup;
 
+// reducers
 export type InitialDataReducer = () => ((dayLevelData: MonthData[], quarterLevelData: TimePeriodData[], habits: HabitWithValues[]) => MainProps);
+export type RemoveDataIfNeeded = (macroMap: MacroMap, dates: DatesData, rmm: MacroMap) => { dates: DatesData, macroMap: MacroMap };
+export type ReceiveMoreDataReducer = (data: MainProps) => (responses: GetUserMapPureResponse[], rmm: MacroMap, removeDataOutsideMap: boolean) => MainProps;
+export type SetValueReducer = (data: MainProps) => (date: string, habitIndex: number, values: { valueId: string, text: string | null }) => MainProps;
+export type AddHabitReducer = (data: MainProps) => (habit: Habit, values: Value[]) => MainProps;
+export type UpdateHabitReducer = (data: MainProps) => (habitIndex: number, newHabitValues: Partial<Value>) => MainProps;
+export type DeleteHabitReducer = (data: MainProps) => (index: number) => MainProps;
+export type SwitchHabitsReducer = (data: MainProps) => (isDown: boolean, index: number) => MainProps;
+export type SwitchOptionsReducer = (data: MainProps) => (isDown: boolean, habitIndex: number, valueIndex: number) => MainProps;
+export type UpdateOptionReducer = (data: MainProps) => (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => MainProps;
+export type DeleteOptionReducer = (data: MainProps) => (habitIndex: number, valueIndex: number) => MainProps;
+export type AddOptionReducer = (data: MainProps) => (habitIndex: number, value: Value) => MainProps;
 
 export type SeparatorType = 'today' | 'month' | 'year';
 

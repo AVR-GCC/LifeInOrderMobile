@@ -1,5 +1,21 @@
 import { createDatesLookup, emptyDatesData, emptyMacroMap, mergeMaps } from '../utils/dataStructures';
-import type { DatesData, Habit, MainProps, Value, ZoomLevelData, MacroMap, GetUserMapPureResponse, InitialDataReducer } from '../types';
+import type {
+  DatesData,
+  ZoomLevelData,
+  MacroMap,
+  InitialDataReducer,
+  RemoveDataIfNeeded,
+  ReceiveMoreDataReducer,
+  SetValueReducer,
+  AddHabitReducer,
+  UpdateHabitReducer,
+  DeleteHabitReducer,
+  SwitchHabitsReducer,
+  SwitchOptionsReducer,
+  UpdateOptionReducer,
+  DeleteOptionReducer,
+  AddOptionReducer
+} from '../types';
 import { dateDiffStr, last } from '../utils/general';
 import { modes } from '../constants/zoom';
 
@@ -29,7 +45,7 @@ export const loadInitialDataReducer: InitialDataReducer = () => (dayLevelData, q
   return { dates, datesLookup, habits, macroMap, mode: 0 };
 };
 
-const removeDataIfNeeded = (macroMap: MacroMap, dates: DatesData, rmm: MacroMap) => {
+const removeDataIfNeeded: RemoveDataIfNeeded = (macroMap, dates, rmm) => {
   const newData = emptyDatesData();
   const newMacroMap = emptyMacroMap();
   modes.forEach(mode => {
@@ -56,7 +72,7 @@ const removeDataIfNeeded = (macroMap: MacroMap, dates: DatesData, rmm: MacroMap)
   return { macroMap: newMacroMap, dates: newData };
 };
 
-export const receiveMoreDataReducer = (data: MainProps) => (responses: GetUserMapPureResponse[], rmm: MacroMap, removeDataOutsideMap: boolean) => {
+export const receiveMoreDataReducer: ReceiveMoreDataReducer = (data) => (responses, rmm, removeDataOutsideMap) => {
   const { dates: oldDates, macroMap: oldMacroMap } = data;
   let addedDates = oldDates, addedMacroMap = oldMacroMap;
   responses.forEach(({ map, datesData }) => {
@@ -75,7 +91,7 @@ export const receiveMoreDataReducer = (data: MainProps) => (responses: GetUserMa
   return { ...data, datesLookup, dates, macroMap };
 };
 
-export const setValueReducer = (data: MainProps) => (date: string, habitIndex: number, values: { valueId: string, text: string | null }) => {
+export const setValueReducer: SetValueReducer = (data) => (date, habitIndex, values) => {
   const { dates, datesLookup, macroMap } = data;
   const newDayZoomData = [...dates.day]
   const { dateIndex, monthIndex } = datesLookup[date];
@@ -110,7 +126,7 @@ export const setValueReducer = (data: MainProps) => (date: string, habitIndex: n
   return { ...data, datesLookup, dates: newDates, macroMap: newMacroMap };
 };
 
-export const addHabitReducer = (data: MainProps) => (habit: Habit, values: Value[]) => {
+export const addHabitReducer: AddHabitReducer = (data) => (habit, values) => {
   const newData = { ...data };
   const newHabits = [...newData.habits];
   const values_hashmap: Record<string, number> = {};
@@ -121,7 +137,7 @@ export const addHabitReducer = (data: MainProps) => (habit: Habit, values: Value
   return { ...newData, habits: newHabits };
 }
 
-export const updateHabitReducer = (data: MainProps) => (habitIndex: number, newHabitValues: Partial<Value>) => {
+export const updateHabitReducer: UpdateHabitReducer = (data) => (habitIndex, newHabitValues) => {
   const newData = { ...data };
   const newHabits = [...newData.habits];
   newHabits[habitIndex].habit = { ...newHabits[habitIndex].habit, ...newHabitValues };
@@ -129,14 +145,14 @@ export const updateHabitReducer = (data: MainProps) => (habitIndex: number, newH
   return { ...newData, habits: newHabits };
 };
 
-export const deleteHabitReducer = (data: MainProps) => (index: number) => {
+export const deleteHabitReducer: DeleteHabitReducer = (data) => (index) => {
   const newData = { ...data };
   const newHabits = [...newData.habits];
   newHabits.splice(index, 1);
   return { ...newData, habits: newHabits };
 };
 
-export const switchHabitsReducer = (data: MainProps) => (isDown: boolean, index: number) => {
+export const switchHabitsReducer: SwitchHabitsReducer = (data) => (isDown, index) => {
   const newData = { ...data };
   const newHabits = [...newData.habits];
   const otherIndex = index + (isDown ? 1 : -1);
@@ -146,7 +162,7 @@ export const switchHabitsReducer = (data: MainProps) => (isDown: boolean, index:
   return { ...newData, habits: newHabits };
 };
 
-export const switchValuesReducer = (data: MainProps) => (isDown: boolean, habitIndex: number, valueIndex: number) => {
+export const switchOptionsReducer: SwitchOptionsReducer = (data) => (isDown, habitIndex, valueIndex) => {
   const newData = { ...data };
   const newHabits = [...newData.habits];
   const newHabit = { ...newHabits[habitIndex] };
@@ -160,7 +176,7 @@ export const switchValuesReducer = (data: MainProps) => (isDown: boolean, habitI
   return { ...newData, habits: newHabits };
 };
 
-export const updateValueReducer = (data: MainProps) => (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => {
+export const updateOptionReducer: UpdateOptionReducer = (data) => (habitIndex, valueIndex, newValueValues) => {
   const newData = { ...data };
   const newHabits = [...newData.habits];
   const newHabit = { ...newHabits[habitIndex] };
@@ -172,7 +188,7 @@ export const updateValueReducer = (data: MainProps) => (habitIndex: number, valu
   return { ...newData, habits: newHabits };
 };
 
-export const deleteValueReducer = (data: MainProps) => (habitIndex: number, valueIndex: number) => {
+export const deleteOptionReducer: DeleteOptionReducer = (data) => (habitIndex, valueIndex) => {
   const { habits } = data;
   const newHabits = [...habits];
   const newValues = [...newHabits[habitIndex].values];
@@ -181,7 +197,7 @@ export const deleteValueReducer = (data: MainProps) => (habitIndex: number, valu
   return { ...data, habits: newHabits };
 }
 
-export const addValueReducer = (data: MainProps) => (habitIndex: number, value: Value) => {
+export const addOptionReducer: AddOptionReducer = (data) => (habitIndex, value) => {
   const newData = { ...data };
   const newHabits = [...newData.habits];
   const newHabit = { ...newHabits[habitIndex] };
@@ -198,7 +214,7 @@ export default {
   updateHabitReducer,
   deleteHabitReducer,
   switchHabitsReducer,
-  switchValuesReducer,
-  updateValueReducer,
-  addValueReducer
+  switchOptionsReducer,
+  updateOptionReducer,
+  addOptionReducer
 }; 
