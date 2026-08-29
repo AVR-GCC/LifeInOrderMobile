@@ -163,23 +163,6 @@ export const getUserMap = async (map: MacroMap, isBefore: boolean, id: number, w
   return res;
 };
 
-export const setDayValueServer: SetValueSocket = (() => {
-  const func: SetValueSocket = async (date, habitId, { valueId, text }) => {
-    try {
-      await axios.post(`${baseUrl}/values`, {
-        value_id: valueId,
-        habit_id: habitId,
-        date,
-        text,
-        number: null
-      });
-    } catch (error) {
-      console.error('Error setting day value:', error);
-    }
-  };
-  return debounce((date, habitId) => `${date}-${habitId}`, func, 1000);
-})();
-
 export const createHabitServer = async (newHabit: Partial<Habit>) => {
   try {
     const route = `${baseUrl}/habits`;
