@@ -42,7 +42,7 @@ interface AppContextType {
   switchHabits: (isDown: boolean, index: number) => void;
   createOption: (habitIndex: number, sequence: number) => Promise<null | undefined>;
   switchValues: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
-  updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
+  updateOption: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteOption: DeleteOption;
   loadMoreDataIfNeeded: (rmm: MacroMap, removeDataOutsideMap: boolean) => void;
   loadAndPrefetch: (date: string, dayPixels: number) => void;
@@ -263,7 +263,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateData(switchValuesReducer(dataRef.current)(isDown, habitIndex, valueIndex));
   };
 
-  const updateValue = (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => {
+  const updateOption = (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
     const oldValue = habits[habitIndex].values[valueIndex];
@@ -291,7 +291,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         switchHabits,
         createOption,
         switchValues,
-        updateValue,
+        updateOption,
         deleteOption,
         loadMoreDataIfNeeded,
         loadAndPrefetch,

@@ -1,7 +1,7 @@
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
 import { TextInput, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import type { DeleteOption, HabitWithValues, SwitchValues, UpdateValue, Value } from '../types';
+import type { DeleteOption, HabitWithValues, SwitchValues, UpdateOption, Value } from '../types';
 import VerticalChevrons from './VerticalChevrons';
 import { COLORS } from '../constants/theme';
 
@@ -28,7 +28,7 @@ interface OptionCardProps {
   valueIndex: number;
   switchValues: SwitchValues;
   deleteOption: DeleteOption;
-  updateValue: UpdateValue;
+  updateOption: UpdateOption;
   openPallete: () => void;
   palleteOpen: boolean;
   createOption: () => void;
@@ -43,7 +43,7 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
   valueIndex,
   switchValues,
   deleteOption,
-  updateValue,
+  updateOption,
   openPallete,
   palleteOpen,
   createOption,
@@ -89,7 +89,7 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
             onBlur={() => setInputFocused(false)}
             value={value.label}
             onChangeText={label => {
-              updateValue(habitIndex, valueIndex, { label });
+              updateOption(habitIndex, valueIndex, { label });
             }}
           />
         </View>
@@ -127,7 +127,7 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
             {colorOptions.map((color) => (
               <TouchableOpacity
                 key={color}
-                onPress={() => updateValue(habitIndex, valueIndex, { color })}
+                onPress={() => updateOption(habitIndex, valueIndex, { color })}
               >
                 <View
                   style={[

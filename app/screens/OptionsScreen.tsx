@@ -6,7 +6,7 @@ import TitleBar from '../components/TitleBar';
 import OptionCard from '../components/OptionCard';
 import VerticalChevrons from '../components/VerticalChevrons';
 import { COLORS } from '../constants/theme';
-import type { CreateOption, DeleteOption, MainProps, SwitchValues, UpdateHabit, UpdateValue } from '../types';
+import type { CreateOption, DeleteOption, MainProps, SwitchValues, UpdateHabit, UpdateOption } from '../types';
 import BackArrow from '../components/BackArrow';
 import useKeyboardScroll from '../hooks/useKeyboardScroll';
 
@@ -14,7 +14,7 @@ interface OptionsScreenProps {
   data: MainProps | null;
   switchValues: SwitchValues;
   deleteOption: DeleteOption;
-  updateValue: UpdateValue;
+  updateOption: UpdateOption;
   updateHabit: UpdateHabit;
   createOption: CreateOption;
 }
@@ -24,7 +24,7 @@ const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function OptionsS
   updateHabit,
   switchValues,
   deleteOption,
-  updateValue,
+  updateOption,
   createOption
 }) {
   const { date, habit, name } = useLocalSearchParams();
@@ -131,7 +131,7 @@ const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function OptionsS
           valueIndex={habits.length}
           switchValues={switchValues}
           deleteOption={deleteOption}
-          updateValue={updateValue}
+          updateOption={updateOption}
           createOption={handleCreateOption}
           palleteOpen={false}
           openPallete={() => {}}
@@ -148,7 +148,7 @@ const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function OptionsS
               valueIndex={index}
               switchValues={switchValues}
               deleteOption={deleteOption}
-              updateValue={updateValue}
+              updateOption={updateOption}
               createOption={handleCreateOption}
               palleteOpen={openPallete === v.id}
               openPallete={() => {
