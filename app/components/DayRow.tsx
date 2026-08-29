@@ -1,19 +1,19 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { GetDayHabitValue, HabitWithValues } from '../types';
+import { GetValue, HabitWithValues } from '../types';
 
 export const UNFILLED_COLOR = '#555555';
 
 interface DayRowProps {
   date: string;
   habits: HabitWithValues[];
-  getDayHabitValue: GetDayHabitValue;
+  getValue: GetValue;
 }
 
 function DayRow({
   date,
   habits,
-  getDayHabitValue
+  getValue
 }: DayRowProps) {
   return (
     <View
@@ -22,7 +22,7 @@ function DayRow({
     >
       {habits.map((h, habitIndex) => {
         if (h.habit.habit_type !== 'Color') return;
-        const valueId = getDayHabitValue(date, habitIndex);
+        const valueId = getValue(date, habitIndex);
         let background = UNFILLED_COLOR;
         if (valueId !== null) {
           const valueIndex = h.values_hashmap[valueId];

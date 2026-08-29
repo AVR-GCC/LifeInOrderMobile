@@ -2,12 +2,12 @@ import { useAppContext } from '../../context/AppContext';
 import TextValueScreen from '../../screens/TextValueScreen';
 
 export default function TextValueRoute() {
-  const { data, getDayHabitValue, setDayHabitValue } = useAppContext();
+  const { data, getValue, setDayHabitValue } = useAppContext();
 
   return (
     <TextValueScreen
       data={data}
-      getDayHabitValue={getDayHabitValue}
+      getValue={getValue}
       setDayHabitValue={setDayHabitValue}
     />
   );

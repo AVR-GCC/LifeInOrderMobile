@@ -27,7 +27,7 @@ import {
   updateValueReducer
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
-import type { CreateHabit, DeleteOption, Habit, LoadingMap, MacroMap, MainProps, SetDayValue, Value } from '../types';
+import type { CreateHabit, DeleteOption, GetValue, Habit, LoadingMap, MacroMap, MainProps, SetDayValue, Value } from '../types';
 import { emptyDatesData, getSurroundingMacroMap, isEmptyMacroMap, mapToLoadParams, mergeMaps, subtractMaps } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
@@ -35,7 +35,7 @@ import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
 interface AppContextType {
   data: MainProps | null;
   setDayHabitValue: SetDayValue;
-  getDayHabitValue: (date: string, habitIndex: number) => string | null;
+  getValue: GetValue;
   createHabit: CreateHabit;
   updateHabit: (habitIndex: number, newHabitValues: Partial<Habit>) => void;
   deleteHabit: (index: number) => void;
@@ -182,7 +182,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateData(setDayHabitValueReducer(dataRef.current)(date, habitIndex, values));
   };
 
-  const getDayHabitValue = (date: string, habitIndex: number) => {
+  const getValue: GetValue = (date, habitIndex) => {
     if (dataRef.current === null) return null;
     return getDayHabitValueSelector(dataRef.current)(date, habitIndex);
   };
@@ -284,7 +284,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         data,
         setDayHabitValue,
-        getDayHabitValue,
+        getValue,
         createHabit,
         updateHabit,
         deleteHabit,

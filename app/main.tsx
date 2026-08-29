@@ -3,12 +3,12 @@ import { useAppContext } from './context/AppContext';
 import MainScreen from './screens/MainScreen';
 
 const MainRoute: React.FC = React.memo(function MainRoute() {
-  const { data, getDayHabitValue } = useAppContext();
+  const { data, getValue } = useAppContext();
 
   return (
     <MainScreen
       data={data}
-      getDayHabitValue={getDayHabitValue}
+      getValue={getValue}
     />
   );
 });

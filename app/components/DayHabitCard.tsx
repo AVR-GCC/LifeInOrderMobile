@@ -3,26 +3,26 @@ import React, { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../constants/theme';
 import { UNFILLED_COLOR } from './DayRow';
-import { GetDayHabitValue, HabitWithValues, SetDayValue } from '../types';
+import { GetValue, HabitWithValues, SetDayValue } from '../types';
 
 interface DayHabitCardProps {
   date: string;
   habitIndex: number;
-  getDayHabitValue: GetDayHabitValue;
+  getValue: GetValue;
   setDayHabitValue: SetDayValue;
   habit: HabitWithValues;
   onInputFocused: (y: number) => void;
 }
 
 const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCard({
-  date, habitIndex, getDayHabitValue, setDayHabitValue, habit, onInputFocused
+  date, habitIndex, getValue, setDayHabitValue, habit, onInputFocused
 }) {
     const [focused, setFocused] = useState(false);
     const inputRef = useRef<TextInput>(null);
     const router = useRouter();
 
     if (habit.habit.habit_type === 'Color') {
-      const valueId = getDayHabitValue(date, habitIndex);
+      const valueId = getValue(date, habitIndex);
       const selectedIndex = valueId === null ? null : habit.values_hashmap[valueId];
       const selectedValue = selectedIndex === null ? null : habit.values[selectedIndex];
       return (
@@ -74,7 +74,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
         </TouchableOpacity>
       );
     }
-    const value = getDayHabitValue(date, habitIndex) || '';
+    const value = getValue(date, habitIndex) || '';
     const borderColor = focused ? COLORS.text : value.length > 0 ? COLORS.text : COLORS.border;
 
     const onFocus = () => {

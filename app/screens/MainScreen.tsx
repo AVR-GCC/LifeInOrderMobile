@@ -15,7 +15,7 @@ import { MainScreenProps, ZoomLevelData } from '../types';
 import { dateString } from '../utils/general';
 import ImageRowItem from '../components/ImageRowItem';
 
-const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ data, getDayHabitValue }) {
+const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ data, getValue }) {
   const router = useRouter();
   const { height } = useWindowDimensions();
   const loaded = useRef(false);
@@ -68,7 +68,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
                   if (isPanning.current) return;
                   router.replace(`/day/${day.date}`);
                 }}
-                getDayHabitValue={getDayHabitValue}
+                getValue={getValue}
               />
             );
           });

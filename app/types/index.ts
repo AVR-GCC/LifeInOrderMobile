@@ -122,7 +122,7 @@ export interface NavigationValues {
   
 export type LoadDataInput = { date: string, zoom: ZoomLevel, count: number };
 
-export type GetDayHabitValue = (date: string, habitIndex: number) => string | null;
+export type GetValue = (date: string, habitIndex: number) => string | null;
 export type SetDayValue = (date: string, habitIndex: number, values: { valueId: string, text: string | null }) => void;
 export type SetDayValueServer = (date: string, habitId: string, values: { valueId: string, text: string | null }) => void;
 export type CreateHabit = (sequence: number, type: HabitType, name: string) => Promise<null | undefined>;
@@ -148,7 +148,7 @@ export interface SeparatorData {
 
 export interface MainScreenProps {
   data: MainProps | null;
-  getDayHabitValue: GetDayHabitValue;
+  getValue: GetValue;
 }
 
 export default {};

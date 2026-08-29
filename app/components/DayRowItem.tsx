@@ -3,20 +3,20 @@ import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import DayRow from './DayRow';
 import { BASE_DAY_HEIGHT, LEFT_BAR_WIDTH } from '../constants/mainScreen';
 import { COLORS } from '../constants/theme';
-import { GetDayHabitValue, HabitWithValues } from '../types';
+import { GetValue, HabitWithValues } from '../types';
 
 interface DayRowItemProps {
   date: string;
   habits: HabitWithValues[];
   onPress: () => void;
-  getDayHabitValue: GetDayHabitValue;
+  getValue: GetValue;
 }
 
 const DayRowItem: React.FC<DayRowItemProps> = React.memo(function DayRowItem({
   date,
   habits,
   onPress,
-  getDayHabitValue,
+  getValue,
 }) {
   const dayDate = new Date(date + 'T00:00:00');
   const dayOfWeek = date ? dayDate.getDay() : null;
@@ -40,7 +40,7 @@ const DayRowItem: React.FC<DayRowItemProps> = React.memo(function DayRowItem({
         <DayRow
           date={date}
           habits={habits}
-          getDayHabitValue={getDayHabitValue}
+          getValue={getValue}
         />
       </View>
     </TouchableOpacity>
