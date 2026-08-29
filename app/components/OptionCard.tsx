@@ -1,7 +1,7 @@
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
 import { TextInput, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import type { DeleteOption, HabitWithValues, SwitchOptions, UpdateOption, Value } from '../types';
+import type { DeleteOption, HabitWithValues, SwitchOptions, UpdateOption, Option } from '../types';
 import VerticalChevrons from './VerticalChevrons';
 import { COLORS } from '../constants/theme';
 
@@ -24,7 +24,7 @@ export const colorOptions = [
 interface OptionCardProps {
   habit: HabitWithValues;
   habitIndex: number;
-  value: Value | null;
+  value: Option | null;
   valueIndex: number;
   switchOptions: SwitchOptions;
   deleteOption: DeleteOption;

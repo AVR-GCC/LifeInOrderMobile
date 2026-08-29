@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as Crypto from 'expo-crypto';
-import type { GetUserMapPureResponse, Habit, MacroMap, SetValueSocket, Value, ZoomLevel } from '../types';
+import type { GetUserMapPureResponse, Habit, MacroMap, SetValueSocket, Option, ZoomLevel } from '../types';
 import { getZoomModeRange } from '../constants/zoom';
 import { emptyDatesData, mapToLoadParams } from '../utils/dataStructures';
 import { debounce } from '../utils/API';
@@ -99,7 +99,7 @@ class SocketClient {
           text,
           number: null
         };
-        const resolve = (data: Value) => {
+        const resolve = (data: Option) => {
           console.log(data, 'has been set, remove from local storage');
         }
         const reject = (reason: string) => {
@@ -225,7 +225,7 @@ export const deleteValueServer = async (id: string) => {
   }
 };
 
-export const createValueServer = async (newValue: Partial<Value>) => {
+export const createValueServer = async (newValue: Partial<Option>) => {
   try {
     const route = `${baseUrl}/options`;
     const res = await axios.post(route, newValue);
@@ -237,7 +237,7 @@ export const createValueServer = async (newValue: Partial<Value>) => {
 };
 
 export const updateValueServer = (() => {
-  const func = async (newValue: Value) => {
+  const func = async (newValue: Option) => {
     try {
       const route = `${baseUrl}/options`;
       const res = await axios.put(route, newValue);

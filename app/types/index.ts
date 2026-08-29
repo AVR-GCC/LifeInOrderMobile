@@ -1,4 +1,4 @@
-export interface Value {
+export interface Option {
   id: string;
   label: string;
   color: string;
@@ -19,7 +19,7 @@ export interface Habit {
 
 export interface HabitWithValues {
   habit: Habit;
-  values: Value[];
+  values: Option[];
   values_hashmap: Record<string, number>;
   freshly_created?: boolean;
 }
@@ -131,9 +131,9 @@ export type UpdateHabit = (habitIndex: number, newValueValues: Partial<Habit>) =
 export type DeleteHabit = (index: number) => void;
 export type SwitchHabits = (isDown: boolean, index: number) => void;
 export type CreateOption = (habitIndex: number, sequence: number) => Promise<null | undefined>;
-export type DeleteOption = (habitIndex: number, valueIndex: number) => void;
+export type DeleteOption = (habitIndex: number, optionIndex: number) => void;
 export type SwitchOptions = (isDown: boolean, habitIndex: number, valueIndex: number) => void;
-export type UpdateOption = (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
+export type UpdateOption = (habitIndex: number, valueIndex: number, newValueValues: Partial<Option>) => void;
 
 export type LoadMoreDataIfNeeded = (rmm: MacroMap, removeDataOutsideMap: boolean) => void;
 export type LoadAndPrefetch = (date: string, dayPixels: number) => void;
@@ -151,14 +151,14 @@ export type InitialDataReducer = () => ((dayLevelData: MonthData[], quarterLevel
 export type RemoveDataIfNeeded = (macroMap: MacroMap, dates: DatesData, rmm: MacroMap) => { dates: DatesData, macroMap: MacroMap };
 export type ReceiveMoreDataReducer = (data: MainProps) => (responses: GetUserMapPureResponse[], rmm: MacroMap, removeDataOutsideMap: boolean) => MainProps;
 export type SetValueReducer = (data: MainProps) => (date: string, habitIndex: number, values: { valueId: string, text: string | null }) => MainProps;
-export type AddHabitReducer = (data: MainProps) => (habit: Habit, values: Value[]) => MainProps;
-export type UpdateHabitReducer = (data: MainProps) => (habitIndex: number, newHabitValues: Partial<Value>) => MainProps;
+export type AddHabitReducer = (data: MainProps) => (habit: Habit, values: Option[]) => MainProps;
+export type UpdateHabitReducer = (data: MainProps) => (habitIndex: number, newHabitValues: Partial<Option>) => MainProps;
 export type DeleteHabitReducer = (data: MainProps) => (index: number) => MainProps;
 export type SwitchHabitsReducer = (data: MainProps) => (isDown: boolean, index: number) => MainProps;
 export type SwitchOptionsReducer = (data: MainProps) => (isDown: boolean, habitIndex: number, valueIndex: number) => MainProps;
-export type UpdateOptionReducer = (data: MainProps) => (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => MainProps;
+export type UpdateOptionReducer = (data: MainProps) => (habitIndex: number, valueIndex: number, newValueValues: Partial<Option>) => MainProps;
 export type DeleteOptionReducer = (data: MainProps) => (habitIndex: number, valueIndex: number) => MainProps;
-export type AddOptionReducer = (data: MainProps) => (habitIndex: number, value: Value) => MainProps;
+export type AddOptionReducer = (data: MainProps) => (habitIndex: number, value: Option) => MainProps;
 
 export type SeparatorType = 'today' | 'month' | 'year';
 
