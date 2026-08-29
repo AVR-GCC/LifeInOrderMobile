@@ -75,7 +75,7 @@ export const receiveMoreDataReducer = (data: MainProps) => (responses: GetUserMa
   return { ...data, datesLookup, dates, macroMap };
 };
 
-export const setDayHabitValueReducer = (data: MainProps) => (date: string, habitIndex: number, values: { valueId: string, text: string | null }) => {
+export const setValueReducer = (data: MainProps) => (date: string, habitIndex: number, values: { valueId: string, text: string | null }) => {
   const { dates, datesLookup, macroMap } = data;
   const newDayZoomData = [...dates.day]
   const { dateIndex, monthIndex } = datesLookup[date];
@@ -193,7 +193,7 @@ export const addValueReducer = (data: MainProps) => (habitIndex: number, value: 
 
 export default {
   loadInitialDataReducer,
-  setDayHabitValueReducer,
+  setValueReducer,
   addHabitReducer,
   updateHabitReducer,
   deleteHabitReducer,

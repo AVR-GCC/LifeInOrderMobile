@@ -20,7 +20,7 @@ import {
   deleteValueReducer,
   loadInitialDataReducer,
   receiveMoreDataReducer,
-  setDayHabitValueReducer,
+  setValueReducer,
   switchHabitsReducer,
   switchValuesReducer,
   updateHabitReducer,
@@ -179,7 +179,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
     client.setValue(date, habits[habitIndex].habit.id, values);
-    updateData(setDayHabitValueReducer(dataRef.current)(date, habitIndex, values));
+    updateData(setValueReducer(dataRef.current)(date, habitIndex, values));
   };
 
   const getValue: GetValue = (date, habitIndex) => {
