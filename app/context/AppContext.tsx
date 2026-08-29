@@ -12,7 +12,7 @@ import client, {
   updateHabitServer,
   updateValueServer
 } from '../api/client';
-import { colorOptions } from '../components/ValueCard';
+import { colorOptions } from '../components/OptionCard';
 import {
   addHabitReducer,
   addValueReducer,

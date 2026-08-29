@@ -60,11 +60,11 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
   if (value === null) {
     return (
       <TouchableOpacity
-        style={[styles.valueCard, styles.newValue]}
+        style={[styles.optionCard, styles.newOption]}
         onPress={createValue}
       >
         <AntDesign name="plus" size={18} color={COLORS.text} />
-        <Text style={styles.newValueText}>Create Value</Text>
+        <Text style={styles.newOptionText}>Create Value</Text>
       </TouchableOpacity>
     );
   }
@@ -79,8 +79,8 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
   };
 
   return (
-    <View style={[styles.valueCard, { paddingBottom: 0 }, palleteOpen && { zIndex: 10, overflow: 'visible' }]}>
-      <View style={styles.valueCardMain}>
+    <View style={[styles.optionCard, { paddingBottom: 0 }, palleteOpen && { zIndex: 10, overflow: 'visible' }]}>
+      <View style={styles.optionCardMain}>
         <View style={styles.leftSide}>
           <TextInput
             style={[styles.input, inputFocused && styles.inputFocused]}
@@ -104,7 +104,7 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
           <TouchableOpacity style={styles.buttonHolder} onPress={openPallete}>
             <View
               style={[
-                styles.valueColorCircle,
+                styles.optionColorCircle,
                 {
                   backgroundColor: value.color,
                   borderColor: palleteOpen ? COLORS.text : 'transparent',
@@ -131,7 +131,7 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
               >
                 <View
                   style={[
-                    styles.valueColorCircle,
+                    styles.optionColorCircle,
                     {
                       backgroundColor: color,
                       borderColor: color === value.color ? COLORS.text : 'transparent',
@@ -149,7 +149,7 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
 });
 
 const styles = StyleSheet.create({
-  valueCard: {
+  optionCard: {
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'column',
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     overflow: 'visible',
   },
-  valueCardMain: {
+  optionCardMain: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  valueColorCircle: {
+  optionColorCircle: {
     borderRadius: '50%',
     height: 26,
     width: 26,
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     borderWidth: 1,
   },
-  newValue: {
+  newOption: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderStyle: 'dashed',
   },
-  newValueText: {
+  newOptionText: {
     fontSize: 16,
     color: COLORS.text,
     margin: 5,
