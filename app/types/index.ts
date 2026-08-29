@@ -131,7 +131,7 @@ export type DeleteHabit = (index: number) => void;
 export type SwitchHabits = (isDown: boolean, index: number) => void;
 export type CreateOption = (habitIndex: number, sequence: number) => Promise<null | undefined>;
 export type DeleteOption = (habitIndex: number, valueIndex: number) => void;
-export type SwitchValues = (isDown: boolean, habitIndex: number, valueIndex: number) => void;
+export type SwitchOptions = (isDown: boolean, habitIndex: number, valueIndex: number) => void;
 export type UpdateOption = (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
 
 export type CreateDatesLookup = (days: ZoomLevelData[]) => DatesLookup;

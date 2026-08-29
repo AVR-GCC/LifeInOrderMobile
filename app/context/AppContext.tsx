@@ -41,7 +41,7 @@ interface AppContextType {
   deleteHabit: (index: number) => void;
   switchHabits: (isDown: boolean, index: number) => void;
   createOption: (habitIndex: number, sequence: number) => Promise<null | undefined>;
-  switchValues: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
+  switchOptions: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
   updateOption: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
   deleteOption: DeleteOption;
   loadMoreDataIfNeeded: (rmm: MacroMap, removeDataOutsideMap: boolean) => void;
@@ -251,7 +251,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateData(addValueReducer(dataRef.current)(habitIndex, newValueValues));
   };
 
-  const switchValues = (isDown: boolean, habitIndex: number, valueIndex: number) => {
+  const switchOptions = (isDown: boolean, habitIndex: number, valueIndex: number) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
     const otherIndex = valueIndex + (isDown ? 1 : -1);
@@ -290,7 +290,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteHabit,
         switchHabits,
         createOption,
-        switchValues,
+        switchOptions,
         updateOption,
         deleteOption,
         loadMoreDataIfNeeded,

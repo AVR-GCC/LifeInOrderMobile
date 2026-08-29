@@ -6,13 +6,13 @@ import TitleBar from '../components/TitleBar';
 import OptionCard from '../components/OptionCard';
 import VerticalChevrons from '../components/VerticalChevrons';
 import { COLORS } from '../constants/theme';
-import type { CreateOption, DeleteOption, MainProps, SwitchValues, UpdateHabit, UpdateOption } from '../types';
+import type { CreateOption, DeleteOption, MainProps, SwitchOptions, UpdateHabit, UpdateOption } from '../types';
 import BackArrow from '../components/BackArrow';
 import useKeyboardScroll from '../hooks/useKeyboardScroll';
 
 interface OptionsScreenProps {
   data: MainProps | null;
-  switchValues: SwitchValues;
+  switchOptions: SwitchOptions;
   deleteOption: DeleteOption;
   updateOption: UpdateOption;
   updateHabit: UpdateHabit;
@@ -22,7 +22,7 @@ interface OptionsScreenProps {
 const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function OptionsScreen({
   data,
   updateHabit,
-  switchValues,
+  switchOptions,
   deleteOption,
   updateOption,
   createOption
@@ -129,7 +129,7 @@ const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function OptionsS
           habitIndex={habitIndex}
           value={null}
           valueIndex={habits.length}
-          switchValues={switchValues}
+          switchOptions={switchOptions}
           deleteOption={deleteOption}
           updateOption={updateOption}
           createOption={handleCreateOption}
@@ -146,7 +146,7 @@ const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function OptionsS
               habitIndex={habitIndex}
               value={v}
               valueIndex={index}
-              switchValues={switchValues}
+              switchOptions={switchOptions}
               deleteOption={deleteOption}
               updateOption={updateOption}
               createOption={handleCreateOption}

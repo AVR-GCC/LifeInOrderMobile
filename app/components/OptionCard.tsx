@@ -1,7 +1,7 @@
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
 import { TextInput, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import type { DeleteOption, HabitWithValues, SwitchValues, UpdateOption, Value } from '../types';
+import type { DeleteOption, HabitWithValues, SwitchOptions, UpdateOption, Value } from '../types';
 import VerticalChevrons from './VerticalChevrons';
 import { COLORS } from '../constants/theme';
 
@@ -26,7 +26,7 @@ interface OptionCardProps {
   habitIndex: number;
   value: Value | null;
   valueIndex: number;
-  switchValues: SwitchValues;
+  switchOptions: SwitchOptions;
   deleteOption: DeleteOption;
   updateOption: UpdateOption;
   openPallete: () => void;
@@ -41,7 +41,7 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
   habitIndex,
   value,
   valueIndex,
-  switchValues,
+  switchOptions,
   deleteOption,
   updateOption,
   openPallete,
@@ -96,7 +96,7 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
         <View style={styles.rightSide}>
           <View style={styles.chevronSection}>
             <VerticalChevrons
-              onPress={(isDown) => switchValues(isDown, habitIndex, valueIndex)}
+              onPress={(isDown) => switchOptions(isDown, habitIndex, valueIndex)}
               upDisabled={valueIndex === 0}
               downDisabled={valueIndex === habit.values.length - 1}
             />
