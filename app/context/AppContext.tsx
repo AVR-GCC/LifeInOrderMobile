@@ -27,7 +27,7 @@ import {
   updateValueReducer
 } from '../state/reducers';
 import { getDayHabitValueSelector } from '../state/selectors';
-import type { CreateHabit, DeleteValue, Habit, LoadingMap, MacroMap, MainProps, SetDayValue, Value } from '../types';
+import type { CreateHabit, DeleteOption, Habit, LoadingMap, MacroMap, MainProps, SetDayValue, Value } from '../types';
 import { emptyDatesData, getSurroundingMacroMap, isEmptyMacroMap, mapToLoadParams, mergeMaps, subtractMaps } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
@@ -43,7 +43,7 @@ interface AppContextType {
   createOption: (habitIndex: number, sequence: number) => Promise<null | undefined>;
   switchValues: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
   updateValue: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
-  deleteValue: DeleteValue;
+  deleteOption: DeleteOption;
   loadMoreDataIfNeeded: (rmm: MacroMap, removeDataOutsideMap: boolean) => void;
   loadAndPrefetch: (date: string, dayPixels: number) => void;
   setScale: (newScale: number) => void;
@@ -272,7 +272,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateData(updateValueReducer(dataRef.current)(habitIndex, valueIndex, newValueValues));
   };
 
-  const deleteValue = (habitIndex: number, valueIndex: number) => {
+  const deleteOption = (habitIndex: number, valueIndex: number) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
     deleteValueServer(habits[habitIndex].values[valueIndex].id);
@@ -292,7 +292,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createOption,
         switchValues,
         updateValue,
-        deleteValue,
+        deleteOption,
         loadMoreDataIfNeeded,
         loadAndPrefetch,
         setScale,

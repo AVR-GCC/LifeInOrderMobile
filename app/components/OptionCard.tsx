@@ -1,7 +1,7 @@
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
 import { TextInput, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import type { DeleteValue, HabitWithValues, SwitchValues, UpdateValue, Value } from '../types';
+import type { DeleteOption, HabitWithValues, SwitchValues, UpdateValue, Value } from '../types';
 import VerticalChevrons from './VerticalChevrons';
 import { COLORS } from '../constants/theme';
 
@@ -27,7 +27,7 @@ interface OptionCardProps {
   value: Value | null;
   valueIndex: number;
   switchValues: SwitchValues;
-  deleteValue: DeleteValue;
+  deleteOption: DeleteOption;
   updateValue: UpdateValue;
   openPallete: () => void;
   palleteOpen: boolean;
@@ -42,7 +42,7 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
   value,
   valueIndex,
   switchValues,
-  deleteValue,
+  deleteOption,
   updateValue,
   openPallete,
   palleteOpen,
@@ -115,7 +115,7 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.buttonHolder}
-            onPress={() => deleteValue(habitIndex, valueIndex)}
+            onPress={() => deleteOption(habitIndex, valueIndex)}
           >
             <Ionicons name="trash" size={20} color="#ef4444" style={styles.delete} />
           </TouchableOpacity>

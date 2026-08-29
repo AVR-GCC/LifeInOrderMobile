@@ -2,13 +2,13 @@ import { useAppContext } from '../../../context/AppContext';
 import OptionsScreen from '../../../screens/OptionsScreen';
 
 export default function OptionsRoute() {
-  const { data, switchValues, deleteValue, createOption, updateValue, updateHabit } = useAppContext();
+  const { data, switchValues, deleteOption, createOption, updateValue, updateHabit } = useAppContext();
 
   return (
     <OptionsScreen
       data={data}
       switchValues={switchValues}
-      deleteValue={deleteValue}
+      deleteOption={deleteOption}
       updateValue={updateValue}
       updateHabit={updateHabit}
       createOption={createOption}
