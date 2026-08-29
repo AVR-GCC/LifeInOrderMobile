@@ -155,10 +155,10 @@ export type AddHabitReducer = (data: MainProps) => (habit: Habit, values: Option
 export type UpdateHabitReducer = (data: MainProps) => (habitIndex: number, newHabitValues: Partial<Option>) => MainProps;
 export type DeleteHabitReducer = (data: MainProps) => (index: number) => MainProps;
 export type SwitchHabitsReducer = (data: MainProps) => (isDown: boolean, index: number) => MainProps;
-export type SwitchOptionsReducer = (data: MainProps) => (isDown: boolean, habitIndex: number, valueIndex: number) => MainProps;
-export type UpdateOptionReducer = (data: MainProps) => (habitIndex: number, valueIndex: number, newValueValues: Partial<Option>) => MainProps;
-export type DeleteOptionReducer = (data: MainProps) => (habitIndex: number, valueIndex: number) => MainProps;
-export type AddOptionReducer = (data: MainProps) => (habitIndex: number, value: Option) => MainProps;
+export type SwitchOptionsReducer = (data: MainProps) => (isDown: boolean, habitIndex: number, optionIndex: number) => MainProps;
+export type UpdateOptionReducer = (data: MainProps) => (habitIndex: number, optionIndex: number, newOptionValues: Partial<Option>) => MainProps;
+export type DeleteOptionReducer = (data: MainProps) => (habitIndex: number, optionIndex: number) => MainProps;
+export type AddOptionReducer = (data: MainProps) => (habitIndex: number, option: Option) => MainProps;
 
 export type SeparatorType = 'today' | 'month' | 'year';
 

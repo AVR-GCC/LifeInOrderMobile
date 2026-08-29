@@ -271,32 +271,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateData(addOptionReducer(dataRef.current)(habitIndex, newOptionValues));
   };
 
-  const switchOptions: SwitchOptions = (isDown, habitIndex, valueIndex) => {
+  const switchOptions: SwitchOptions = (isDown, habitIndex, optionIndex) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
-    const otherIndex = valueIndex + (isDown ? 1 : -1);
+    const otherIndex = optionIndex + (isDown ? 1 : -1);
     const values = habits[habitIndex].values;
     const ids = values.map(v => v.id);
-    ids[valueIndex] = values[otherIndex].id;
-    ids[otherIndex] = values[valueIndex].id;
+    ids[optionIndex] = values[otherIndex].id;
+    ids[otherIndex] = values[optionIndex].id;
     reorderValuesServer(ids);
-    updateData(switchOptionsReducer(dataRef.current)(isDown, habitIndex, valueIndex));
+    updateData(switchOptionsReducer(dataRef.current)(isDown, habitIndex, optionIndex));
   };
 
-  const updateOption: UpdateOption = (habitIndex, valueIndex, newValueValues) => {
+  const updateOption: UpdateOption = (habitIndex, optionIndex, newOptionValues) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
-    const oldValue = habits[habitIndex].values[valueIndex];
-    const newValue = { ...oldValue, ...newValueValues };
-    updateValueServer(newValue);
-    updateData(updateOptionReducer(dataRef.current)(habitIndex, valueIndex, newValueValues));
+    const oldOption = habits[habitIndex].values[optionIndex];
+    const newOption = { ...oldOption, ...newOptionValues };
+    updateValueServer(newOption);
+    updateData(updateOptionReducer(dataRef.current)(habitIndex, optionIndex, newOptionValues));
   };
 
-  const deleteOption: DeleteOption = (habitIndex, valueIndex) => {
+  const deleteOption: DeleteOption = (habitIndex, optionIndex) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
-    deleteValueServer(habits[habitIndex].values[valueIndex].id);
-    updateData(deleteOptionReducer(dataRef.current)(habitIndex, valueIndex));
+    deleteValueServer(habits[habitIndex].values[optionIndex].id);
+    updateData(deleteOptionReducer(dataRef.current)(habitIndex, optionIndex));
   };
 
   return (

@@ -162,47 +162,47 @@ export const switchHabitsReducer: SwitchHabitsReducer = (data) => (isDown, index
   return { ...newData, habits: newHabits };
 };
 
-export const switchOptionsReducer: SwitchOptionsReducer = (data) => (isDown, habitIndex, valueIndex) => {
+export const switchOptionsReducer: SwitchOptionsReducer = (data) => (isDown, habitIndex, optionIndex) => {
   const newData = { ...data };
   const newHabits = [...newData.habits];
   const newHabit = { ...newHabits[habitIndex] };
   const newValues = [...newHabit.values];
-  const otherIndex = valueIndex + (isDown ? 1 : -1);
-  const temp = newValues[valueIndex];
-  newValues[valueIndex] = newValues[otherIndex];
+  const otherIndex = optionIndex + (isDown ? 1 : -1);
+  const temp = newValues[optionIndex];
+  newValues[optionIndex] = newValues[otherIndex];
   newValues[otherIndex] = temp;
   newHabit.values = newValues;
   newHabits[habitIndex] = newHabit;
   return { ...newData, habits: newHabits };
 };
 
-export const updateOptionReducer: UpdateOptionReducer = (data) => (habitIndex, valueIndex, newValueValues) => {
+export const updateOptionReducer: UpdateOptionReducer = (data) => (habitIndex, optionIndex, newOptionValues) => {
   const newData = { ...data };
   const newHabits = [...newData.habits];
   const newHabit = { ...newHabits[habitIndex] };
   const newValues = [...newHabit.values];
-  const newValue = { ...newValues[valueIndex], ...newValueValues };
-  newValues[valueIndex] = newValue;
+  const newOption = { ...newValues[optionIndex], ...newOptionValues };
+  newValues[optionIndex] = newOption;
   newHabit.values = newValues;
   newHabits[habitIndex] = newHabit;
   return { ...newData, habits: newHabits };
 };
 
-export const deleteOptionReducer: DeleteOptionReducer = (data) => (habitIndex, valueIndex) => {
+export const deleteOptionReducer: DeleteOptionReducer = (data) => (habitIndex, optionIndex) => {
   const { habits } = data;
   const newHabits = [...habits];
   const newValues = [...newHabits[habitIndex].values];
-  newValues.splice(valueIndex, 1);
+  newValues.splice(optionIndex, 1);
   newHabits[habitIndex].values = newValues;
   return { ...data, habits: newHabits };
 }
 
-export const addOptionReducer: AddOptionReducer = (data) => (habitIndex, value) => {
+export const addOptionReducer: AddOptionReducer = (data) => (habitIndex, option) => {
   const newData = { ...data };
   const newHabits = [...newData.habits];
   const newHabit = { ...newHabits[habitIndex] };
-  newHabit.values.push(value);
-  newHabit.values_hashmap[value.id] = newHabit.values.length - 1;
+  newHabit.values.push(option);
+  newHabit.values_hashmap[option.id] = newHabit.values.length - 1;
   newHabits[habitIndex] = newHabit;
   return { ...newData, habits: newHabits };
 }
