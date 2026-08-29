@@ -3,19 +3,19 @@ import React, { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../constants/theme';
 import { UNFILLED_COLOR } from './DayRow';
-import { GetValue, HabitWithValues, SetDayValue } from '../types';
+import { GetValue, HabitWithValues, SetValue } from '../types';
 
 interface DayHabitCardProps {
   date: string;
   habitIndex: number;
   getValue: GetValue;
-  setDayHabitValue: SetDayValue;
+  setValue: SetValue;
   habit: HabitWithValues;
   onInputFocused: (y: number) => void;
 }
 
 const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCard({
-  date, habitIndex, getValue, setDayHabitValue, habit, onInputFocused
+  date, habitIndex, getValue, setValue, habit, onInputFocused
 }) {
     const [focused, setFocused] = useState(false);
     const inputRef = useRef<TextInput>(null);
@@ -33,7 +33,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
           onPress={() => {
             const nextIndex = selectedIndex === null ? 0 : (selectedIndex + 1) % habit.values.length;
             const nextValue = habit.values[nextIndex];
-            if (nextValue) setDayHabitValue(date, habitIndex, { valueId: nextValue.id, text: null });
+            if (nextValue) setValue(date, habitIndex, { valueId: nextValue.id, text: null });
           }}
         >
           <View style={styles.habitHeaderRow}>
@@ -54,7 +54,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
                       : { backgroundColor: '#3a4a5a', borderColor: '#3a4a5a' },
                   ]}
                   onPress={() => {
-                    setDayHabitValue(date, habitIndex, { valueId: v.id, text: null });
+                    setValue(date, habitIndex, { valueId: v.id, text: null });
                   }}
                 >
                   <View style={[styles.pillDot, { backgroundColor: isSelected ? COLORS.colorOne : v.color }]} />
@@ -108,7 +108,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
           placeholderTextColor={COLORS.muted}
           value={value}
           onChangeText={arg => {
-            setDayHabitValue(date, habitIndex, { valueId: habit.values[0].id, text: arg });
+            setValue(date, habitIndex, { valueId: habit.values[0].id, text: arg });
           }}
           onFocus={onFocus}
           onBlur={() => setFocused(false)}

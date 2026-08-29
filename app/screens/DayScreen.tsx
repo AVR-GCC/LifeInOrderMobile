@@ -7,7 +7,7 @@ import Screen from '../components/Screen';
 import TitleBar from '../components/TitleBar';
 import VerticalChevrons from '../components/VerticalChevrons';
 import { COLORS } from '../constants/theme';
-import type { GetValue, HabitWithValues, MainProps, SetDayValue } from '../types';
+import type { GetValue, HabitWithValues, MainProps, SetValue } from '../types';
 import BackArrow from '../components/BackArrow';
 import DayHabitCard from '../components/DayHabitCard';
 import useKeyboardScroll from '../hooks/useKeyboardScroll';
@@ -18,10 +18,10 @@ const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
 interface DayScreenProps {
   data: MainProps | null;
   getValue: GetValue;
-  setDayHabitValue: SetDayValue;
+  setValue: SetValue;
 }
 
-const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data, getValue, setDayHabitValue }) {
+const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data, getValue, setValue }) {
   const { date: dateStrs } = useLocalSearchParams();
   const router = useRouter();
 
@@ -94,7 +94,7 @@ const DayScreen: React.FC<DayScreenProps> = React.memo(function DayScreen({ data
       habitIndex={habitIndex}
       onInputFocused={setTargetY}
       getValue={getValue}
-      setDayHabitValue={setDayHabitValue}
+      setValue={setValue}
     />
   );
 

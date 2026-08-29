@@ -5,17 +5,17 @@ import BackArrow from '../components/BackArrow';
 import Screen from '../components/Screen';
 import TitleBar from '../components/TitleBar';
 import { COLORS } from '../constants/theme';
-import type { GetValue, MainProps, SetDayValue } from '../types';
+import type { GetValue, MainProps, SetValue } from '../types';
 import useKeyboardScroll from '../hooks/useKeyboardScroll';
 
 interface TextValueScreenProps {
   data: MainProps | null;
   getValue: GetValue;
-  setDayHabitValue: SetDayValue;
+  setValue: SetValue;
 }
 
 const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function TextValueScreen({
-  data, getValue, setDayHabitValue,
+  data, getValue, setValue,
 }) {
   const { date: dateStrs, habitIndex: habitIndexParam } = useLocalSearchParams();
   const date = Array.isArray(dateStrs) ? dateStrs[0] : dateStrs;
@@ -58,7 +58,7 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
         prevHeight.current = height;
       });
     }
-    setDayHabitValue(date, habitIndex, {
+    setValue(date, habitIndex, {
       valueId: habit.values[0].id,
       text: newText,
     });
