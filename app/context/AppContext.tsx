@@ -27,7 +27,27 @@ import {
   updateValueReducer
 } from '../state/reducers';
 import { getValueSelector } from '../state/selectors';
-import type { CreateHabit, DeleteOption, GetValue, Habit, LoadingMap, MacroMap, MainProps, SetValue, Value } from '../types';
+import type {
+  CreateHabit,
+  CreateOption,
+  DeleteHabit,
+  DeleteOption,
+  GetScale,
+  GetScroll,
+  GetValue,
+  LoadAndPrefetch,
+  LoadingMap,
+  LoadMoreDataIfNeeded,
+  MainProps,
+  SetMode,
+  SetScale,
+  SetScroll,
+  SetValue,
+  SwitchHabits,
+  SwitchOptions,
+  UpdateHabit,
+  UpdateOption
+} from '../types';
 import { emptyDatesData, getSurroundingMacroMap, isEmptyMacroMap, mapToLoadParams, mergeMaps, subtractMaps } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
@@ -37,20 +57,20 @@ interface AppContextType {
   setValue: SetValue;
   getValue: GetValue;
   createHabit: CreateHabit;
-  updateHabit: (habitIndex: number, newHabitValues: Partial<Habit>) => void;
-  deleteHabit: (index: number) => void;
-  switchHabits: (isDown: boolean, index: number) => void;
-  createOption: (habitIndex: number, sequence: number) => Promise<null | undefined>;
-  switchOptions: (isDown: boolean, habitIndex: number, valueIndex: number) => void;
-  updateOption: (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
+  updateHabit: UpdateHabit;
+  deleteHabit: DeleteHabit;
+  switchHabits: SwitchHabits;
+  createOption: CreateOption;
+  switchOptions: SwitchOptions;
+  updateOption: UpdateOption;
   deleteOption: DeleteOption;
-  loadMoreDataIfNeeded: (rmm: MacroMap, removeDataOutsideMap: boolean) => void;
-  loadAndPrefetch: (date: string, dayPixels: number) => void;
-  setScale: (newScale: number) => void;
-  getScale: () => number;
-  setScroll: (newScroll: number) => void;
-  getScroll: () => number;
-  setMode: (mode: number) => void;
+  loadMoreDataIfNeeded: LoadMoreDataIfNeeded;
+  loadAndPrefetch: LoadAndPrefetch;
+  setScale: SetScale;
+  getScale: GetScale;
+  setScroll: SetScroll;
+  getScroll: GetScroll;
+  setMode: SetMode;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -69,17 +89,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const scaleRef = useRef(1);
-  const getScale = () => scaleRef.current;
-  const setScale = (newScale: number) => {
+  const getScale: GetScale = () => scaleRef.current;
+  const setScale: SetScale = (newScale) => {
     scaleRef.current = newScale;
   }
   const scrollRef = useRef(0);
-  const getScroll = () => scrollRef.current;
-  const setScroll = (newScroll: number) => {
+  const getScroll: GetScroll = () => scrollRef.current;
+  const setScroll: SetScroll = (newScroll) => {
     scrollRef.current = newScroll;
   }
 
-  const setMode = (mode: number) => {
+  const setMode: SetMode = (mode) => {
     if (!dataRef.current) return;
     updateData({ ...dataRef.current, mode });
   }
@@ -108,7 +128,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadMoreDataIfNeeded = (rmm: MacroMap, removeDataOutsideMap: boolean) => {
+  const loadMoreDataIfNeeded: LoadMoreDataIfNeeded = (rmm, removeDataOutsideMap) => {
     if (running.current || dataRef.current === null) return;
     running.current = true;
     // console.log('required', rmm.day ? rmm.day.range : 'null');
@@ -168,7 +188,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  const loadAndPrefetch = (date: string, dayPixels: number) => {
+  const loadAndPrefetch: LoadAndPrefetch = (date, dayPixels) => {
     const closeMap = getSurroundingMacroMap(date, dayPixels, 1, height);
     loadMoreDataIfNeeded(closeMap, false);
     const farMap = getSurroundingMacroMap(date, dayPixels, 2, height);
@@ -211,7 +231,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateData(addHabitReducer(dataRef.current)(newHabitValue, values));
   }
 
-  const updateHabit = (habitIndex: number, newHabitValues: Partial<Value>) => {
+  const updateHabit: UpdateHabit = (habitIndex, newHabitValues) => {
     if (dataRef.current === null) return;
     const newData = updateHabitReducer(dataRef.current)(habitIndex, newHabitValues);
     updateData(newData);
@@ -219,14 +239,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateHabitServer(habits[habitIndex].habit);
   };
 
-  const deleteHabit = (index: number) => {
+  const deleteHabit: DeleteHabit = (index) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
     deleteHabitServer(habits[index].habit.id);
     updateData(deleteHabitReducer(dataRef.current)(index));
   };
 
-  const switchHabits = (isDown: boolean, index: number) => {
+  const switchHabits: SwitchHabits = (isDown, index) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
     const otherIndex = index + (isDown ? 1 : -1);
@@ -237,7 +257,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateData(switchHabitsReducer(dataRef.current)(isDown, index));
   };
 
-  const createOption = async (habitIndex: number, sequence: number) => {
+  const createOption: CreateOption = async (habitIndex, sequence) => {
     if (dataRef.current === null) return null;
     const { habits } = dataRef.current;
     const newValue = {
@@ -251,7 +271,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateData(addValueReducer(dataRef.current)(habitIndex, newValueValues));
   };
 
-  const switchOptions = (isDown: boolean, habitIndex: number, valueIndex: number) => {
+  const switchOptions: SwitchOptions = (isDown, habitIndex, valueIndex) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
     const otherIndex = valueIndex + (isDown ? 1 : -1);
@@ -263,7 +283,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateData(switchValuesReducer(dataRef.current)(isDown, habitIndex, valueIndex));
   };
 
-  const updateOption = (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => {
+  const updateOption: UpdateOption = (habitIndex, valueIndex, newValueValues) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
     const oldValue = habits[habitIndex].values[valueIndex];
@@ -272,7 +292,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateData(updateValueReducer(dataRef.current)(habitIndex, valueIndex, newValueValues));
   };
 
-  const deleteOption = (habitIndex: number, valueIndex: number) => {
+  const deleteOption: DeleteOption = (habitIndex, valueIndex) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
     deleteValueServer(habits[habitIndex].values[valueIndex].id);

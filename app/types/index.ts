@@ -134,6 +134,14 @@ export type DeleteOption = (habitIndex: number, valueIndex: number) => void;
 export type SwitchOptions = (isDown: boolean, habitIndex: number, valueIndex: number) => void;
 export type UpdateOption = (habitIndex: number, valueIndex: number, newValueValues: Partial<Value>) => void;
 
+export type LoadMoreDataIfNeeded = (rmm: MacroMap, removeDataOutsideMap: boolean) => void;
+export type LoadAndPrefetch = (date: string, dayPixels: number) => void;
+export type SetScale = (newScale: number) => void;
+export type GetScale = () => number;
+export type SetScroll = (newScroll: number) => void;
+export type GetScroll = () => number;
+export type SetMode = (mode: number) => void;
+
 export type CreateDatesLookup = (days: ZoomLevelData[]) => DatesLookup;
 
 export type InitialDataReducer = () => ((dayLevelData: MonthData[], quarterLevelData: TimePeriodData[], habits: HabitWithValues[]) => MainProps);
