@@ -21,7 +21,7 @@ export const colorOptions = [
   "#8b5cf6", // Purple
 ];
 
-interface ValueCardProps {
+interface OptionCardProps {
   habit: HabitWithValues;
   habitIndex: number;
   value: Value | null;
@@ -36,7 +36,7 @@ interface ValueCardProps {
   setFocusLastCardRef: (func: () => void) => void;
 }
 
-const ValueCard: React.FC<ValueCardProps> = React.memo(function ValueCard({
+const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
   habit,
   habitIndex,
   value,
@@ -254,4 +254,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default ValueCard; 
+export default OptionCard;

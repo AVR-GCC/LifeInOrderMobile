@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Screen from '../components/Screen';
 import TitleBar from '../components/TitleBar';
-import ValueCard from '../components/ValueCard';
+import OptionCard from '../components/ValueCard';
 import VerticalChevrons from '../components/VerticalChevrons';
 import { COLORS } from '../constants/theme';
 import type { CreateValue, DeleteValue, MainProps, SwitchValues, UpdateHabit, UpdateValue } from '../types';
@@ -123,7 +123,7 @@ const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function ValuesSc
         </View>
       </TitleBar>
       <View style={styles.dayContainer}>
-        <ValueCard
+        <OptionCard
           key="new"
           habit={habits[habitIndex]}
           habitIndex={habitIndex}
@@ -140,7 +140,7 @@ const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function ValuesSc
         />
         <KeyboardScrollView style={styles.scrollContainer}>
           {habits[habitIndex].values.map((v, index) => (
-            <ValueCard
+            <OptionCard
               key={v.id}
               habit={habits[habitIndex]}
               habitIndex={habitIndex}
