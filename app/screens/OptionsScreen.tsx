@@ -10,7 +10,7 @@ import type { CreateValue, DeleteValue, MainProps, SwitchValues, UpdateHabit, Up
 import BackArrow from '../components/BackArrow';
 import useKeyboardScroll from '../hooks/useKeyboardScroll';
 
-interface ValuesScreenProps {
+interface OptionsScreenProps {
   data: MainProps | null;
   switchValues: SwitchValues;
   deleteValue: DeleteValue;
@@ -19,7 +19,7 @@ interface ValuesScreenProps {
   createValue: CreateValue;
 }
 
-const ValuesScreen: React.FC<ValuesScreenProps> = React.memo(function ValuesScreen({
+const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function ValuesScreen({
   data,
   updateHabit,
   switchValues,
@@ -246,4 +246,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ValuesScreen; 
+export default OptionsScreen; 

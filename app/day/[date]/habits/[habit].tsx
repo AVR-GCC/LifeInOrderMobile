@@ -1,11 +1,11 @@
 import { useAppContext } from '../../../context/AppContext';
-import ValuesScreen from '../../../screens/ValuesScreen';
+import OptionsScreen from '../../../screens/OptionsScreen';
 
-export default function ValuesRoute() {
+export default function OptionsRoute() {
   const { data, switchValues, deleteValue, createValue, updateValue, updateHabit } = useAppContext();
 
   return (
-    <ValuesScreen
+    <OptionsScreen
       data={data}
       switchValues={switchValues}
       deleteValue={deleteValue}
