@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as Crypto from 'expo-crypto';
-import type { GetUserMapPureResponse, Habit, MacroMap, SetValueSocket, Option, ZoomLevel } from '../types';
+import type { GetUserMapPureResponse, Habit, MacroMap, SetValueSocket, Option, ZoomLevel, DeleteOption, DeleteOptionSocket } from '../types';
 import { getZoomModeRange } from '../constants/zoom';
 import { emptyDatesData, mapToLoadParams } from '../utils/dataStructures';
 import { debounce } from '../utils/API';
@@ -77,10 +77,11 @@ class SocketClient {
     this.pending.delete(id);
   }
 
-  request<T = unknown>(route: string, params: object, resolveTyped: (data: T) => void, reject: (reason: string) => void) {
+  request<T = unknown>(routeRaw: string, method: string, params: any, resolveTyped: (data: T) => void, reject: (reason: string) => void) {
     const id = Crypto.randomUUID();
     this.pending.set(id, { resolve: resolveTyped as (data: unknown) => void, reject });
     if (this.socket) {
+      const route = `${routeRaw}-${method}`;
       const srp: SocketRequestPayload = { id, route, params };
       this.socket.send(JSON.stringify(srp));
     }
@@ -90,6 +91,7 @@ class SocketClient {
     const func: SetValueSocket = async (date, habitId, { valueId, text }) => {
       try {
         const route = 'values';
+        const method = 'post';
         const params = {
           value_id: valueId,
           habit_id: habitId,
@@ -103,13 +105,30 @@ class SocketClient {
         const reject = (reason: string) => {
           console.log('Error setting value:', date, habitId, { valueId, text }, reason);
         }
-        this.request(route, params, resolve, reject);
+        this.request(route, method, params, resolve, reject);
       } catch (error) {
         console.error('Error setting day value:', error);
       }
     };
     return debounce((date, habitId) => `${date}-${habitId}`, func, 1000);
   })();
+
+  deleteOption: DeleteOptionSocket = async (id) => {
+    try {
+      const route = 'options';
+      const method = 'delete';
+      const params = id;
+      const resolve = (data: Option) => {
+        console.log(id, data, 'has been deleted, remove from local storage');
+      }
+      const reject = (reason: string) => {
+        console.log('Error deleting option:', id, reason);
+      }
+      this.request(route, method, params, resolve, reject);
+    } catch (error) {
+      console.error('Error deleting option:', error);
+    }
+  }
 }
 
 export const getUserConfig = async () => {
@@ -211,17 +230,6 @@ export const reorderValuesServer =  (() => {
   };
   return debounce(() => 'any', func, 1000);
 })();
-
-export const deleteValueServer = async (id: string) => {
-  try {
-    const route = `${baseUrl}/options/${parseInt(id, 10)}`;
-    const res = await axios.delete(route);
-    return res.status === 200;
-  } catch (error) {
-    console.error('Error deleting value:', error);
-    return false;
-  }
-};
 
 export const createValueServer = async (newValue: Partial<Option>) => {
   try {

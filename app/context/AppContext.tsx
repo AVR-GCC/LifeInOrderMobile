@@ -3,7 +3,6 @@ import client, {
   createHabitServer,
   createValueServer,
   deleteHabitServer,
-  deleteValueServer,
   getUserConfig,
   getUserList,
   getUserMap,
@@ -295,7 +294,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteOption: DeleteOption = (habitIndex, optionIndex) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
-    deleteValueServer(habits[habitIndex].values[optionIndex].id);
+    const id = habits[habitIndex].values[optionIndex].id;
+    client.deleteOption(id);
     updateData(deleteOptionReducer(dataRef.current)(habitIndex, optionIndex));
   };
 
