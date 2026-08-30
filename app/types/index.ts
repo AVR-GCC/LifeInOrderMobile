@@ -125,14 +125,12 @@ export type LoadDataInput = { date: string, zoom: ZoomLevel, count: number };
 // AppContext
 export type GetValue = (date: string, habitIndex: number) => string | null;
 export type SetValue = (date: string, habitIndex: number, values: { valueId: string, text: string | null }) => void;
-export type SetValueSocket = (date: string, habitId: string, values: { valueId: string, text: string | null }) => void;
 export type CreateHabit = (sequence: number, type: HabitType, name: string) => Promise<null | undefined>;
 export type UpdateHabit = (habitIndex: number, newValueValues: Partial<Habit>) => void;
 export type DeleteHabit = (index: number) => void;
 export type SwitchHabits = (isDown: boolean, index: number) => void;
 export type CreateOption = (habitIndex: number, sequence: number) => Promise<null | undefined>;
 export type DeleteOption = (habitIndex: number, optionIndex: number) => void;
-export type DeleteOptionSocket = (id: string) => Promise<void>;
 export type SwitchOptions = (isDown: boolean, habitIndex: number, valueIndex: number) => void;
 export type UpdateOption = (habitIndex: number, valueIndex: number, newValueValues: Partial<Option>) => void;
 
@@ -144,6 +142,9 @@ export type SetScroll = (newScroll: number) => void;
 export type GetScroll = () => number;
 export type SetMode = (mode: number) => void;
 
+// socket
+export type SetValueSocket = (date: string, habitId: string, values: { valueId: string, text: string | null }) => void;
+export type DeleteOptionSocket = (id: string) => Promise<void>;
 
 export type CreateDatesLookup = (days: ZoomLevelData[]) => DatesLookup;
 
