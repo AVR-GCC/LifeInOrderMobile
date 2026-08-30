@@ -5,9 +5,7 @@ import { getZoomModeRange } from '../constants/zoom';
 import { emptyDatesData, mapToLoadParams } from '../utils/dataStructures';
 import { debounce } from '../utils/API';
 
-const baseAddress = 'lifeinorderbackend.fly.dev';
-// const baseAddress = '192.168.1.88:8080'; // TODO: Make this configurable via environment variables
-// const baseAddress = '10.168.243.108:8080'; // TODO: Make this configurable via environment variables
+const baseAddress = process.env.EXPO_PUBLIC_API_BASE;
 
 const baseUrl = `http://${baseAddress}`;
 const WS_URL = `ws://${baseAddress}/ws`;
