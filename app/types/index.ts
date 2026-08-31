@@ -144,7 +144,12 @@ export type SetMode = (mode: number) => void;
 
 // socket
 export type SetValueSocket = (date: string, habitId: string, values: { valueId: string, text: string | null }) => Promise<Option>;
+export type UpdateOptionSocket = (newOption: Option) => Promise<Option>;
+export type ReorderOptionsSocket = (ids: string[]) => Promise<boolean>;
 export type DeleteOptionSocket = (id: string) => Promise<boolean>;
+export type UpdateHabitSocket = (newHabit: Habit) => Promise<Habit>;
+export type ReorderHabitsSocket = (ids: string[]) => Promise<boolean>;
+export type DeleteHabitSocket = (id: string) => Promise<boolean>;
 
 export type CreateDatesLookup = (days: ZoomLevelData[]) => DatesLookup;
 

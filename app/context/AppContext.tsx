@@ -2,14 +2,9 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 import client, {
   createHabitServer,
   createValueServer,
-  deleteHabitServer,
   getUserConfig,
   getUserList,
   getUserMap,
-  reorderHabitsServer,
-  reorderValuesServer,
-  updateHabitServer,
-  updateValueServer
 } from '../api/client';
 import { colorOptions } from '../components/OptionCard';
 import {
@@ -194,6 +189,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadMoreDataIfNeeded(farMap, true);
   }
 
+  // Values
   const setValue: SetValue = (date, habitIndex, values) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
@@ -210,6 +206,63 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return getValueSelector(dataRef.current)(date, habitIndex);
   };
 
+  // Options
+  const createOption: CreateOption = async (habitIndex, sequence) => {
+    if (dataRef.current === null) return null;
+    const { habits } = dataRef.current;
+    const newOption = {
+      label: '',
+      color: colorOptions[0],
+      habit_id: parseInt(habits[habitIndex].habit.id, 10),
+      sequence,
+      created_at: 'new'
+    };
+    const newOptionValues = await createValueServer(newOption);
+    updateData(addOptionReducer(dataRef.current)(habitIndex, newOptionValues));
+  };
+
+  const updateOption: UpdateOption = (habitIndex, optionIndex, newOptionValues) => {
+    if (dataRef.current === null) return;
+    const { habits } = dataRef.current;
+    const oldOption = habits[habitIndex].values[optionIndex];
+    const newOption = { ...oldOption, ...newOptionValues };
+    updateData(updateOptionReducer(dataRef.current)(habitIndex, optionIndex, newOptionValues));
+    client.updateOption(newOption).then(data => {
+      console.log(data, 'has been set, remove from local storage');
+    }).catch(e => {
+      console.log('updateOption error:', e);
+    });
+  };
+
+  const switchOptions: SwitchOptions = (isDown, habitIndex, optionIndex) => {
+    if (dataRef.current === null) return;
+    const { habits } = dataRef.current;
+    const otherIndex = optionIndex + (isDown ? 1 : -1);
+    const values = habits[habitIndex].values;
+    const ids = values.map(v => v.id);
+    ids[optionIndex] = values[otherIndex].id;
+    ids[otherIndex] = values[optionIndex].id;
+    updateData(switchOptionsReducer(dataRef.current)(isDown, habitIndex, optionIndex));
+    client.reorderOptions(ids).then(() => {
+      console.log('Reordered options successfully');
+    }).catch(e => {
+      console.log('switchOptions error:', e);
+    });
+  };
+
+  const deleteOption: DeleteOption = (habitIndex, optionIndex) => {
+    if (dataRef.current === null) return;
+    const { habits } = dataRef.current;
+    const id = habits[habitIndex].values[optionIndex].id;
+    updateData(deleteOptionReducer(dataRef.current)(habitIndex, optionIndex));
+    client.deleteOption(id).then(() => {
+      console.log('Deleted', id, 'successfully deleted');
+    }).catch(e => {
+      console.log('deleteOption error:', e);
+    });
+  };
+
+  // Habits
   const createHabit: CreateHabit = async (sequence, type = 'Color', name = '') => {
     if (dataRef.current === null) return null;
     const newHabit = {
@@ -239,14 +292,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newData = updateHabitReducer(dataRef.current)(habitIndex, newHabitValues);
     updateData(newData);
     const { habits } = newData;
-    updateHabitServer(habits[habitIndex].habit);
-  };
-
-  const deleteHabit: DeleteHabit = (index) => {
-    if (dataRef.current === null) return;
-    const { habits } = dataRef.current;
-    deleteHabitServer(habits[index].habit.id);
-    updateData(deleteHabitReducer(dataRef.current)(index));
+    client.updateHabit(habits[habitIndex].habit).then(data => {
+      console.log(data, 'has been set, remove from local storage');
+    }).catch(e => {
+      console.log('updateHabit error:', e);
+    });
   };
 
   const switchHabits: SwitchHabits = (isDown, index) => {
@@ -256,54 +306,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const ids = habits.map(h => h.habit.id);
     ids[index] = habits[otherIndex].habit.id;
     ids[otherIndex] = habits[index].habit.id;
-    reorderHabitsServer(ids);
     updateData(switchHabitsReducer(dataRef.current)(isDown, index));
-  };
-
-  const createOption: CreateOption = async (habitIndex, sequence) => {
-    if (dataRef.current === null) return null;
-    const { habits } = dataRef.current;
-    const newOption = {
-      label: '',
-      color: colorOptions[0],
-      habit_id: parseInt(habits[habitIndex].habit.id, 10),
-      sequence,
-      created_at: 'new'
-    };
-    const newOptionValues = await createValueServer(newOption);
-    updateData(addOptionReducer(dataRef.current)(habitIndex, newOptionValues));
-  };
-
-  const switchOptions: SwitchOptions = (isDown, habitIndex, optionIndex) => {
-    if (dataRef.current === null) return;
-    const { habits } = dataRef.current;
-    const otherIndex = optionIndex + (isDown ? 1 : -1);
-    const values = habits[habitIndex].values;
-    const ids = values.map(v => v.id);
-    ids[optionIndex] = values[otherIndex].id;
-    ids[otherIndex] = values[optionIndex].id;
-    reorderValuesServer(ids);
-    updateData(switchOptionsReducer(dataRef.current)(isDown, habitIndex, optionIndex));
-  };
-
-  const updateOption: UpdateOption = (habitIndex, optionIndex, newOptionValues) => {
-    if (dataRef.current === null) return;
-    const { habits } = dataRef.current;
-    const oldOption = habits[habitIndex].values[optionIndex];
-    const newOption = { ...oldOption, ...newOptionValues };
-    updateValueServer(newOption);
-    updateData(updateOptionReducer(dataRef.current)(habitIndex, optionIndex, newOptionValues));
-  };
-
-  const deleteOption: DeleteOption = (habitIndex, optionIndex) => {
-    if (dataRef.current === null) return;
-    const { habits } = dataRef.current;
-    const id = habits[habitIndex].values[optionIndex].id;
-    updateData(deleteOptionReducer(dataRef.current)(habitIndex, optionIndex));
-    client.deleteOption(id).then(() => {
-      console.log('Deleted', id, 'successfully deleted');
+    client.reorderHabits(ids).then(() => {
+      console.log('Reordered options successfully');
     }).catch(e => {
-      console.log('deleteOption error:', e);
+      console.log('switchHabits error:', e);
+    });
+  };
+
+  const deleteHabit: DeleteHabit = (index) => {
+    if (dataRef.current === null) return;
+    const { habits } = dataRef.current;
+    updateData(deleteHabitReducer(dataRef.current)(index));
+    client.deleteHabit(habits[index].habit.id).then(() => {
+      console.log('Deleted', habits[index].habit.id, 'successfully deleted');
+    }).catch(e => {
+      console.log('deleteHabit error:', e);
     });
   };
 

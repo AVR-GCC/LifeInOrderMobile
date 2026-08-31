@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as Crypto from 'expo-crypto';
-import type { GetUserMapPureResponse, Habit, MacroMap, SetValueSocket, Option, ZoomLevel, DeleteOption, DeleteOptionSocket } from '../types';
+
+import type { GetUserMapPureResponse, Habit, MacroMap, SetValueSocket, DeleteHabitSocket, UpdateHabitSocket, ReorderHabitsSocket, Option, ZoomLevel, DeleteOptionSocket, UpdateOptionSocket, ReorderOptionsSocket } from '../types';
 import { getZoomModeRange } from '../constants/zoom';
 import { emptyDatesData, mapToLoadParams } from '../utils/dataStructures';
 import { debounce } from '../utils/API';
@@ -89,6 +90,7 @@ class SocketClient {
     });
   }
 
+  // Values
   setValue: SetValueSocket = (() => {
     const func: SetValueSocket = async (date, habitId, { valueId, text }) => {
       const route = 'values';
@@ -105,8 +107,55 @@ class SocketClient {
     return debounce((date, habitId) => `${date}-${habitId}`, func, 1000);
   })();
 
+  // Options
+  updateOption: UpdateOptionSocket = (() => {
+    const func: UpdateOptionSocket = async (newOption) => {
+      const route = 'options';
+      const method = 'put';
+      return this.request<Option>(route, method, newOption);
+    };
+    return debounce((newOption) => newOption.id, func, 1000);
+  })();
+
+  reorderOptions: ReorderOptionsSocket = (() => {
+    const func: ReorderOptionsSocket = async (ids) => {
+      const route = 'options-reorder';
+      const method = 'post';
+      const params = { ordered_ids: ids }
+      return this.request<boolean>(route, method, params);
+    };
+    return debounce((_) => 'any', func, 1000);
+  })();
+
   deleteOption: DeleteOptionSocket = (id) => {
     const route = 'options';
+    const method = 'delete';
+    const params = id;
+    return this.request<boolean>(route, method, params);
+  }
+
+  // Habits
+  updateHabit: UpdateHabitSocket = (() => {
+    const func: UpdateHabitSocket = async (newHabit) => {
+      const route = 'habits';
+      const method = 'put';
+      return this.request<Habit>(route, method, newHabit);
+    };
+    return debounce((newHabit) => newHabit.id, func, 1000);
+  })();
+
+  reorderHabits: ReorderHabitsSocket = (() => {
+    const func: ReorderHabitsSocket = async (ids) => {
+      const route = 'habits-reorder';
+      const method = 'post';
+      const params = { ordered_ids: ids }
+      return this.request<boolean>(route, method, params);
+    };
+    return debounce((_) => 'any', func, 1000);
+  })();
+
+  deleteHabit: DeleteHabitSocket = (id) => {
+    const route = 'habits';
     const method = 'delete';
     const params = id;
     return this.request<boolean>(route, method, params);
@@ -174,45 +223,6 @@ export const createHabitServer = async (newHabit: Partial<Habit>) => {
   }
 };
 
-export const deleteHabitServer = async (id: string) => {
-  try {
-    const route = `${baseUrl}/habits/${parseInt(id, 10)}`;
-    const res = await axios.delete(route);
-    return res.status === 200;
-  } catch (error) {
-    console.error('Error deleting habit:', error);
-    return false;
-  }
-};
-
-const reorderGeneralServer = async (route: string, ids: string[]) => {
-  try {
-    const res = await axios.post(route, {
-      ordered_ids: ids
-    });
-    return res.status === 200;
-  } catch (error) {
-    console.error('Error reordering:', error);
-    return false;
-  }
-};
-
-export const reorderHabitsServer = (() => {
-  const func = async (ids: string[]) => {
-    const route = `${baseUrl}/habits/reorder`;
-    return reorderGeneralServer(route, ids);
-  };
-  return debounce(() => 'any', func, 1000);
-})();
-
-export const reorderValuesServer =  (() => {
-  const func = async (ids: string[]) => {
-    const route = `${baseUrl}/options/reorder`;
-    return reorderGeneralServer(route, ids);
-  };
-  return debounce(() => 'any', func, 1000);
-})();
-
 export const createValueServer = async (newValue: Partial<Option>) => {
   try {
     const route = `${baseUrl}/options`;
@@ -223,33 +233,5 @@ export const createValueServer = async (newValue: Partial<Option>) => {
     return false;
   }
 };
-
-export const updateValueServer = (() => {
-  const func = async (newValue: Option) => {
-    try {
-      const route = `${baseUrl}/options`;
-      const res = await axios.put(route, newValue);
-      return res.status === 200;
-    } catch (error) {
-      console.error('Error updating value:', error);
-      return false;
-    }
-  };
-  return debounce(() => 'any', func, 1000);
-})();
-
-export const updateHabitServer = (() => {
-  const func = async (newHabit: Habit) => {
-    try {
-      const route = `${baseUrl}/habits`;
-      const res = await axios.put(route, newHabit);
-      return res.status === 200;
-    } catch (error) {
-      console.error('Error updating habit:', error);
-      return false;
-    }
-  };
-  return debounce(() => 'any', func, 1000);
-})();
 
 export default new SocketClient();
