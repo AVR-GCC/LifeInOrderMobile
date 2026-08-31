@@ -11,7 +11,7 @@ const baseUrl = `http://${baseAddress}`;
 const WS_URL = `ws://${baseAddress}/ws`;
 
 type PendingRequest<T = unknown> = {
-  resolve: (value: T) => void;
+  resolve: (value: T | PromiseLike<T>) => void;
   reject: (reason: string) => void;
 };
 
@@ -34,7 +34,7 @@ interface RNMessageEvent {
 // socketClient.js
 class SocketClient {
   private socket: WebSocket | null = null;
-  private pending: Map<string, PendingRequest> = new Map();
+  private pending: Map<string, PendingRequest<any>> = new Map();
 
   constructor() {
     this.socket = null;
@@ -77,57 +77,39 @@ class SocketClient {
     this.pending.delete(id);
   }
 
-  request<T = unknown>(routeRaw: string, method: string, params: any, resolveTyped: (data: T) => void, reject: (reason: string) => void) {
+  request<T>(routeRaw: string, method: string, params: any) {
     const id = Crypto.randomUUID();
-    this.pending.set(id, { resolve: resolveTyped as (data: unknown) => void, reject });
     if (this.socket) {
       const route = `${routeRaw}-${method}`;
       const srp: SocketRequestPayload = { id, route, params };
       this.socket.send(JSON.stringify(srp));
     }
+    return new Promise<T>((resolve, reject) => {
+      this.pending.set(id, { resolve, reject });
+    });
   }
 
   setValue: SetValueSocket = (() => {
     const func: SetValueSocket = async (date, habitId, { valueId, text }) => {
-      try {
-        const route = 'values';
-        const method = 'post';
-        const params = {
-          value_id: valueId,
-          habit_id: habitId,
-          date,
-          text,
-          number: null
-        };
-        const resolve = (data: Option) => {
-          console.log(data, 'has been set, remove from local storage');
-        }
-        const reject = (reason: string) => {
-          console.log('Error setting value:', date, habitId, { valueId, text }, reason);
-        }
-        this.request(route, method, params, resolve, reject);
-      } catch (error) {
-        console.error('Error setting day value:', error);
-      }
+      const route = 'values';
+      const method = 'post';
+      const params = {
+        value_id: valueId,
+        habit_id: habitId,
+        date,
+        text,
+        number: null
+      };
+      return this.request<Option>(route, method, params);
     };
     return debounce((date, habitId) => `${date}-${habitId}`, func, 1000);
   })();
 
-  deleteOption: DeleteOptionSocket = async (id) => {
-    try {
-      const route = 'options';
-      const method = 'delete';
-      const params = id;
-      const resolve = (data: Option) => {
-        console.log(id, data, 'has been deleted, remove from local storage');
-      }
-      const reject = (reason: string) => {
-        console.log('Error deleting option:', id, reason);
-      }
-      this.request(route, method, params, resolve, reject);
-    } catch (error) {
-      console.error('Error deleting option:', error);
-    }
+  deleteOption: DeleteOptionSocket = (id) => {
+    const route = 'options';
+    const method = 'delete';
+    const params = id;
+    return this.request<boolean>(route, method, params);
   }
 }
 

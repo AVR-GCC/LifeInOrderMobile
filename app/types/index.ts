@@ -143,8 +143,8 @@ export type GetScroll = () => number;
 export type SetMode = (mode: number) => void;
 
 // socket
-export type SetValueSocket = (date: string, habitId: string, values: { valueId: string, text: string | null }) => void;
-export type DeleteOptionSocket = (id: string) => Promise<void>;
+export type SetValueSocket = (date: string, habitId: string, values: { valueId: string, text: string | null }) => Promise<Option>;
+export type DeleteOptionSocket = (id: string) => Promise<boolean>;
 
 export type CreateDatesLookup = (days: ZoomLevelData[]) => DatesLookup;
 

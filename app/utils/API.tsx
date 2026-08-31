@@ -1,11 +1,15 @@
-export const debounce = (getKey: (...args: any) => string, func: (...args: any) => any, milis: number) => {
+export const debounce = <TArgs extends any[], TReturn>(
+  getKey: (...args: TArgs) => string,
+  func: (...args: TArgs) => TReturn,
+  milis: number
+): ((...args: TArgs) => Promise<Awaited<TReturn>>) => {
   const debounces: { [key: string]: ReturnType<typeof setTimeout> } = {};
-  return (...args: any) => new Promise(resolve => {
+  return (...args: TArgs) => new Promise((resolve) => {
     const key = getKey(...args);
     if (debounces[key]) {
       clearTimeout(debounces[key]);
     }
-    debounces[key] = setTimeout(() => resolve(func(...args)), milis);
+    debounces[key] = setTimeout(async () => resolve(await func(...args)), milis);
   });
 };
 
