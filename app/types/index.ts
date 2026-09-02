@@ -144,6 +144,7 @@ export type SetMode = (mode: number) => void;
 
 // socket
 export type SetValueSocket = (date: string, habitId: string, values: { valueId: string, text: string | null }) => Promise<Option>;
+export type CreateOptionSocket = (newOption: Partial<Option>) => Promise<Option>;
 export type UpdateOptionSocket = (newOption: Option) => Promise<Option>;
 export type ReorderOptionsSocket = (ids: string[]) => Promise<boolean>;
 export type DeleteOptionSocket = (id: string) => Promise<boolean>;
@@ -166,6 +167,7 @@ export type SwitchOptionsReducer = (data: MainProps) => (isDown: boolean, habitI
 export type UpdateOptionReducer = (data: MainProps) => (habitIndex: number, optionIndex: number, newOptionValues: Partial<Option>) => MainProps;
 export type DeleteOptionReducer = (data: MainProps) => (habitIndex: number, optionIndex: number) => MainProps;
 export type AddOptionReducer = (data: MainProps) => (habitIndex: number, option: Option) => MainProps;
+export type AddOptionIdReducer = (data: MainProps) => (habitIndex: number, tempId: string, realId: string) => MainProps;
 
 export type SeparatorType = 'today' | 'month' | 'year';
 

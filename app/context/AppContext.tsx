@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import * as Crypto from 'expo-crypto';
 import client, {
   createHabitServer,
   createValueServer,
@@ -9,6 +10,7 @@ import client, {
 import { colorOptions } from '../components/OptionCard';
 import {
   addHabitReducer,
+  addOptionIdReducer,
   addOptionReducer,
   deleteHabitReducer,
   deleteOptionReducer,
@@ -217,8 +219,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       sequence,
       created_at: 'new'
     };
-    const newOptionValues = await createValueServer(newOption);
-    updateData(addOptionReducer(dataRef.current)(habitIndex, newOptionValues));
+    const id = Crypto.randomUUID();
+    updateData(addOptionReducer(dataRef.current)(habitIndex, { id, ...newOption }));
+    client.createOption(newOption).then(data => {
+      if (dataRef.current === null) return null;
+      updateData(addOptionIdReducer(dataRef.current)(habitIndex, id, data.id));
+    }).catch(e => {
+      console.log('createOption error:', e);
+    });
   };
 
   const updateOption: UpdateOption = (habitIndex, optionIndex, newOptionValues) => {

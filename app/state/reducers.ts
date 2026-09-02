@@ -14,7 +14,8 @@ import type {
   SwitchOptionsReducer,
   UpdateOptionReducer,
   DeleteOptionReducer,
-  AddOptionReducer
+  AddOptionReducer,
+  AddOptionIdReducer
 } from '../types';
 import { dateDiffStr, last } from '../utils/general';
 import { modes } from '../constants/zoom';
@@ -203,6 +204,21 @@ export const addOptionReducer: AddOptionReducer = (data) => (habitIndex, option)
   const newHabit = { ...newHabits[habitIndex] };
   newHabit.values.push(option);
   newHabit.values_hashmap[option.id] = newHabit.values.length - 1;
+  newHabits[habitIndex] = newHabit;
+  return { ...newData, habits: newHabits };
+}
+
+export const addOptionIdReducer: AddOptionIdReducer = (data) => (habitIndex, tempId, realId) => {
+  const index = data.habits[habitIndex].values.findIndex(o => o.id === tempId);
+  if (index === -1) {
+    return data;
+  }
+  const newData = { ...data };
+  const newHabits = [...newData.habits];
+  const newHabit = { ...newHabits[habitIndex] };
+  newHabit.values[index].id = realId;
+  newHabit.values_hashmap[realId] = newHabit.values_hashmap[tempId];
+  delete newHabit.values_hashmap[tempId];
   newHabits[habitIndex] = newHabit;
   return { ...newData, habits: newHabits };
 }

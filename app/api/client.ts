@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as Crypto from 'expo-crypto';
 
-import type { GetUserMapPureResponse, Habit, MacroMap, SetValueSocket, DeleteHabitSocket, UpdateHabitSocket, ReorderHabitsSocket, Option, ZoomLevel, DeleteOptionSocket, UpdateOptionSocket, ReorderOptionsSocket } from '../types';
+import type { GetUserMapPureResponse, Habit, MacroMap, SetValueSocket, DeleteHabitSocket, UpdateHabitSocket, ReorderHabitsSocket, Option, ZoomLevel, DeleteOptionSocket, UpdateOptionSocket, ReorderOptionsSocket, CreateOptionSocket } from '../types';
 import { getZoomModeRange } from '../constants/zoom';
 import { emptyDatesData, mapToLoadParams } from '../utils/dataStructures';
 import { debounce } from '../utils/API';
@@ -108,6 +108,15 @@ class SocketClient {
   })();
 
   // Options
+  createOption: CreateOptionSocket = (() => {
+    const func: CreateOptionSocket = async (newOption) => {
+      const route = 'options';
+      const method = 'post';
+      return this.request<Option>(route, method, newOption);
+    };
+    return debounce((_) => 'any', func, 300);
+  })();
+
   updateOption: UpdateOptionSocket = (() => {
     const func: UpdateOptionSocket = async (newOption) => {
       const route = 'options';
