@@ -15,7 +15,10 @@ import type {
   UpdateOptionReducer,
   DeleteOptionReducer,
   AddOptionReducer,
-  AddOptionIdReducer
+  AddOptionIdReducer,
+  AddHabitIdReducer,
+  HabitWithValues,
+  Option
 } from '../types';
 import { dateDiffStr, last } from '../utils/general';
 import { modes } from '../constants/zoom';
@@ -127,15 +130,29 @@ export const setValueReducer: SetValueReducer = (data) => (date, habitIndex, val
   return { ...data, datesLookup, dates: newDates, macroMap: newMacroMap };
 };
 
-export const addHabitReducer: AddHabitReducer = (data) => (habit, values) => {
+export const addHabitReducer: AddHabitReducer = (data) => (habit) => {
   const newData = { ...data };
   const newHabits = [...newData.habits];
-  const values_hashmap: Record<string, number> = {};
-  values.forEach((v, i) => {
-    values_hashmap[v.id.toString()] = i;
-  });
-  newHabits.push({ habit, values, values_hashmap, freshly_created: true });
+  newHabits.push(habit);
   return { ...newData, habits: newHabits };
+}
+
+export const addHabitIdReducer: AddHabitIdReducer = (data) => (tempId, realId) => {
+  const index = data.habits.findIndex(h => h.habit.id === tempId);
+  if (index === -1) {
+    return data;
+  }
+  const newData = { ...data };
+  const newHabitsWithValues = [...newData.habits];
+  const newValues: Option[] = newHabitsWithValues[index].values.map(o => ({ ...o, habit_id: realId }));
+  const newHabitWithValues: HabitWithValues = {
+    habit: { ...newHabitsWithValues[index].habit, id: realId },
+    values_hashmap: newHabitsWithValues[index].values_hashmap,
+    values: newValues,
+    freshly_created: false
+  };
+  newHabitsWithValues[index] = newHabitWithValues;
+  return { ...newData, habits: newHabitsWithValues };
 }
 
 export const updateHabitReducer: UpdateHabitReducer = (data) => (habitIndex, newHabitValues) => {
@@ -227,6 +244,7 @@ export default {
   loadInitialDataReducer,
   setValueReducer,
   addHabitReducer,
+  addHabitIdReducer,
   updateHabitReducer,
   deleteHabitReducer,
   switchHabitsReducer,

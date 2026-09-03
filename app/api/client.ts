@@ -144,6 +144,15 @@ class SocketClient {
   }
 
   // Habits
+  createHabit: CreateHabitSocket = (() => {
+    const func: CreateHabitSocket = async (newHabit) => {
+      const route = 'habits';
+      const method = 'post';
+      return this.request<Habit>(route, method, newHabit);
+    };
+    return debounce((_) => 'any', func, 300);
+  })();
+
   updateHabit: UpdateHabitSocket = (() => {
     const func: UpdateHabitSocket = async (newHabit) => {
       const route = 'habits';

@@ -1,14 +1,12 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
-import * as Crypto from 'expo-crypto';
 import client, {
-  createHabitServer,
-  createValueServer,
   getUserConfig,
   getUserList,
   getUserMap,
 } from '../api/client';
 import { colorOptions } from '../components/OptionCard';
 import {
+  addHabitIdReducer,
   addHabitReducer,
   addOptionIdReducer,
   addOptionReducer,
@@ -35,6 +33,7 @@ import type {
   LoadingMap,
   LoadMoreDataIfNeeded,
   MainProps,
+  Option,
   SetMode,
   SetScale,
   SetScroll,
@@ -280,20 +279,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       sequence,
       habit_type: type,
     };
-    const newHabitValue = await createHabitServer(newHabit);
-    const values = [];
+    let optionId = null;
+    const habitId = generateEightDigitNumber();
+    const newOption = {
+      label: newHabit.name,
+      color: colorOptions[0],
+      habit_id: habitId,
+      sequence: 1,
+      created_at: 'new'
+    };
+    const habit = { id: habitId, ...newHabit };
+    const values: Option[] = [];
+    const values_hashmap: Record<string, number> = {};
     if (type === 'Text') {
-      const newValue = {
-        label: newHabit.name,
-        color: colorOptions[0],
-        habit_id: parseInt(newHabitValue.id, 10),
-        sequence: 1,
-        created_at: 'new'
-      };
-      const newValueValues = await createValueServer(newValue);
-      values.push(newValueValues);
+      optionId = generateEightDigitNumber();
+      values.push({ ...newOption, id: optionId });
+      values_hashmap[optionId.toString()] = values.length;
     }
-    updateData(addHabitReducer(dataRef.current)(newHabitValue, values));
+    const habitWithValues = { habit, values, values_hashmap, freshly_created: true };
+    updateData(addHabitReducer(dataRef.current)(habitWithValues));
+    client.createHabit(newHabit).then(h => {
+      if (dataRef.current === null) return null;
+      const habitIndex = dataRef.current.habits.findIndex(h => h.habit.id === habitId);
+      updateData(addHabitIdReducer(dataRef.current)(habitId, h.id));
+      if (optionId) {
+        client.createOption({ ...newOption, habit_id: h.id }).then(data => {
+          if (dataRef.current === null) return null;
+          updateData(addOptionIdReducer(dataRef.current)(habitIndex, optionId, data.id));
+        }).catch(e => {
+          console.log('createOption in createHabit error:', e);
+        });
+      }
+    }).catch(e => {
+      console.log('createHabit error:', e);
+    });
   }
 
   const updateHabit: UpdateHabit = (habitIndex, newHabitValues) => {
