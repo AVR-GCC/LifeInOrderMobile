@@ -1,5 +1,5 @@
 export interface Option {
-  id: string;
+  id: number;
   label: string;
   color: string;
   sequence: number;
@@ -10,7 +10,7 @@ export interface Option {
 export type HabitType = 'Color' | 'Text';
 
 export interface Habit {
-  id: string;
+  id: number;
   name: string;
   weight: number;
   sequence: number;
@@ -143,14 +143,14 @@ export type GetScroll = () => number;
 export type SetMode = (mode: number) => void;
 
 // socket
-export type SetValueSocket = (date: string, habitId: string, values: { valueId: string, text: string | null }) => Promise<Option>;
+export type SetValueSocket = (date: string, habitId: number, values: { valueId: string, text: string | null }) => Promise<Option>;
 export type CreateOptionSocket = (newOption: Partial<Option>) => Promise<Option>;
 export type UpdateOptionSocket = (newOption: Option) => Promise<Option>;
-export type ReorderOptionsSocket = (ids: string[]) => Promise<boolean>;
-export type DeleteOptionSocket = (id: string) => Promise<boolean>;
+export type ReorderOptionsSocket = (ids: number[]) => Promise<boolean>;
+export type DeleteOptionSocket = (id: number) => Promise<boolean>;
 export type UpdateHabitSocket = (newHabit: Habit) => Promise<Habit>;
-export type ReorderHabitsSocket = (ids: string[]) => Promise<boolean>;
-export type DeleteHabitSocket = (id: string) => Promise<boolean>;
+export type ReorderHabitsSocket = (ids: number[]) => Promise<boolean>;
+export type DeleteHabitSocket = (id: number) => Promise<boolean>;
 
 export type CreateDatesLookup = (days: ZoomLevelData[]) => DatesLookup;
 
@@ -167,7 +167,7 @@ export type SwitchOptionsReducer = (data: MainProps) => (isDown: boolean, habitI
 export type UpdateOptionReducer = (data: MainProps) => (habitIndex: number, optionIndex: number, newOptionValues: Partial<Option>) => MainProps;
 export type DeleteOptionReducer = (data: MainProps) => (habitIndex: number, optionIndex: number) => MainProps;
 export type AddOptionReducer = (data: MainProps) => (habitIndex: number, option: Option) => MainProps;
-export type AddOptionIdReducer = (data: MainProps) => (habitIndex: number, tempId: string, realId: string) => MainProps;
+export type AddOptionIdReducer = (data: MainProps) => (habitIndex: number, tempId: number, realId: number) => MainProps;
 
 export type SeparatorType = 'today' | 'month' | 'year';
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as Crypto from 'expo-crypto';
 
-import type { GetUserMapPureResponse, Habit, MacroMap, SetValueSocket, DeleteHabitSocket, UpdateHabitSocket, ReorderHabitsSocket, Option, ZoomLevel, DeleteOptionSocket, UpdateOptionSocket, ReorderOptionsSocket, CreateOptionSocket } from '../types';
+import type { GetUserMapPureResponse, Habit, MacroMap, SetValueSocket, DeleteHabitSocket, UpdateHabitSocket, ReorderHabitsSocket, Option, ZoomLevel, DeleteOptionSocket, UpdateOptionSocket, ReorderOptionsSocket, CreateOptionSocket, CreateHabitSocket } from '../types';
 import { getZoomModeRange } from '../constants/zoom';
 import { emptyDatesData, mapToLoadParams } from '../utils/dataStructures';
 import { debounce } from '../utils/API';
@@ -123,7 +123,7 @@ class SocketClient {
       const method = 'put';
       return this.request<Option>(route, method, newOption);
     };
-    return debounce((newOption) => newOption.id, func, 1000);
+    return debounce((newOption) => newOption.id.toString(), func, 1000);
   })();
 
   reorderOptions: ReorderOptionsSocket = (() => {
@@ -150,7 +150,7 @@ class SocketClient {
       const method = 'put';
       return this.request<Habit>(route, method, newHabit);
     };
-    return debounce((newHabit) => newHabit.id, func, 1000);
+    return debounce((newHabit) => newHabit.id.toString(), func, 1000);
   })();
 
   reorderHabits: ReorderHabitsSocket = (() => {

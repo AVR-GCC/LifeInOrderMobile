@@ -232,5 +232,6 @@ export default {
   switchHabitsReducer,
   switchOptionsReducer,
   updateOptionReducer,
-  addOptionReducer
+  addOptionReducer,
+  addOptionIdReducer
 }; 

@@ -47,6 +47,7 @@ import type {
 import { emptyDatesData, getSurroundingMacroMap, isEmptyMacroMap, mapToLoadParams, mergeMaps, subtractMaps } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
+import { generateEightDigitNumber } from '../utils/general';
 
 interface AppContextType {
   data: MainProps | null;
@@ -215,11 +216,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newOption = {
       label: '',
       color: colorOptions[0],
-      habit_id: parseInt(habits[habitIndex].habit.id, 10),
+      habit_id: habits[habitIndex].habit.id,
       sequence,
       created_at: 'new'
     };
-    const id = Crypto.randomUUID();
+    const id = generateEightDigitNumber();
     updateData(addOptionReducer(dataRef.current)(habitIndex, { id, ...newOption }));
     client.createOption(newOption).then(data => {
       if (dataRef.current === null) return null;
