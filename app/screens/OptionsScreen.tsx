@@ -29,7 +29,7 @@ const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function OptionsS
 }) {
   const { date, habit, name } = useLocalSearchParams();
   const router = useRouter();
-  const [openPallete, setOpenPallete] = useState<string | null>(null);
+  const [openPallete, setOpenPallete] = useState<number | null>(null);
   const [inputFocused, setInputFocused] = useState(false);
   const [weightInputFocused, setWeightInputFocused] = useState(false);
   const [weightInputEmpty, setWeightInputEmpty] = useState(false);

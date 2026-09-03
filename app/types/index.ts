@@ -124,7 +124,7 @@ export type LoadDataInput = { date: string, zoom: ZoomLevel, count: number };
 
 // AppContext
 export type GetValue = (date: string, habitIndex: number) => string | null;
-export type SetValue = (date: string, habitIndex: number, values: { valueId: string, text: string | null }) => void;
+export type SetValue = (date: string, habitIndex: number, values: { valueId: number, text: string | null }) => void;
 export type CreateHabit = (sequence: number, type: HabitType, name: string) => Promise<null | undefined>;
 export type UpdateHabit = (habitIndex: number, newValueValues: Partial<Habit>) => void;
 export type DeleteHabit = (index: number) => void;
@@ -143,11 +143,12 @@ export type GetScroll = () => number;
 export type SetMode = (mode: number) => void;
 
 // socket
-export type SetValueSocket = (date: string, habitId: number, values: { valueId: string, text: string | null }) => Promise<Option>;
+export type SetValueSocket = (date: string, habitId: number, values: { valueId: number, text: string | null }) => Promise<Option>;
 export type CreateOptionSocket = (newOption: Partial<Option>) => Promise<Option>;
 export type UpdateOptionSocket = (newOption: Option) => Promise<Option>;
 export type ReorderOptionsSocket = (ids: number[]) => Promise<boolean>;
 export type DeleteOptionSocket = (id: number) => Promise<boolean>;
+export type CreateHabitSocket = (newHabit: Partial<Habit>) => Promise<Habit>;
 export type UpdateHabitSocket = (newHabit: Habit) => Promise<Habit>;
 export type ReorderHabitsSocket = (ids: number[]) => Promise<boolean>;
 export type DeleteHabitSocket = (id: number) => Promise<boolean>;
@@ -158,8 +159,9 @@ export type CreateDatesLookup = (days: ZoomLevelData[]) => DatesLookup;
 export type InitialDataReducer = () => ((dayLevelData: MonthData[], quarterLevelData: TimePeriodData[], habits: HabitWithValues[]) => MainProps);
 export type RemoveDataIfNeeded = (macroMap: MacroMap, dates: DatesData, rmm: MacroMap) => { dates: DatesData, macroMap: MacroMap };
 export type ReceiveMoreDataReducer = (data: MainProps) => (responses: GetUserMapPureResponse[], rmm: MacroMap, removeDataOutsideMap: boolean) => MainProps;
-export type SetValueReducer = (data: MainProps) => (date: string, habitIndex: number, values: { valueId: string, text: string | null }) => MainProps;
-export type AddHabitReducer = (data: MainProps) => (habit: Habit, values: Option[]) => MainProps;
+export type SetValueReducer = (data: MainProps) => (date: string, habitIndex: number, values: { valueId: number, text: string | null }) => MainProps;
+export type AddHabitReducer = (data: MainProps) => (habit: HabitWithValues) => MainProps;
+export type AddHabitIdReducer = (data: MainProps) => (tempId: number, realId: number) => MainProps;
 export type UpdateHabitReducer = (data: MainProps) => (habitIndex: number, newHabitValues: Partial<Option>) => MainProps;
 export type DeleteHabitReducer = (data: MainProps) => (index: number) => MainProps;
 export type SwitchHabitsReducer = (data: MainProps) => (isDown: boolean, index: number) => MainProps;
