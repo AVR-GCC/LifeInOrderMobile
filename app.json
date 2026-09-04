@@ -19,7 +19,6 @@
         "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#213448"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.lifeinorder.app",
       "runtimeVersion": "1.0.0"
     },
@@ -38,7 +37,10 @@
           "resizeMode": "contain",
           "backgroundColor": "#213448"
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
