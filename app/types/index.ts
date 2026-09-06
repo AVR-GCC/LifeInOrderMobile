@@ -122,6 +122,13 @@ export interface NavigationValues {
   
 export type LoadDataInput = { date: string, zoom: ZoomLevel, count: number };
 
+export type Segment = {
+  zoom: ZoomLevel,
+  date: string
+}
+
+export type SegmentStatus = 'present' | 'loading' | 'pending';
+
 // AppContext
 export type GetValue = (date: string, habitIndex: number) => string | null;
 export type SetValue = (date: string, habitIndex: number, values: { valueId: number, text: string | null }) => void;
