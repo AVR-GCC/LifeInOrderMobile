@@ -164,6 +164,7 @@ export type CreateDatesLookup = (days: ZoomLevelData[]) => DatesLookup;
 
 // reducers
 export type InitialDataReducer = () => ((dayLevelData: MonthData[], quarterLevelData: TimePeriodData[], habits: HabitWithValues[]) => MainProps);
+export type AttachSegmentReducer = (data: MainProps) => (segment: Segment, zld: ZoomLevelData, isBefore: boolean) => MainProps;
 export type RemoveDataIfNeeded = (macroMap: MacroMap, dates: DatesData, rmm: MacroMap) => { dates: DatesData, macroMap: MacroMap };
 export type ReceiveMoreDataReducer = (data: MainProps) => (responses: GetUserMapPureResponse[], rmm: MacroMap, removeDataOutsideMap: boolean) => MainProps;
 export type SetValueReducer = (data: MainProps) => (date: string, habitIndex: number, values: { valueId: number, text: string | null }) => MainProps;

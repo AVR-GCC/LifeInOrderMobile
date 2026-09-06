@@ -1,4 +1,4 @@
-import { createDatesLookup, emptyDatesData, emptyMacroMap, mergeMaps } from '../utils/dataStructures';
+import { createDatesLookup, emptyDatesData, emptyMacroMap, findAnchorDate, mergeMaps } from '../utils/dataStructures';
 import type {
   DatesData,
   ZoomLevelData,
@@ -18,10 +18,11 @@ import type {
   AddOptionIdReducer,
   AddHabitIdReducer,
   HabitWithValues,
-  Option
+  Option,
+  AttachSegmentReducer
 } from '../types';
 import { dateDiffStr, last } from '../utils/general';
-import { modes } from '../constants/zoom';
+import { modes, nextDate } from '../constants/zoom';
 
 const getZoomLevelDataRange = (zld: ZoomLevelData[]) => {
   if (zld.length === 0) return null;
@@ -48,6 +49,38 @@ export const loadInitialDataReducer: InitialDataReducer = () => (dayLevelData, q
   const datesLookup = createDatesLookup(dayLevelData);
   return { dates, datesLookup, habits, macroMap, mode: 0 };
 };
+
+export const attachSegmentReducer: AttachSegmentReducer = (data) => (segment, zld, isBefore) => {
+  const { zoom, date } = segment;
+  const { macroMap, dates } = data;
+  if (!macroMap[zoom]) {
+    const anchorDate = findAnchorDate(macroMap);
+    if (!anchorDate) return data;
+    const end = nextDate(date, zoom, true);
+    const range = { start: date, end };
+    const offset = dateDiffStr(end, anchorDate);
+    macroMap[zoom] = { offset, range };
+    dates[zoom] = [zld];
+    return { ...data, dates, macroMap };
+  }
+  const { range, offset } = macroMap[zoom];
+  let start = date;
+  let end = range.end
+  let offsetDiff = 0;
+  if (!isBefore) {
+    start = range.start;
+    end = nextDate(date, zoom, true);
+    offsetDiff = dateDiffStr(end, range.end);
+    dates[zoom].push(zld);
+  } else {
+    dates[zoom].unshift(zld);
+  }
+  macroMap[zoom] = {
+    range: { start, end },
+    offset: offset + offsetDiff
+  };
+  return { ...data, dates, macroMap };
+}
 
 const removeDataIfNeeded: RemoveDataIfNeeded = (macroMap, dates, rmm) => {
   const newData = emptyDatesData();
