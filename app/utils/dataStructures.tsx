@@ -129,19 +129,28 @@ export const emptyDatesData = (): DatesData => ({ day: [], quarter: [], half: []
 
 export const isEmptyMacroMap = (mm: MacroMap) => modes.every(mode => !mm[mode.id]);
 
-export const mergeMaps = (existingMap: MacroMap, additionalMap: MacroMap, existingData: DatesData, additionalData: DatesData) => {
+export const findAnchorDate = (mm: MacroMap) => {
   let anchorDate: string | null = null;
+  modes.forEach(mode => {
+    const zoom = mode.id;
+    const existing = mm[zoom];
+    if (existing && !anchorDate) {
+      const endDate = new Date(existing.range.end);
+      endDate.setUTCDate(endDate.getUTCDate() - existing.offset);
+      anchorDate = dateString(endDate);
+      return true;
+    }
+  });
+  return anchorDate;
+}
+
+export const mergeMaps = (existingMap: MacroMap, additionalMap: MacroMap, existingData: DatesData, additionalData: DatesData) => {
   const macroMapRaw: MacroMap = emptyMacroMap();
   const datesData: DatesData = emptyDatesData();
 
   modes.forEach(mode => {
     const zoom = mode.id;
     const existing = existingMap[zoom];
-    if (existing && !anchorDate) {
-      const endDate = new Date(existing.range.end);
-      endDate.setUTCDate(endDate.getUTCDate() - existing.offset);
-      anchorDate = dateString(endDate);
-    }
     const additional = additionalMap[zoom];
     const existingD = existingData[zoom];
     const additionalD = additionalData[zoom];
@@ -167,6 +176,7 @@ export const mergeMaps = (existingMap: MacroMap, additionalMap: MacroMap, existi
     datesData[zoom] = nextData;
   });
 
+  const anchorDate = findAnchorDate(existingMap);
   if (!anchorDate) {
     return { macroMap: macroMapRaw, datesData };
   }
