@@ -1,5 +1,5 @@
-import { getMinRangeCountIncludingBothDates, getMode, getZoomModeRange, modes, nextDate } from "../constants/zoom";
-import { CreateDatesLookup, DateRange, DatesData, DatesLookup, LoadDataInput, MacroMap, NavigationValues, ZoomLevel, ZoomLevelData } from "../types";
+import { getMinRangeCountIncludingBothDates, getMode, getZoomCenterDate, getZoomModeRange, modes, nextDate, zoomIndeces } from "../constants/zoom";
+import { CreateDatesLookup, DateRange, DatesData, DatesLookup, LoadDataInput, MacroMap, NavigationValues, Segment, ZoomLevel, ZoomLevelData } from "../types";
 import { dateDiffStr, dateString } from "./general";
 
 // MacroMap + NavigationValues
@@ -298,6 +298,54 @@ export const createDatesLookup: CreateDatesLookup = (days) => {
     });
   });
   return datesLookup;
+}
+
+const CLICK_ZOOM_CONSIDERATION_FACTOR = 1.2;
+
+export const segmentDistance = (height: number, baseDate: string, baseDayPixels: number, segmentStartDate: string, segmentZoom: ZoomLevel) => {
+  const { log2, abs, sqrt } = Math;
+  const pointDate = getZoomCenterDate(segmentStartDate, segmentZoom);
+  const baseModeIndex = getMode(baseDayPixels);
+  const pointModeIndex = zoomIndeces[segmentZoom];
+  const pointMode = modes[pointModeIndex];
+  let pointModePixels = baseModeIndex < pointModeIndex ? pointMode.maxPixels : pointMode.minPixels;
+  if (baseModeIndex === pointModeIndex) {
+    pointModePixels = pointMode.dayPixels;
+  }
+  if (!pointModePixels) return 0;
+  const basePixelsLog = log2(baseDayPixels);
+  const pointPixelsLog = log2(pointModePixels);
+  const pointZoomHeightSigned = basePixelsLog - pointPixelsLog;
+  const pointZoomHeight = abs(pointZoomHeightSigned);
+  const daysDist = abs(dateDiffStr(baseDate, pointDate));
+  const pointScreenDays = height / pointModePixels;
+  const screenDateDiff = daysDist / pointScreenDays;
+  const swipingDistance = sqrt(screenDateDiff ** 2 + pointZoomHeight ** 2);
+  const distanceWithClickZoom = pointZoomHeightSigned < 0 ? swipingDistance / CLICK_ZOOM_CONSIDERATION_FACTOR : swipingDistance;
+  return distanceWithClickZoom;
+}
+
+export const sortMacroMapSegments = (mm: MacroMap, height: number, baseDate: string, baseDayPixels: number) => {
+  const segments: Segment[] = [];
+  modes.forEach(mode => {
+    const zoom = mode.id;
+    const map = mm[zoom];
+    if (!map) return true;
+    let currentDate = map.range.start;
+    while (currentDate < map.range.end) {
+      segments.push({ zoom, date: currentDate });
+      currentDate = nextDate(currentDate, zoom, true);
+    }
+  });
+  const sortFunction = (a: Segment, b: Segment) => {
+    const { zoom: zoomA, date: dateA } = a;
+    const { zoom: zoomB, date: dateB } = b;
+    const distA = segmentDistance(height, baseDate, baseDayPixels, dateA, zoomA);
+    const distB = segmentDistance(height, baseDate, baseDayPixels, dateB, zoomB);
+    return distA - distB;
+  }
+  const sorted = segments.sort(sortFunction);
+  return sorted;
 }
 
 export default {
