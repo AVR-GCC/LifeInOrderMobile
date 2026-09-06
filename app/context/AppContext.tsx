@@ -10,6 +10,7 @@ import {
   addHabitReducer,
   addOptionIdReducer,
   addOptionReducer,
+  attachSegmentReducer,
   deleteHabitReducer,
   deleteOptionReducer,
   loadInitialDataReducer,
@@ -32,8 +33,10 @@ import type {
   LoadAndPrefetch,
   LoadingMap,
   LoadMoreDataIfNeeded,
+  MacroMap,
   MainProps,
   Option,
+  SegmentStatus,
   SetMode,
   SetScale,
   SetScroll,
@@ -41,12 +44,14 @@ import type {
   SwitchHabits,
   SwitchOptions,
   UpdateHabit,
-  UpdateOption
+  UpdateOption,
+  ZoomLevelData
 } from '../types';
-import { emptyDatesData, getSurroundingMacroMap, isEmptyMacroMap, mapToLoadParams, mergeMaps, subtractMaps } from '../utils/dataStructures';
+import { emptyDatesData, getSurroundingMacroMap, isEmptyMacroMap, mapToLoadParams, mergeMaps, sortMacroMapSegments, subtractMaps } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
 import { generateEightDigitNumber } from '../utils/general';
+import { nextDate } from '../constants/zoom';
 
 interface AppContextType {
   data: MainProps | null;
@@ -77,6 +82,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [data, setData] = useState<MainProps | null>(null);
   const dataRef = useRef(data);
   const running = useRef(false);
+  const segmentStatuses = useRef<Record<string, SegmentStatus>>({});
+  const pendingSegments = useRef<Record<string, ZoomLevelData>>({});
   const loadingMap = useRef<LoadingMap>({ nextId: 1, entries: [] });
 
   const updateData = (newData: MainProps | null) => {
@@ -99,6 +106,85 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!dataRef.current) return;
     updateData({ ...dataRef.current, mode });
   }
+
+  const loadRequiredSegments = (rmm: MacroMap, date: string, dayPixels: number) => {
+    const segments = sortMacroMapSegments(rmm, height, date, dayPixels);
+    segments.forEach((seg) => {
+      const { date, zoom } = seg;
+      const key = `${date}-${zoom}`;
+      if (!segmentStatuses.current[key]) {
+        segmentStatuses.current[key] = 'loading';
+        client.list(seg).then(zld => {
+          if (dataRef.current === null) return;
+          const { macroMap } = dataRef.current;
+          const zl = macroMap[zoom];
+          if (!zl) {
+            // only segment for zoom level - add
+            updateData(attachSegmentReducer(dataRef.current)(seg, zld, true))
+            segmentStatuses.current[key] = 'present';
+            return;
+          }
+          if (date < zl.range.start) {
+            // is before
+            const next = nextDate(date, zoom, true);
+            const nextKey = `${next}-${zoom}`;
+            const nextStatus = segmentStatuses.current[nextKey];
+            if (nextStatus === 'present') {
+              // next date present - add
+              updateData(attachSegmentReducer(dataRef.current)(seg, zld, true))
+              segmentStatuses.current[key] = 'present';
+              let prev = nextDate(date, zoom, false);
+              let prevKey = `${prev}-${zoom}`;
+              let prevStatus = segmentStatuses.current[prevKey];
+              while (prevStatus === 'pending') {
+                // pending date can now be added - add
+                updateData(attachSegmentReducer(dataRef.current)({ date: prev, zoom }, pendingSegments.current[prevKey], true))
+                segmentStatuses.current[prevKey] = 'present';
+                delete pendingSegments.current[prevKey];
+                prev = nextDate(prev, zoom, false);
+                prevKey = `${prev}-${zoom}`;
+                prevStatus = segmentStatuses.current[prevKey];
+              }
+              return;
+            }
+            // next date not ready - keep pending
+            segmentStatuses.current[key] = 'pending';
+            pendingSegments.current[key] = zld;
+            return;
+          }
+          if (date > zl.range.end) {
+            // is after
+            const prev = nextDate(date, zoom, false);
+            const prevKey = `${prev}-${zoom}`;
+            const prevStatus = segmentStatuses.current[prevKey];
+            if (prevStatus === 'present') {
+              // prev date present - add
+              updateData(attachSegmentReducer(dataRef.current)(seg, zld, false))
+              segmentStatuses.current[key] = 'present';
+              let next = nextDate(date, zoom, true);
+              let nextKey = `${next}-${zoom}`;
+              let nextStatus = segmentStatuses.current[nextKey];
+              while (nextStatus === 'pending') {
+                // pending date can now be added - add
+                updateData(attachSegmentReducer(dataRef.current)({ date: next, zoom }, pendingSegments.current[nextKey], false))
+                segmentStatuses.current[nextKey] = 'present';
+                delete pendingSegments.current[nextKey];
+                next = nextDate(next, zoom, true);
+                nextKey = `${next}-${zoom}`;
+                nextStatus = segmentStatuses.current[nextKey];
+              }
+              return;
+            }
+            // prev date not ready - keep pending
+            segmentStatuses.current[key] = 'pending';
+            pendingSegments.current[key] = zld;
+            return;
+          }
+          console.log('Got segment in the middle of map', key);
+        });
+      }
+    });
+  };
 
   const loadInitialData = async () => {
     const userConfigPromise = getUserConfig();

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as Crypto from 'expo-crypto';
 
-import type { GetUserMapPureResponse, Habit, MacroMap, SetValueSocket, DeleteHabitSocket, UpdateHabitSocket, ReorderHabitsSocket, Option, ZoomLevel, DeleteOptionSocket, UpdateOptionSocket, ReorderOptionsSocket, CreateOptionSocket, CreateHabitSocket } from '../types';
+import type { GetUserMapPureResponse, Habit, MacroMap, SetValueSocket, DeleteHabitSocket, UpdateHabitSocket, ReorderHabitsSocket, Option, ZoomLevel, DeleteOptionSocket, UpdateOptionSocket, ReorderOptionsSocket, CreateOptionSocket, CreateHabitSocket, Segment, ZoomLevelData } from '../types';
 import { getZoomModeRange } from '../constants/zoom';
 import { emptyDatesData, mapToLoadParams } from '../utils/dataStructures';
 import { debounce } from '../utils/API';
@@ -177,6 +177,14 @@ class SocketClient {
     const method = 'delete';
     const params = id;
     return this.request<boolean>(route, method, params);
+  }
+
+  // List
+  list = (segment: Segment) => {
+    const route = 'list';
+    const method = 'get';
+    const params = segment;
+    return this.request<ZoomLevelData>(route, method, params);
   }
 }
 
