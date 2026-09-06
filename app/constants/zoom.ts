@@ -3,10 +3,10 @@ import { dateString } from "../utils/general";
 
 export const modes: ModeInfo[] = [
   {id: 'day',      name: 'Day      ', dayPixels: 24, minPixels: 13.856},
-  {id: 'quarter',  name: 'Quarter  ', dayPixels: 8, minPixels: 5.657, maxPixels: 13.856},
-  {id: 'half',     name: 'Half     ', dayPixels: 4, minPixels: 2.828, maxPixels: 5.657},
-  {id: 'year',     name: 'Year     ', dayPixels: 2, minPixels: 1.414, maxPixels: 2.828},
-  {id: 'two_year', name: 'Two Years', dayPixels: 1, maxPixels: 1.414}
+  {id: 'quarter',  name: 'Quarter  ', dayPixels: 8,  minPixels: 5.657, maxPixels: 13.856},
+  {id: 'half',     name: 'Half     ', dayPixels: 4,  minPixels: 2.828, maxPixels: 5.657},
+  {id: 'year',     name: 'Year     ', dayPixels: 2,  minPixels: 1.414, maxPixels: 2.828},
+  {id: 'two_year', name: 'Two Years', dayPixels: 1,  maxPixels: 1.414}
 ];
 
 export const getMode = (pixels: number) => {
@@ -44,6 +44,17 @@ export const nextDate = (date: string, zoom: ZoomLevel, future: boolean) => {
   const res = dateString(nDate);
   return res;
 };
+
+export const getZoomCenterDate = (date: string, zoom: ZoomLevel) => {
+  const next = nextDate(date, zoom, true);
+  const prev = nextDate(nextDate(date, zoom, true), zoom, false);
+  const nd = new Date(next);
+  const pd = new Date(prev);
+  const midTime = (nd.getTime() + pd.getTime()) / 2;
+  const md = new Date(midTime);
+  const ms = dateString(md);
+  return ms;
+}
 
 export const getZoomModeRange = (date: string, zoom: ZoomLevel, count = 1) => {
   const { floor } = Math;
