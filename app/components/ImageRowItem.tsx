@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     // height: BASE_DAY_HEIGHT,
   } as const,
   touchOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   } as const,
   leftBar: {
     width: LEFT_BAR_WIDTH,

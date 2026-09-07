@@ -13,7 +13,7 @@ const Loading = () => (
 
 const styles = StyleSheet.create({
   loadingIndicatorHolder: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
