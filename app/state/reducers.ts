@@ -150,14 +150,14 @@ export const setValueReducer: SetValueReducer = (data) => (date, habitIndex, val
     Quarter: null,
     Half: null,
     Year: null,
-    two_year: null
+    Two_year: null
   };
   const newDates: DatesData = {
     Day: newDayZoomData,
     Quarter: [],
     Half: [],
     Year: [],
-    two_year: []
+    Two_year: []
   };
   dates.Day = newDayZoomData;
   return { ...data, datesLookup, dates: newDates, macroMap: newMacroMap };
