@@ -33,7 +33,7 @@ const sectionNames: Record<ZoomLevel, (date: Date) => string> = {
       'DECEMBER',
     ][month]
   },
-  half: date => {
+  Half: date => {
     const month = date.getMonth();
     const year = date.getFullYear();
     return [

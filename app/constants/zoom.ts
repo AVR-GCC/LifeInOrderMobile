@@ -4,7 +4,7 @@ import { dateString } from "../utils/general";
 export const modes: ModeInfo[] = [
   {id: 'Day',      name: 'Day      ', dayPixels: 24, minPixels: 13.856},
   {id: 'Quarter',  name: 'Quarter  ', dayPixels: 8,  minPixels: 5.657, maxPixels: 13.856},
-  {id: 'half',     name: 'Half     ', dayPixels: 4,  minPixels: 2.828, maxPixels: 5.657},
+  {id: 'Half',     name: 'Half     ', dayPixels: 4,  minPixels: 2.828, maxPixels: 5.657},
   {id: 'year',     name: 'Year     ', dayPixels: 2,  minPixels: 1.414, maxPixels: 2.828},
   {id: 'two_year', name: 'Two Years', dayPixels: 1,  maxPixels: 1.414}
 ];
@@ -21,7 +21,7 @@ export const getMode = (pixels: number) => {
 export const zoomIndeces: Record<ZoomLevel, number> = {
   Day: modes.findIndex(m => m.id === 'Day'),
   Quarter: modes.findIndex(m => m.id === 'Quarter'),
-  half: modes.findIndex(m => m.id === 'half'),
+  Half: modes.findIndex(m => m.id === 'Half'),
   year: modes.findIndex(m => m.id === 'year'),
   two_year: modes.findIndex(m => m.id === 'two_year')
 };
@@ -29,7 +29,7 @@ export const zoomIndeces: Record<ZoomLevel, number> = {
 export const zoomMonths: Record<ZoomLevel, number> = {
   Day: 1,
   Quarter: 3,
-  half: 6,
+  Half: 6,
   year: 12,
   two_year: 24
 };
@@ -85,7 +85,7 @@ export const getZoomModeRange = (date: string, zoom: ZoomLevel, count = 1) => {
       end = dateString(dateObj);
       // console.log('getZoomModeRange end', end);
       return { start, end };
-    case 'half':
+    case 'Half':
       const hstartMonth = month <= 5 ? 0 : 6;
       dateObj.setUTCMonth(hstartMonth);
       start = dateString(dateObj);
