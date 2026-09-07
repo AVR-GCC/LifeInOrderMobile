@@ -24,7 +24,7 @@ export interface HabitWithValues {
   freshly_created?: boolean;
 }
 
-export type ZoomLevel = 'Day' | 'Quarter' | 'Half' | 'year' | 'two_year';
+export type ZoomLevel = 'Day' | 'Quarter' | 'Half' | 'Year' | 'two_year';
 
 export type ModeInfo = {
   id: ZoomLevel,

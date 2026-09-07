@@ -51,7 +51,7 @@ const sectionNames: Record<ZoomLevel, (date: Date) => string> = {
       `Q4 ${year}`,
     ][month]
   },
-  year: date => {
+  Year: date => {
     const month = date.getMonth();
     const year = date.getFullYear();
     return [
@@ -100,7 +100,7 @@ const ImageRowItem: React.FC<ImageRowItemProps> = React.memo(function ImageRowIt
       const nextDate = new Date(current);
       const month = currentDate.getMonth();
       const name = sectionNames[zoom](currentDate);
-      const prevZoom = zoom === 'year' ? 'Quarter' : modes[zoomIndeces[zoom] - 1].id;
+      const prevZoom = zoom === 'Year' ? 'Quarter' : modes[zoomIndeces[zoom] - 1].id;
       nextDate.setUTCMonth(month + zoomMonths[prevZoom]);
       nextDate.setUTCDate(0);
       const flex = dateDiff(nextDate, currentDate);

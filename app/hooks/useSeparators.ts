@@ -8,7 +8,7 @@ type ReturnType = Record<ZoomLevel, SeparatorData[]>;
 
 export const useSeparators = (data: MainProps | null): ReturnType => {
   return useMemo((): ReturnType => {
-    const separators: ReturnType = { Day: [], Quarter: [], Half: [], year: [], two_year: [] };
+    const separators: ReturnType = { Day: [], Quarter: [], Half: [], Year: [], two_year: [] };
     if (!data) return separators;
     const { macroMap } = data;
     modes.forEach(modeObj => {
