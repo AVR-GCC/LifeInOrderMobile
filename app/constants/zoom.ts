@@ -2,7 +2,7 @@ import { DateRange, ModeInfo, ZoomLevel } from "../types";
 import { dateString } from "../utils/general";
 
 export const modes: ModeInfo[] = [
-  {id: 'day',      name: 'Day      ', dayPixels: 24, minPixels: 13.856},
+  {id: 'Day',      name: 'Day      ', dayPixels: 24, minPixels: 13.856},
   {id: 'quarter',  name: 'Quarter  ', dayPixels: 8,  minPixels: 5.657, maxPixels: 13.856},
   {id: 'half',     name: 'Half     ', dayPixels: 4,  minPixels: 2.828, maxPixels: 5.657},
   {id: 'year',     name: 'Year     ', dayPixels: 2,  minPixels: 1.414, maxPixels: 2.828},
@@ -19,7 +19,7 @@ export const getMode = (pixels: number) => {
 };
 
 export const zoomIndeces: Record<ZoomLevel, number> = {
-  day: modes.findIndex(m => m.id === 'day'),
+  Day: modes.findIndex(m => m.id === 'Day'),
   quarter: modes.findIndex(m => m.id === 'quarter'),
   half: modes.findIndex(m => m.id === 'half'),
   year: modes.findIndex(m => m.id === 'year'),
@@ -27,7 +27,7 @@ export const zoomIndeces: Record<ZoomLevel, number> = {
 };
 
 export const zoomMonths: Record<ZoomLevel, number> = {
-  day: 1,
+  Day: 1,
   quarter: 3,
   half: 6,
   year: 12,
@@ -65,7 +65,7 @@ export const getZoomModeRange = (date: string, zoom: ZoomLevel, count = 1) => {
   dateObj.setUTCDate(1);
   const month = dateObj.getMonth();
   switch (zoom) {
-    case 'day':
+    case 'Day':
       start = dateString(dateObj);
       dateObj.setUTCMonth(dateObj.getMonth() + count);
       end = dateString(dateObj);

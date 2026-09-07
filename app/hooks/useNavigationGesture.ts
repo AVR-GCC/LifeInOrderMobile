@@ -48,8 +48,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
 
   const zoomStyles = {
     day: useAnimatedStyle<ViewStyle>(() => ({
-      opacity: navigationValue.get().mode === zoomIndeces.day ? 1 : 0,
-      pointerEvents: navigationValue.get().mode === zoomIndeces.day ? 'auto' : 'none'
+      opacity: navigationValue.get().mode === zoomIndeces.Day ? 1 : 0,
+      pointerEvents: navigationValue.get().mode === zoomIndeces.Day ? 'auto' : 'none'
     })),
     quarter: useAnimatedStyle<ViewStyle>(() => ({
       opacity: navigationValue.get().mode === zoomIndeces.quarter ? 1 : 0,

@@ -15,7 +15,7 @@ interface ImageRowItemProps {
 }
 
 const sectionNames: Record<ZoomLevel, (date: Date) => string> = {
-  day: () => '',
+  Day: () => '',
   quarter: date => {
     const month = date.getMonth();
     return [

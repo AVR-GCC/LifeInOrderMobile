@@ -40,8 +40,8 @@ export const loadInitialDataReducer: InitialDataReducer = () => (dayLevelData, q
   const diff = dateDiffStr(dayRange.end, quarterRange.end);
   const dayOffset = diff < 0 ? -1 * diff : 0;
   const day = { offset: dayOffset, range: dayRange };
-  macroMap.day = day;
-  dates.day = dayLevelData;
+  macroMap.Day = day;
+  dates.Day = dayLevelData;
   const quarterOffset = diff > 0 ? diff : 0;
   const quarter = { offset: quarterOffset, range: quarterRange };
   macroMap.quarter = quarter;
@@ -124,13 +124,13 @@ export const receiveMoreDataReducer: ReceiveMoreDataReducer = (data) => (respons
   const { macroMap, dates } = removeDataOutsideMap ?
     removeDataIfNeeded(addedMacroMap, addedDates, rmm)
     : { macroMap: addedMacroMap, dates: addedDates };
-  const datesLookup = createDatesLookup(dates.day);
+  const datesLookup = createDatesLookup(dates.Day);
   return { ...data, datesLookup, dates, macroMap };
 };
 
 export const setValueReducer: SetValueReducer = (data) => (date, habitIndex, values) => {
   const { dates, datesLookup, macroMap } = data;
-  const newDayZoomData = [...dates.day]
+  const newDayZoomData = [...dates.Day]
   const { dateIndex, monthIndex } = datesLookup[date];
   const newMonth = { ...newDayZoomData[monthIndex] };
   if ('image' in newMonth) return data;
@@ -146,20 +146,20 @@ export const setValueReducer: SetValueReducer = (data) => (date, habitIndex, val
   newMonth.days[dateIndex] = newDate;
   newDayZoomData[monthIndex] = newMonth;
   const newMacroMap: MacroMap = {
-    day: macroMap.day,
+    Day: macroMap.Day,
     quarter: null,
     half: null,
     year: null,
     two_year: null
   };
   const newDates: DatesData = {
-    day: newDayZoomData,
+    Day: newDayZoomData,
     quarter: [],
     half: [],
     year: [],
     two_year: []
   };
-  dates.day = newDayZoomData;
+  dates.Day = newDayZoomData;
   return { ...data, datesLookup, dates: newDates, macroMap: newMacroMap };
 };
 
