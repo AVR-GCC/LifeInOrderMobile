@@ -52,8 +52,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       pointerEvents: navigationValue.get().mode === zoomIndeces.Day ? 'auto' : 'none'
     })),
     quarter: useAnimatedStyle<ViewStyle>(() => ({
-      opacity: navigationValue.get().mode === zoomIndeces.quarter ? 1 : 0,
-      pointerEvents: navigationValue.get().mode === zoomIndeces.quarter ? 'auto' : 'none'
+      opacity: navigationValue.get().mode === zoomIndeces.Quarter ? 1 : 0,
+      pointerEvents: navigationValue.get().mode === zoomIndeces.Quarter ? 'auto' : 'none'
     })),
     half: useAnimatedStyle<ViewStyle>(() => ({
       opacity: navigationValue.get().mode === zoomIndeces.half ? 1 : 0,

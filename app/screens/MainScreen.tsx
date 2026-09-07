@@ -82,8 +82,8 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
               navigationValue={navigationValue}
               onPress={(targetDate, currentZoom) => {
                 if (isPanning.current) return;
-                if (currentZoom === 'quarter') zoomToPeriod(targetDate, 'Day');
-                if (['half', 'year'].includes(currentZoom)) zoomToPeriod(targetDate, 'quarter');
+                if (currentZoom === 'Quarter') zoomToPeriod(targetDate, 'Day');
+                if (['half', 'year'].includes(currentZoom)) zoomToPeriod(targetDate, 'Quarter');
                 if (currentZoom === 'two_year') zoomToPeriod(targetDate, 'year');
               }}
             />

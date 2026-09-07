@@ -44,8 +44,8 @@ export const loadInitialDataReducer: InitialDataReducer = () => (dayLevelData, q
   dates.Day = dayLevelData;
   const quarterOffset = diff > 0 ? diff : 0;
   const quarter = { offset: quarterOffset, range: quarterRange };
-  macroMap.quarter = quarter;
-  dates.quarter = quarterLevelData;
+  macroMap.Quarter = quarter;
+  dates.Quarter = quarterLevelData;
   const datesLookup = createDatesLookup(dayLevelData);
   return { dates, datesLookup, habits, macroMap, mode: 0 };
 };
@@ -147,14 +147,14 @@ export const setValueReducer: SetValueReducer = (data) => (date, habitIndex, val
   newDayZoomData[monthIndex] = newMonth;
   const newMacroMap: MacroMap = {
     Day: macroMap.Day,
-    quarter: null,
+    Quarter: null,
     half: null,
     year: null,
     two_year: null
   };
   const newDates: DatesData = {
     Day: newDayZoomData,
-    quarter: [],
+    Quarter: [],
     half: [],
     year: [],
     two_year: []
