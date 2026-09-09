@@ -114,7 +114,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const key = `${date}-${zoom}`;
       if (!segmentStatuses.current[key]) {
         segmentStatuses.current[key] = 'loading';
-        client.list(seg).then(zld => {
+        client.list(seg, width - LEFT_BAR_WIDTH).then(zld => {
           if (dataRef.current === null) return;
           const { macroMap } = dataRef.current;
           const zl = macroMap[zoom];
