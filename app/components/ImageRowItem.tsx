@@ -69,7 +69,7 @@ const sectionNames: Record<ZoomLevel, (date: Date) => string> = {
       `Q4 ${year}`,
     ][month]
   },
-  Two_year: date => {
+  TwoYear: date => {
     const year = date.getFullYear();
     return year.toString();
   },

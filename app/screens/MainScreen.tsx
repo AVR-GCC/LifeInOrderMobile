@@ -84,7 +84,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
                 if (isPanning.current) return;
                 if (currentZoom === 'Quarter') zoomToPeriod(targetDate, 'Day');
                 if (['half', 'year'].includes(currentZoom)) zoomToPeriod(targetDate, 'Quarter');
-                if (currentZoom === 'Two_year') zoomToPeriod(targetDate, 'Year');
+                if (currentZoom === 'TwoYear') zoomToPeriod(targetDate, 'Year');
               }}
             />
           );

@@ -123,9 +123,9 @@ export const getSurroundingMacroMap = (centerDate: string, dayPixels: number, ra
   return res;
 }
 
-export const emptyMacroMap = (): MacroMap => ({ Day: null, Quarter: null, Half: null, Year: null, Two_year: null });
+export const emptyMacroMap = (): MacroMap => ({ Day: null, Quarter: null, Half: null, Year: null, TwoYear: null });
 
-export const emptyDatesData = (): DatesData => ({ Day: [], Quarter: [], Half: [], Year: [], Two_year: [] });
+export const emptyDatesData = (): DatesData => ({ Day: [], Quarter: [], Half: [], Year: [], TwoYear: [] });
 
 export const isEmptyMacroMap = (mm: MacroMap) => modes.every(mode => !mm[mode.id]);
 
