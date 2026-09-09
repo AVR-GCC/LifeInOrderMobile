@@ -180,11 +180,12 @@ class SocketClient {
   }
 
   // List
-  list = (segment: Segment) => {
+  list = async (segment: Segment, width: number) => {
     const route = 'list';
     const method = 'get';
-    const params = segment;
-    return this.request<ZoomLevelData>(route, method, params);
+    const params = { ...segment, width };
+    const data = await this.request<string>(route, method, params);
+    return JSON.parse(data);
   }
 }
 
