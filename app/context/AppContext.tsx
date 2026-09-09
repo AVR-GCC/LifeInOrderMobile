@@ -206,7 +206,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     client.connect();
-    loadInitialData();
+    setImmediate(loadInitialData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
