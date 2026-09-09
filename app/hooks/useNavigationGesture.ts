@@ -47,23 +47,23 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   });
 
   const zoomStyles = {
-    day: useAnimatedStyle<ViewStyle>(() => ({
+    Day: useAnimatedStyle<ViewStyle>(() => ({
       opacity: navigationValue.get().mode === zoomIndeces.Day ? 1 : 0,
       pointerEvents: navigationValue.get().mode === zoomIndeces.Day ? 'auto' : 'none'
     })),
-    quarter: useAnimatedStyle<ViewStyle>(() => ({
+    Quarter: useAnimatedStyle<ViewStyle>(() => ({
       opacity: navigationValue.get().mode === zoomIndeces.Quarter ? 1 : 0,
       pointerEvents: navigationValue.get().mode === zoomIndeces.Quarter ? 'auto' : 'none'
     })),
-    half: useAnimatedStyle<ViewStyle>(() => ({
+    Half: useAnimatedStyle<ViewStyle>(() => ({
       opacity: navigationValue.get().mode === zoomIndeces.Half ? 1 : 0,
       pointerEvents: navigationValue.get().mode === zoomIndeces.Half ? 'auto' : 'none'
     })),
-    year: useAnimatedStyle<ViewStyle>(() => ({
+    Year: useAnimatedStyle<ViewStyle>(() => ({
       opacity: navigationValue.get().mode === zoomIndeces.Year ? 1 : 0,
       pointerEvents: navigationValue.get().mode === zoomIndeces.Year ? 'auto' : 'none'
     })),
-    two_year: useAnimatedStyle<ViewStyle>(() => ({
+    Two_year: useAnimatedStyle<ViewStyle>(() => ({
       opacity: navigationValue.get().mode === zoomIndeces.Two_year ? 1 : 0,
       pointerEvents: navigationValue.get().mode === zoomIndeces.Two_year ? 'auto' : 'none'
     })),
