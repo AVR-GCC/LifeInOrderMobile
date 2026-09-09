@@ -59,27 +59,41 @@ export const attachSegmentReducer: AttachSegmentReducer = (data) => (segment, zl
     const end = nextDate(date, zoom, true);
     const range = { start: date, end };
     const offset = dateDiffStr(end, anchorDate);
-    macroMap[zoom] = { offset, range };
-    dates[zoom] = [zld];
-    return { ...data, dates, macroMap };
+    const newMacroMap = { ...macroMap, [zoom]: { offset, range } };
+    const newDates = { ...dates, [zoom]: [zld] };
+    return { ...data, dates: newDates, macroMap: newMacroMap };
   }
   const { range, offset } = macroMap[zoom];
   let start = date;
   let end = range.end
   let offsetDiff = 0;
+  const newDates = emptyDatesData();
   if (!isBefore) {
     start = range.start;
     end = nextDate(date, zoom, true);
     offsetDiff = dateDiffStr(end, range.end);
-    dates[zoom].push(zld);
+    const zoomDates = [...(dates[zoom]), zld];
+    newDates[zoom] = zoomDates;
+    modes.forEach(m => {
+      if (m.id !== zoom) {
+        newDates[m.id] = dates[m.id]
+      }
+    })
   } else {
-    dates[zoom].unshift(zld);
+    const zoomDates = [zld, ...(dates[zoom])];
+    newDates[zoom] = zoomDates;
+    modes.forEach(m => {
+      if (m.id !== zoom) {
+        newDates[m.id] = dates[m.id]
+      }
+    })
   }
-  macroMap[zoom] = {
+  const newMacroMap = { ...macroMap, [zoom]: {
     range: { start, end },
     offset: offset + offsetDiff
-  };
-  return { ...data, dates, macroMap };
+  } };
+  const datesLookup = zoom === 'Day' ? createDatesLookup(dates.Day) : data.datesLookup;
+  return { ...data, datesLookup, dates: newDates, macroMap: newMacroMap };
 }
 
 const removeDataIfNeeded: RemoveDataIfNeeded = (macroMap, dates, rmm) => {
