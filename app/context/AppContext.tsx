@@ -152,7 +152,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             pendingSegments.current[key] = zld;
             return;
           }
-          if (date > zl.range.end) {
+          if (date >= zl.range.end) {
             // is after
             const prev = nextDate(date, zoom, false);
             const prevKey = `${prev}-${zoom}`;
