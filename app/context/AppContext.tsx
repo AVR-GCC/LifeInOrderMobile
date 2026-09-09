@@ -112,13 +112,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     segments.forEach((seg) => {
       const { date, zoom } = seg;
       const key = `${date}-${zoom}`;
+      // console.log(key, 'required', segmentStatuses.current[key]);
       if (!segmentStatuses.current[key]) {
         segmentStatuses.current[key] = 'loading';
+        // console.log(key, 'loading...');
         client.list(seg, width - LEFT_BAR_WIDTH).then(zld => {
+          // console.log(key, 'received');
           if (dataRef.current === null) return;
           const { macroMap } = dataRef.current;
           const zl = macroMap[zoom];
           if (!zl) {
+            // console.log(key, 'the only segment for zoom level');
             // only segment for zoom level - add
             updateData(attachSegmentReducer(dataRef.current)(seg, zld, true))
             segmentStatuses.current[key] = 'present';
@@ -126,56 +130,70 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
           if (date < zl.range.start) {
             // is before
+            // console.log(key, 'is before');
             const next = nextDate(date, zoom, true);
             const nextKey = `${next}-${zoom}`;
             const nextStatus = segmentStatuses.current[nextKey];
+            // console.log(key, 'next', nextKey, nextStatus);
             if (nextStatus === 'present') {
               // next date present - add
               updateData(attachSegmentReducer(dataRef.current)(seg, zld, true))
+              // console.log(key, 'added before');
               segmentStatuses.current[key] = 'present';
               let prev = nextDate(date, zoom, false);
               let prevKey = `${prev}-${zoom}`;
               let prevStatus = segmentStatuses.current[prevKey];
+              // console.log(key, 'prev', prevKey, prevStatus);
               while (prevStatus === 'pending') {
                 // pending date can now be added - add
                 updateData(attachSegmentReducer(dataRef.current)({ date: prev, zoom }, pendingSegments.current[prevKey], true))
+                // console.log(key, 'prev', prevKey, 'added');
                 segmentStatuses.current[prevKey] = 'present';
                 delete pendingSegments.current[prevKey];
                 prev = nextDate(prev, zoom, false);
                 prevKey = `${prev}-${zoom}`;
                 prevStatus = segmentStatuses.current[prevKey];
+                // console.log(key, 'prev', prevKey, prevStatus);
               }
               return;
             }
             // next date not ready - keep pending
+            // console.log(key, 'next date not ready, keep pending');
             segmentStatuses.current[key] = 'pending';
             pendingSegments.current[key] = zld;
             return;
           }
           if (date >= zl.range.end) {
             // is after
+            // console.log(key, 'is after');
             const prev = nextDate(date, zoom, false);
             const prevKey = `${prev}-${zoom}`;
             const prevStatus = segmentStatuses.current[prevKey];
+            // console.log(key, 'prev', prevKey, prevStatus);
             if (prevStatus === 'present') {
               // prev date present - add
               updateData(attachSegmentReducer(dataRef.current)(seg, zld, false))
+              // console.log(key, 'added after');
               segmentStatuses.current[key] = 'present';
               let next = nextDate(date, zoom, true);
               let nextKey = `${next}-${zoom}`;
               let nextStatus = segmentStatuses.current[nextKey];
+              // console.log(key, 'next', nextKey, nextStatus);
               while (nextStatus === 'pending') {
                 // pending date can now be added - add
                 updateData(attachSegmentReducer(dataRef.current)({ date: next, zoom }, pendingSegments.current[nextKey], false))
+                // console.log(key, 'next', nextKey, 'adding...');
                 segmentStatuses.current[nextKey] = 'present';
                 delete pendingSegments.current[nextKey];
                 next = nextDate(next, zoom, true);
                 nextKey = `${next}-${zoom}`;
                 nextStatus = segmentStatuses.current[nextKey];
+                // console.log(key, 'next', nextKey, nextStatus);
               }
               return;
             }
             // prev date not ready - keep pending
+            // console.log(key, 'prev date not ready, keep pending');
             segmentStatuses.current[key] = 'pending';
             pendingSegments.current[key] = zld;
             return;
