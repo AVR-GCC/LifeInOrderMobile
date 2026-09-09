@@ -51,6 +51,7 @@ import { emptyDatesData, getSurroundingMacroMap, isEmptyMacroMap, mapToLoadParam
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
 import { generateEightDigitNumber } from '../utils/general';
+// import { debounce } from '../utils/API';
 import { nextDate } from '../constants/zoom';
 
 interface AppContextType {
@@ -227,7 +228,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         segmentStatuses.current[key] = 'present';
       });
       const rmm2 = getSurroundingMacroMap(today, 24, 2, height);
-      loadMoreDataIfNeeded(rmm2, true);
+      loadRequiredSegments(rmm2, today, 24);
     }
   };
 
@@ -298,10 +299,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const loadAndPrefetch: LoadAndPrefetch = (date, dayPixels) => {
-    const closeMap = getSurroundingMacroMap(date, dayPixels, 1, height);
-    loadMoreDataIfNeeded(closeMap, false);
     const farMap = getSurroundingMacroMap(date, dayPixels, 2, height);
-    loadMoreDataIfNeeded(farMap, true);
+    loadRequiredSegments(farMap, date, dayPixels);
   }
 
   // Values
