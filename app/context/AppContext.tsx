@@ -192,6 +192,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const rmmb = getSurroundingMacroMap(today, 24, 1, height);
     const loadParams = mapToLoadParams(rmmb);
+    const segments = sortMacroMapSegments(rmmb, height, today, 24);
+    segments.forEach(({ date, zoom }) => {
+      const key = `${date}-${zoom}`;
+      segmentStatuses.current[key] = 'loading';
+    });
     const loadPromises = loadParams.map(({ date, zoom, count }) => getUserList(date, zoom, count, width - LEFT_BAR_WIDTH));
     const [dates, months, habits] = await Promise.all([
       ...loadPromises,
@@ -199,6 +204,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ]);
     if (dates && months && habits) {
       updateData(loadInitialDataReducer()(dates, months, habits));
+      segments.forEach(({ date, zoom }) => {
+        const key = `${date}-${zoom}`;
+        segmentStatuses.current[key] = 'present';
+      });
       const rmm2 = getSurroundingMacroMap(today, 24, 2, height);
       loadMoreDataIfNeeded(rmm2, true);
     }
