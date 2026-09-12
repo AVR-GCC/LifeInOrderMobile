@@ -104,7 +104,7 @@ export const isEmptyMacroMap = (mm: MacroMap) => modes.every(mode => !mm[mode.id
 
 export const findAnchorDate = (mm: MacroMap) => {
   let anchorDate: string | null = null;
-  modes.forEach(mode => {
+  modes.some(mode => {
     const zoom = mode.id;
     const existing = mm[zoom];
     if (existing && !anchorDate) {
@@ -113,6 +113,7 @@ export const findAnchorDate = (mm: MacroMap) => {
       anchorDate = dateString(endDate);
       return true;
     }
+    return false;
   });
   return anchorDate;
 }

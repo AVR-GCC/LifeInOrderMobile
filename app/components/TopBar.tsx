@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
+import { LEFT_BAR_WIDTH, TOP_BAR_HEIGHT } from '../constants/mainScreen';
 import { COLORS } from '../constants/theme';
 import { HabitWithValues } from '../types';
 
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.133)',
     overflow: 'hidden',
-    height: 30,
+    height: TOP_BAR_HEIGHT,
   },
   columnTitle: {
     padding: 5,

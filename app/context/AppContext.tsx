@@ -72,11 +72,13 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | null>(null);
 
-const MAX_SEGMENTS = 12;
+const MAX_SEGMENTS = 16;
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // const userId = 1;
-  const { height, width } = useWindowDimensions();
+  const { height: screenHeight, width: screenWidth } = useWindowDimensions();
+  const height = screenHeight - TOP_BAR_HEIGHT - TOP_BUFFER_HEIGHT;
+  const width = screenWidth - LEFT_BAR_WIDTH;
   const [data, setData] = useState<MainProps | null>(null);
   const dataRef = useRef(data);
   const segmentStatuses = useRef<Record<string, SegmentStatus>>({});
@@ -143,7 +145,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const maxDist = maxSegmentDistance();
       if (!segmentStatuses.current[key] && dist < maxDist) {
         segmentStatuses.current[key] = 'loading';
-        client.list(seg, width - LEFT_BAR_WIDTH).then(zld => {
+        client.list(seg, width).then(zld => {
           const maxDist = maxSegmentDistance();
           if (dataRef.current === null) return;
           const { macroMap } = dataRef.current;

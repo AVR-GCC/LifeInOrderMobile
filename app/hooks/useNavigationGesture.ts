@@ -3,7 +3,7 @@ import { Gesture, GestureType } from 'react-native-gesture-handler';
 import { SharedValue, useAnimatedStyle, useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import { useAppContext } from '../context/AppContext';
-import { MacroMap, MainProps, NavigationValues, ZoomLevel } from '../types';
+import { MacroMap, MainProps, NavigationValues, SetNavigationValuesInput, ZoomLevel } from '../types';
 import { getMode, modes, zoomIndeces, zoomMonths } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
 import { getDayPixels, getFinalDayPixels, getLocationDate, getModeInfo, mergeDateRanges } from '../utils/dataStructures';
@@ -14,7 +14,6 @@ const DECELERATION = 0.998;
 const MIN_VELOCITY = 0.01;
 const PAN_THRESHOLD = 5;
 
-type SetNavigationValuesInput = { mode: number, offset: number, scale: number };
 type FabNavigationValues = (params: SetNavigationValuesInput) => NavigationValues;
 type SetNavigationValues = (params: SetNavigationValuesInput) => NavigationValues;
 
@@ -203,7 +202,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     earliestLoadedDate.setUTCDate(1);
     const earliestLoadedDateStr = dateString(earliestLoadedDate);
     const numDays = dateDiff(latestVisibleDate, earliestVisibleDate);
-    const scale  = (height - 125) / (newZoomDayPixels * numDays);
+    const scale  = height / (newZoomDayPixels * numDays);
     const { contiguous, range: { end: lastDateInNewRange } } = mergeDateRanges(range, { start: earliestLoadedDateStr, end: latestLoadedDateStr });
     if (!lastDateInNewRange || !range.end) return;
     const macroMapDayOffsetFinal = contiguous ? macroMapDayOffset + dateDiffStr(lastDateInNewRange, range.end) : 0;
@@ -322,7 +321,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       const newDistance = arg.allTouches[0].absoluteY - arg.allTouches[1].absoluteY;
       const unlimitedScale = abs(newDistance / originalDistanceScale);
       const newDayPixels = unlimitedScale * modes[navigationValue.get().mode].dayPixels;
-      const newScale = newDayPixels > ((height - 125) / 7)
+      const newScale = newDayPixels > (height / 7)
         ? navigationValue.get().zoom.current.scale
         : unlimitedScale;
 
@@ -332,8 +331,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       if (oldLocation) {
         const oldScale = navigationValue.get().zoom.current.scale;
 
-        const oldFormattedLocation = height - 125 - oldLocation;
-        const newFormattedLocation = height - 125 - newLocation;
+        const oldFormattedLocation = height - oldLocation;
+        const newFormattedLocation = height - newLocation;
         newScroll = (oldFormattedLocation + oldOffset) * newScale / oldScale - newFormattedLocation;
       }
 
@@ -381,8 +380,8 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
       const oldOffset = navigationValue.get().scroll.current.offset ;
       let newScroll = oldOffset;
       if (oldLocation) {
-        const oldFormattedLocation = height - 125 - oldLocation;
-        const newFormattedLocation = height - 125 - newLocation;
+        const oldFormattedLocation = height - oldLocation;
+        const newFormattedLocation = height - newLocation;
         newScroll = oldFormattedLocation + oldOffset - newFormattedLocation;
       }
 

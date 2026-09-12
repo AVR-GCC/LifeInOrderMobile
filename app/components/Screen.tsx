@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { COLORS } from '../constants/theme';
+import { BOTTOM_BUFFER_HEIGHT, TOP_BUFFER_HEIGHT } from '../constants/mainScreen';
 
 const Screen: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
@@ -18,7 +19,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.colorOne,
   },
   topBuffer: {
-    height: 40,
+    height: TOP_BUFFER_HEIGHT,
     width: '100%',
     backgroundColor: '#000000',
     zIndex: 1,
@@ -27,7 +28,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bottomBuffer: {
-    height: 50,
+    height: BOTTOM_BUFFER_HEIGHT,
     width: '100%',
     backgroundColor: '#000000',
   },

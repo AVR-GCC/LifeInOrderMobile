@@ -83,7 +83,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
               onPress={(targetDate, currentZoom) => {
                 if (isPanning.current) return;
                 if (currentZoom === 'Quarter') zoomToPeriod(targetDate, 'Day');
-                if (['half', 'year'].includes(currentZoom)) zoomToPeriod(targetDate, 'Quarter');
+                if (['Half', 'Year'].includes(currentZoom)) zoomToPeriod(targetDate, 'Quarter');
                 if (currentZoom === 'TwoYear') zoomToPeriod(targetDate, 'Year');
               }}
             />
@@ -96,7 +96,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   return (
     <Screen>
       <TopBar habits={habits.filter(h => h.habit.habit_type === 'Color')} />
-      <View style={{ display: 'flex', flexDirection: 'column-reverse', height: height - 125, overflow: 'hidden' }}>
+      <View style={{ display: 'flex', flexDirection: 'column-reverse', height, overflow: 'hidden' }}>
         <GestureDetector gesture={gesture}>
           <Animated.View style={[animatedListStyle, { transformOrigin: 'bottom center' }]}>
             {modes.map(m => (
