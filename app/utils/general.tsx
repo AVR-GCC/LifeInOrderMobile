@@ -8,8 +8,8 @@ export const sleep = (timeout: number) => {
 
 export const last = (arr: any[]) => arr.length === 0 ? null : arr[arr.length - 1];
 
-export const dateDiff = (from: Date, to: Date) => {
-  const daysToLast = Math.ceil((from.getTime() - to.getTime()) / (1000 * 60 * 60 * 24));
+export const dateDiff = (late: Date, early: Date) => {
+  const daysToLast = Math.ceil((late.getTime() - early.getTime()) / (1000 * 60 * 60 * 24));
   return daysToLast;
 };
 
