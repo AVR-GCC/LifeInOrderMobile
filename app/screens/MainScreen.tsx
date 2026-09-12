@@ -25,7 +25,7 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   const { gesture, animatedListStyle, navigationValue, zoomToPeriod, zoomStyles, scrollToDate, isPanning } = useNavigationGesture(data);
 
   useEffect(() => {
-    if (!loaded.current && data !== null) {
+    if (!loaded.current && data !== null && data.segmentCount > 4) {
       loaded.current = true;
       const { habits } = data;
       setTimeout(() => {
@@ -46,11 +46,11 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
 
   const { dates, habits, macroMap } = data;
 
-  if (!dates) {
+  if (habits.length === 0) {
     return <Loading />;
   }
 
-  if (habits.length === 0) {
+  if (data.segmentCount < 6) {
     return <Loading />;
   }
 
