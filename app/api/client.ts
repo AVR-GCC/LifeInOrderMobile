@@ -1,9 +1,7 @@
 import axios from 'axios';
 import * as Crypto from 'expo-crypto';
 
-import type { GetUserMapPureResponse, Habit, MacroMap, SetValueSocket, DeleteHabitSocket, UpdateHabitSocket, ReorderHabitsSocket, Option, ZoomLevel, DeleteOptionSocket, UpdateOptionSocket, ReorderOptionsSocket, CreateOptionSocket, CreateHabitSocket, Segment, ZoomLevelData } from '../types';
-import { getZoomModeRange } from '../constants/zoom';
-import { emptyDatesData, mapToLoadParams } from '../utils/dataStructures';
+import type { Habit, SetValueSocket, DeleteHabitSocket, UpdateHabitSocket, ReorderHabitsSocket, Option, DeleteOptionSocket, UpdateOptionSocket, ReorderOptionsSocket, CreateOptionSocket, CreateHabitSocket, Segment } from '../types';
 import { debounce } from '../utils/API';
 
 const baseAddress = process.env.EXPO_PUBLIC_API_BASE;
@@ -200,64 +198,6 @@ export const getUserConfig = async () => {
   } catch (error) {
     console.error('Error fetching user config:', error);
     return null;
-  }
-};
-
-export const getUserList = async (date: string, zoom: ZoomLevel, count: number, width: number) => {
-  try {
-    // console.log('getUserList date, zoom, count', date, zoom, count);
-    const route = `${baseUrl}/users/1/list?date=${date}&zoom=${zoom}&count=${count}&width=${width}`;
-    const config = zoom !== 'Day' ? { responseType: 'arraybuffer' as const } : {};
-    const res = await axios.get(route, config);
-    // console.log('getUserList', date);
-    if (res.data?.length) {
-      // console.log('getUserList res.data', JSON.stringify(res.data, null, 2));
-      return res.data;
-    } else {
-      const base64String = res.request._response;
-      const image = `data:image/webp;base64,${base64String}`;
-      const range = getZoomModeRange(date, zoom, count);
-      // console.log('getUserList range', range);
-      return [{ range, image, zoom }];
-    }
-  } catch (error) {
-    console.error('Error fetching user list:', error);
-    return null;
-  }
-};
-
-export const getUserMap = async (map: MacroMap, isBefore: boolean, id: number, width: number) => {
-  // console.log('getUserMap', width, isBefore ? 'before' : 'after');
-  // printMacroMap(map);
-  const inputs = mapToLoadParams(map);
-  const datesData = emptyDatesData();
-  await Promise.all(inputs.map(async({ date, zoom, count }) => {
-    datesData[zoom] = await getUserList(date, zoom, count, width);
-  }));
-  const res: GetUserMapPureResponse = { id, map, datesData, isBefore };
-  return res;
-};
-
-export const createHabitServer = async (newHabit: Partial<Habit>) => {
-  try {
-    const route = `${baseUrl}/habits`;
-    const withUserId = { user_id: 1, ...newHabit };
-    const res = await axios.post(route, withUserId);
-    return res.data;
-  } catch (error) {
-    console.error('Error creating habit:', error);
-    return false;
-  }
-};
-
-export const createValueServer = async (newValue: Partial<Option>) => {
-  try {
-    const route = `${baseUrl}/options`;
-    const res = await axios.post(route, newValue);
-    return res.data;
-  } catch (error) {
-    console.error('Error creating value:', error);
-    return false;
   }
 };
 

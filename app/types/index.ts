@@ -62,16 +62,6 @@ export type MacroMapEntry = {
 }
 export type MacroMap = Record<ZoomLevel, MacroMapEntry | null>;
 
-export type LoadingMapEntry = {
-  map: MacroMap,
-  id: number
-};
-
-export type LoadingMap = {
-  entries: LoadingMapEntry[],
-  nextId: number
-};
-
 export type DatesLookupEntry = {
   dateIndex: number,
   monthIndex: number,
@@ -87,13 +77,6 @@ export interface MainProps {
   macroMap: MacroMap;
   mode: number;
   segmentCount: number;
-}
-
-export interface GetUserMapPureResponse {
-  id: number;
-  map: MacroMap;
-  datesData: DatesData;
-  isBefore: boolean;
 }
 
 export interface NavigationValues {
@@ -121,8 +104,6 @@ export interface NavigationValues {
   mode: number;
 }
   
-export type LoadDataInput = { date: string, zoom: ZoomLevel, count: number };
-
 export type Segment = {
   distance?: number,
   zoom: ZoomLevel,
@@ -143,7 +124,6 @@ export type DeleteOption = (habitIndex: number, optionIndex: number) => void;
 export type SwitchOptions = (isDown: boolean, habitIndex: number, valueIndex: number) => void;
 export type UpdateOption = (habitIndex: number, valueIndex: number, newValueValues: Partial<Option>) => void;
 
-export type LoadMoreDataIfNeeded = (rmm: MacroMap, removeDataOutsideMap: boolean) => void;
 export type LoadAndPrefetch = (date: string, dayPixels: number) => void;
 export type AddSegmentToState = (segment: Segment, zld: ZoomLevelData, isBefore: boolean) => void;
 export type SetScale = (newScale: number) => void;
@@ -169,8 +149,6 @@ export type CreateDatesLookup = (days: ZoomLevelData[]) => DatesLookup;
 export type InitialDataReducer = () => ((habits: HabitWithValues[]) => MainProps);
 export type AttachSegmentReducer = (data: MainProps) => (segment: Segment, zld: ZoomLevelData, isBefore: boolean) => MainProps;
 export type RemoveSegmentReducer = (data: MainProps) => (segment: Segment) => MainProps;
-export type RemoveDataIfNeeded = (macroMap: MacroMap, dates: DatesData, rmm: MacroMap) => { dates: DatesData, macroMap: MacroMap };
-export type ReceiveMoreDataReducer = (data: MainProps) => (responses: GetUserMapPureResponse[], rmm: MacroMap, removeDataOutsideMap: boolean) => MainProps;
 export type SetValueReducer = (data: MainProps) => (date: string, habitIndex: number, values: { valueId: number, text: string | null }) => MainProps;
 export type AddHabitReducer = (data: MainProps) => (habit: HabitWithValues) => MainProps;
 export type AddHabitIdReducer = (data: MainProps) => (tempId: number, realId: number) => MainProps;

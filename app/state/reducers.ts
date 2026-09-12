@@ -1,10 +1,8 @@
-import { createDatesLookup, emptyDatesData, emptyMacroMap, findAnchorDate, mergeMaps, printMacroMap } from '../utils/dataStructures';
+import { createDatesLookup, emptyDatesData, emptyMacroMap, findAnchorDate } from '../utils/dataStructures';
 import type {
   DatesData,
   MacroMap,
   InitialDataReducer,
-  RemoveDataIfNeeded,
-  ReceiveMoreDataReducer,
   SetValueReducer,
   AddHabitReducer,
   UpdateHabitReducer,
@@ -131,52 +129,6 @@ export const attachSegmentReducer: AttachSegmentReducer = (data) => (segment, zl
   const datesLookup = zoom === 'Day' ? createDatesLookup(dates.Day) : data.datesLookup;
   return { ...data, datesLookup, dates: newDates, macroMap: newMacroMap, segmentCount: segmentCount + 1 };
 }
-
-const removeDataIfNeeded: RemoveDataIfNeeded = (macroMap, dates, rmm) => {
-  const newData = emptyDatesData();
-  const newMacroMap = emptyMacroMap();
-  modes.forEach(mode => {
-    const zoom = mode.id;
-    const requiredMap = rmm[zoom];
-    const existingMap = macroMap[zoom];
-    const existingData = dates[zoom];
-    if (!existingMap || !requiredMap || !existingData.length) return true;
-    const { range } = requiredMap;
-    for (let i = 0; i < existingData.length; i++) {
-      const { start, end } = existingData[i].range;
-      const keep = !(end < range.start) && !(start > range.end);
-      if (keep) {
-        newData[zoom].push(existingData[i]);
-        const offset = existingMap.offset + dateDiffStr(end, existingMap.range.end);
-        if (!newMacroMap[zoom]) {
-          newMacroMap[zoom] = { range: { start, end }, offset };
-        } else {
-          newMacroMap[zoom] = { range: { start: newMacroMap[zoom].range.start, end }, offset };
-        }
-      }
-    }
-  });
-  return { macroMap: newMacroMap, dates: newData };
-};
-
-export const receiveMoreDataReducer: ReceiveMoreDataReducer = (data) => (responses, rmm, removeDataOutsideMap) => {
-  const { dates: oldDates, macroMap: oldMacroMap } = data;
-  let addedDates = oldDates, addedMacroMap = oldMacroMap;
-  responses.forEach(({ map, datesData }) => {
-    // console.log('response', map.day ? map.day.range : 'null');
-    const mapMerge = mergeMaps(addedMacroMap, map, addedDates, datesData);
-    addedDates = mapMerge.datesData;
-    addedMacroMap = mapMerge.macroMap;
-  });
-  // console.log('new state', macroMap.day ? macroMap.day.range : 'null');
-  // console.log('receiveMoreDataReducer');
-  // printMacroMap(macroMap);
-  const { macroMap, dates } = removeDataOutsideMap ?
-    removeDataIfNeeded(addedMacroMap, addedDates, rmm)
-    : { macroMap: addedMacroMap, dates: addedDates };
-  const datesLookup = createDatesLookup(dates.Day);
-  return { ...data, datesLookup, dates, macroMap };
-};
 
 export const setValueReducer: SetValueReducer = (data) => (date, habitIndex, values) => {
   const { dates, datesLookup, macroMap } = data;

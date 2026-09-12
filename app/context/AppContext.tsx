@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import client, {
   getUserConfig,
-  getUserMap,
 } from '../api/client';
 import { colorOptions } from '../components/OptionCard';
 import {
@@ -13,7 +12,6 @@ import {
   deleteHabitReducer,
   deleteOptionReducer,
   loadInitialDataReducer,
-  receiveMoreDataReducer,
   removeSegmentReducer,
   setValueReducer,
   switchHabitsReducer,
@@ -32,8 +30,6 @@ import type {
   GetScroll,
   GetValue,
   LoadAndPrefetch,
-  LoadingMap,
-  LoadMoreDataIfNeeded,
   MacroMap,
   MainProps,
   Option,
@@ -48,7 +44,7 @@ import type {
   UpdateOption,
   ZoomLevelData
 } from '../types';
-import { emptyDatesData, getSurroundingMacroMap, isEmptyMacroMap, mergeMaps, sortMacroMapSegments, subtractMaps } from '../utils/dataStructures';
+import { getSurroundingMacroMap, sortMacroMapSegments } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
 import { generateEightDigitNumber } from '../utils/general';
@@ -66,7 +62,6 @@ interface AppContextType {
   switchOptions: SwitchOptions;
   updateOption: UpdateOption;
   deleteOption: DeleteOption;
-  loadMoreDataIfNeeded: LoadMoreDataIfNeeded;
   loadAndPrefetch: LoadAndPrefetch;
   setScale: SetScale;
   getScale: GetScale;
@@ -84,10 +79,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const { height, width } = useWindowDimensions();
   const [data, setData] = useState<MainProps | null>(null);
   const dataRef = useRef(data);
-  const running = useRef(false);
   const segmentStatuses = useRef<Record<string, SegmentStatus>>({});
   const pendingSegments = useRef<Record<string, ZoomLevelData>>({});
-  const loadingMap = useRef<LoadingMap>({ nextId: 1, entries: [] });
 
   const updateData = (newData: MainProps | null) => {
     dataRef.current = newData;
@@ -242,66 +235,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setImmediate(loadInitialData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const loadMoreDataIfNeeded: LoadMoreDataIfNeeded = (rmm, removeDataOutsideMap) => {
-    if (running.current || dataRef.current === null) return;
-    running.current = true;
-    // console.log('required', rmm.day ? rmm.day.range : 'null');
-    const { macroMap } = dataRef.current;
-    const emptyDates = emptyDatesData();
-    let merged = macroMap;
-    for (let i = 0; i < loadingMap.current.entries.length; i++) {
-      const res = mergeMaps(merged, loadingMap.current.entries[i].map, emptyDates, emptyDates);
-      merged = res.macroMap;
-    }
-    // console.log('available', macroMap.day ? macroMap.day.range : 'null');
-    // console.log('loading', loadingMap.current.day ? loadingMap.current.day.range : 'null');
-    const [before, after] = subtractMaps(merged, rmm);
-    // console.log('before', before.day ? before.day.range : 'null');
-    // console.log('after', after.day ? after.day.range : 'null');
-    const beforeEmpty = isEmptyMacroMap(before);
-    const afterEmpty = isEmptyMacroMap(after);
-    if (beforeEmpty && afterEmpty) {
-      running.current = false;
-      return;
-    }
-    // console.log('loadMoreDataIfNeeded');
-    // console.log('before:');
-    // printMacroMap(before);
-    // console.log('after:');
-    // printMacroMap(after);
-    let beforePromise = null;
-    if (!beforeEmpty) {
-      const entry = {
-        map: before,
-        id: loadingMap.current.nextId
-      };
-      beforePromise = getUserMap(before, true, loadingMap.current.nextId, width - LEFT_BAR_WIDTH);
-      loadingMap.current.nextId++;
-      loadingMap.current.entries.push(entry);
-    }
-    let afterPromise = null;
-    if (!afterEmpty) {
-      const entry = {
-        map: after,
-        id: loadingMap.current.nextId
-      };
-      afterPromise = getUserMap(after, false, loadingMap.current.nextId, width - LEFT_BAR_WIDTH);
-      loadingMap.current.nextId++;
-      loadingMap.current.entries.push(entry);
-    }
-    const promises = [beforePromise, afterPromise].filter(pr => !!pr);
-    running.current = false;
-    Promise.all(promises).then(responses => {
-      if (dataRef.current === null) return;
-      updateData(receiveMoreDataReducer(dataRef.current)(responses, rmm, removeDataOutsideMap));
-      for (let i = 0; i < responses.length; i++) {
-        const { id } = responses[i];
-        const loadingIndex = loadingMap.current.entries.findIndex(lme => lme.id === id);
-        loadingMap.current.entries.splice(loadingIndex);
-      }
-    });
-  };
 
   // Values
   const setValue: SetValue = (date, habitIndex, values) => {
@@ -479,7 +412,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         switchOptions,
         updateOption,
         deleteOption,
-        loadMoreDataIfNeeded,
         loadAndPrefetch,
         setScale,
         getScale,
