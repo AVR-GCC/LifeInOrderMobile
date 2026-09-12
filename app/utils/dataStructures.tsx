@@ -353,16 +353,13 @@ export const sortMacroMapSegments = (mm: MacroMap, height: number, curCenterDate
     if (!map) return true;
     let currentDate = map.range.start;
     while (currentDate < map.range.end) {
-      segments.push({ zoom, date: currentDate });
+      const distance = segmentDistance(height, curCenterDate, curDayPixels, currentDate, zoom);
+      segments.push({ zoom, date: currentDate, distance });
       currentDate = nextDate(currentDate, zoom, true);
     }
   });
   const sortFunction = (a: Segment, b: Segment) => {
-    const { zoom: zoomA, date: dateA } = a;
-    const { zoom: zoomB, date: dateB } = b;
-    const distA = segmentDistance(height, curCenterDate, curDayPixels, dateA, zoomA);
-    const distB = segmentDistance(height, curCenterDate, curDayPixels, dateB, zoomB);
-    return distA - distB;
+    return (a.distance || 0) - (b.distance || 0);
   }
   const sorted = segments.sort(sortFunction);
   return sorted;

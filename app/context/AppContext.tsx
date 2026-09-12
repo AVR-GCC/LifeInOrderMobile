@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import client, {
   getUserConfig,
-  getUserList,
   getUserMap,
 } from '../api/client';
 import { colorOptions } from '../components/OptionCard';
@@ -15,6 +14,7 @@ import {
   deleteOptionReducer,
   loadInitialDataReducer,
   receiveMoreDataReducer,
+  removeSegmentReducer,
   setValueReducer,
   switchHabitsReducer,
   switchOptionsReducer,
@@ -23,6 +23,7 @@ import {
 } from '../state/reducers';
 import { getValueSelector } from '../state/selectors';
 import type {
+  AddSegmentToState,
   CreateHabit,
   CreateOption,
   DeleteHabit,
@@ -47,11 +48,10 @@ import type {
   UpdateOption,
   ZoomLevelData
 } from '../types';
-import { emptyDatesData, getSurroundingMacroMap, isEmptyMacroMap, mapToLoadParams, mergeMaps, sortMacroMapSegments, subtractMaps } from '../utils/dataStructures';
+import { emptyDatesData, getSurroundingMacroMap, isEmptyMacroMap, mergeMaps, sortMacroMapSegments, subtractMaps } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
 import { generateEightDigitNumber } from '../utils/general';
-// import { debounce } from '../utils/API';
 import { nextDate } from '../constants/zoom';
 
 interface AppContextType {
@@ -76,6 +76,8 @@ interface AppContextType {
 }
 
 const AppContext = createContext<AppContextType | null>(null);
+
+const MAX_SEGMENTS = 12;
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // const userId = 1;
@@ -129,19 +131,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const loadRequiredSegments = (rmm: MacroMap, date: string, dayPixels: number) => {
     const addToState = getAddSegmentToState(date, dayPixels);
 
+    const maxSegmentDistance = () => {
+      if (dataRef.current === null) return Infinity;
+      const currentSegments = sortMacroMapSegments(dataRef.current.macroMap, height, date, dayPixels);
+      let maxDist = Infinity;
+      if (currentSegments.length >= MAX_SEGMENTS - 2) {
+        const dist = currentSegments[currentSegments.length - 1].distance;
+        maxDist = dist === undefined ? Infinity : dist;
+      }
+      return maxDist;
+    };
+
     const segments = sortMacroMapSegments(rmm, height, date, dayPixels);
     segments.forEach((seg) => {
-      const { date, zoom } = seg;
+      const { date, zoom, distance } = seg;
+      const dist = distance === undefined ? Infinity : distance;
       const key = `${date}-${zoom}`;
-      // console.log(key, 'required', segmentStatuses.current[key]);
-      if (!segmentStatuses.current[key]) {
+      const maxDist = maxSegmentDistance();
+      if (!segmentStatuses.current[key] && dist < maxDist) {
         segmentStatuses.current[key] = 'loading';
-        // console.log(key, 'loading...');
         client.list(seg, width - LEFT_BAR_WIDTH).then(zld => {
-          // console.log(key, 'received');
+          const maxDist = maxSegmentDistance();
           if (dataRef.current === null) return;
           const { macroMap } = dataRef.current;
           const zl = macroMap[zoom];
+          if (dist > maxDist) {
+            delete segmentStatuses.current[key];
+            return;
+          };
           if (!zl) {
             // only segment for zoom level - add
             addToState(seg, zld, true);

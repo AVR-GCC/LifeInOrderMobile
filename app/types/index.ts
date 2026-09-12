@@ -123,6 +123,7 @@ export interface NavigationValues {
 export type LoadDataInput = { date: string, zoom: ZoomLevel, count: number };
 
 export type Segment = {
+  distance?: number,
   zoom: ZoomLevel,
   date: string
 }
