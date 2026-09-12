@@ -86,6 +86,7 @@ export interface MainProps {
   datesLookup: DatesLookup;
   macroMap: MacroMap;
   mode: number;
+  segmentCount: number;
 }
 
 export interface GetUserMapPureResponse {
@@ -144,6 +145,7 @@ export type UpdateOption = (habitIndex: number, valueIndex: number, newValueValu
 
 export type LoadMoreDataIfNeeded = (rmm: MacroMap, removeDataOutsideMap: boolean) => void;
 export type LoadAndPrefetch = (date: string, dayPixels: number) => void;
+export type AddSegmentToState = (segment: Segment, zld: ZoomLevelData, isBefore: boolean) => void;
 export type SetScale = (newScale: number) => void;
 export type GetScale = () => number;
 export type SetScroll = (newScroll: number) => void;
@@ -164,8 +166,9 @@ export type DeleteHabitSocket = (id: number) => Promise<boolean>;
 export type CreateDatesLookup = (days: ZoomLevelData[]) => DatesLookup;
 
 // reducers
-export type InitialDataReducer = () => ((dayLevelData: MonthData[], quarterLevelData: TimePeriodData[], habits: HabitWithValues[]) => MainProps);
+export type InitialDataReducer = () => ((habits: HabitWithValues[]) => MainProps);
 export type AttachSegmentReducer = (data: MainProps) => (segment: Segment, zld: ZoomLevelData, isBefore: boolean) => MainProps;
+export type RemoveSegmentReducer = (data: MainProps) => (segment: Segment) => MainProps;
 export type RemoveDataIfNeeded = (macroMap: MacroMap, dates: DatesData, rmm: MacroMap) => { dates: DatesData, macroMap: MacroMap };
 export type ReceiveMoreDataReducer = (data: MainProps) => (responses: GetUserMapPureResponse[], rmm: MacroMap, removeDataOutsideMap: boolean) => MainProps;
 export type SetValueReducer = (data: MainProps) => (date: string, habitIndex: number, values: { valueId: number, text: string | null }) => MainProps;
