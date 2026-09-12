@@ -108,7 +108,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateData({ ...dataRef.current, mode });
   }
 
+  const getAddSegmentToState: (date: string, dayPixels: number) => AddSegmentToState = (date, dayPixels) => (seg, zld, isBefore) => {
+    if (dataRef.current === null) return;
+    const { date: segDate, zoom } = seg;
+    const key = `${segDate}-${zoom}`;
+    segmentStatuses.current[key] = 'present';
+    const attachedSegmentState = attachSegmentReducer(dataRef.current)(seg, zld, isBefore);
+    const attachedSegments = sortMacroMapSegments(attachedSegmentState.macroMap, height, date, dayPixels);
+    let useState = attachedSegmentState;
+    if (attachedSegments.length > MAX_SEGMENTS) {
+      const removeSegment = attachedSegments[attachedSegments.length - 1];
+      const { date: segDate, zoom } = removeSegment;
+      const key = `${segDate}-${zoom}`;
+      delete segmentStatuses.current[key];
+      useState = removeSegmentReducer(attachedSegmentState)(removeSegment);
+    }
+    updateData(useState);
+  };
+
   const loadRequiredSegments = (rmm: MacroMap, date: string, dayPixels: number) => {
+    const addToState = getAddSegmentToState(date, dayPixels);
+
     const segments = sortMacroMapSegments(rmm, height, date, dayPixels);
     segments.forEach((seg) => {
       const { date, zoom } = seg;
@@ -123,78 +143,58 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const { macroMap } = dataRef.current;
           const zl = macroMap[zoom];
           if (!zl) {
-            // console.log(key, 'the only segment for zoom level');
             // only segment for zoom level - add
-            updateData(attachSegmentReducer(dataRef.current)(seg, zld, true))
-            segmentStatuses.current[key] = 'present';
+            addToState(seg, zld, true);
             return;
           }
           if (date < zl.range.start) {
             // is before
-            // console.log(key, 'is before');
             const next = nextDate(date, zoom, true);
             const nextKey = `${next}-${zoom}`;
             const nextStatus = segmentStatuses.current[nextKey];
-            // console.log(key, 'next', nextKey, nextStatus);
             if (nextStatus === 'present') {
               // next date present - add
-              updateData(attachSegmentReducer(dataRef.current)(seg, zld, true))
-              // console.log(key, 'added before');
-              segmentStatuses.current[key] = 'present';
+              addToState(seg, zld, true);
               let prev = nextDate(date, zoom, false);
               let prevKey = `${prev}-${zoom}`;
               let prevStatus = segmentStatuses.current[prevKey];
-              // console.log(key, 'prev', prevKey, prevStatus);
               while (prevStatus === 'pending') {
                 // pending date can now be added - add
-                updateData(attachSegmentReducer(dataRef.current)({ date: prev, zoom }, pendingSegments.current[prevKey], true))
-                // console.log(key, 'prev', prevKey, 'added');
-                segmentStatuses.current[prevKey] = 'present';
+                addToState({ date: prev, zoom }, pendingSegments.current[prevKey], true);
                 delete pendingSegments.current[prevKey];
                 prev = nextDate(prev, zoom, false);
                 prevKey = `${prev}-${zoom}`;
                 prevStatus = segmentStatuses.current[prevKey];
-                // console.log(key, 'prev', prevKey, prevStatus);
               }
               return;
             }
             // next date not ready - keep pending
-            // console.log(key, 'next date not ready, keep pending');
             segmentStatuses.current[key] = 'pending';
             pendingSegments.current[key] = zld;
             return;
           }
           if (date >= zl.range.end) {
             // is after
-            // console.log(key, 'is after');
             const prev = nextDate(date, zoom, false);
             const prevKey = `${prev}-${zoom}`;
             const prevStatus = segmentStatuses.current[prevKey];
-            // console.log(key, 'prev', prevKey, prevStatus);
             if (prevStatus === 'present') {
               // prev date present - add
-              updateData(attachSegmentReducer(dataRef.current)(seg, zld, false))
-              // console.log(key, 'added after');
-              segmentStatuses.current[key] = 'present';
+              addToState(seg, zld, false);
               let next = nextDate(date, zoom, true);
               let nextKey = `${next}-${zoom}`;
               let nextStatus = segmentStatuses.current[nextKey];
-              // console.log(key, 'next', nextKey, nextStatus);
               while (nextStatus === 'pending') {
                 // pending date can now be added - add
-                updateData(attachSegmentReducer(dataRef.current)({ date: next, zoom }, pendingSegments.current[nextKey], false))
-                // console.log(key, 'next', nextKey, 'adding...');
-                segmentStatuses.current[nextKey] = 'present';
+                addToState({ date: prev, zoom }, pendingSegments.current[nextKey], false);
                 delete pendingSegments.current[nextKey];
                 next = nextDate(next, zoom, true);
                 nextKey = `${next}-${zoom}`;
                 nextStatus = segmentStatuses.current[nextKey];
-                // console.log(key, 'next', nextKey, nextStatus);
               }
               return;
             }
             // prev date not ready - keep pending
-            // console.log(key, 'prev date not ready, keep pending');
             segmentStatuses.current[key] = 'pending';
             pendingSegments.current[key] = zld;
             return;
