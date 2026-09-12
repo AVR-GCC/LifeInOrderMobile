@@ -8,6 +8,7 @@ import { getMode, modes, zoomIndeces, zoomMonths } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
 import { getDayPixels, getFinalDayPixels, getLocationDate, getModeInfo, mergeDateRanges } from '../utils/dataStructures';
 import { dateDiff, dateDiffStr, dateString } from '../utils/general';
+import { throttle } from '../utils/API';
 
 const DECELERATION = 0.998;
 const MIN_VELOCITY = 0.01;
@@ -145,7 +146,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     ],
   }));
 
-  const checkLoadMoreDataInLocation = (mm: MacroMap, nv: NavigationValues) => {
+  const checkLoadMoreDataInLocation = throttle((_, __) => 'any', (mm: MacroMap, nv: NavigationValues) => {
     const dayPixels = getFinalDayPixels(nv);
     const centerDate = getLocationDate(mm, nv, height);
     loadAndPrefetch(centerDate, dayPixels);
@@ -154,7 +155,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const modeTransitionValues = getModeTransitionValues(mm, newMode);
     if (!modeTransitionValues) return;
     setNavigationValues(modeTransitionValues);
-  };
+  }, 50);
 
   const checkLoadMoreData = () => {
     if (dataRef.current === null) {

@@ -13,4 +13,23 @@ export const debounce = <TArgs extends any[], TReturn>(
   });
 };
 
+export const throttle = <TArgs extends any[], TReturn>(
+  getKey: (...args: TArgs) => string,
+  func: (...args: TArgs) => TReturn,
+  milis: number
+): ((...args: TArgs) => Promise<Awaited<TReturn>>) => {
+  const throttles: { [key: string]: boolean } = {};
+  return (...args: TArgs) => new Promise((resolve) => {
+    const key = getKey(...args);
+    if (throttles[key]) {
+      return;
+    }
+    throttles[key] = true;
+    setTimeout(() => {
+      throttles[key] = false;
+    }, milis);
+    setImmediate(async () => resolve(await func(...args)));
+  });
+};
+
 export default { debounce };
