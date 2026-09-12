@@ -1,5 +1,16 @@
-import { getMinRangeCountIncludingBothDates, getMode, getZoomCenterDate, getZoomModeRange, modes, nextDate, zoomIndeces } from "../constants/zoom";
-import { CreateDatesLookup, DateRange, DatesData, DatesLookup, LoadDataInput, MacroMap, NavigationValues, Segment, ZoomLevel, ZoomLevelData } from "../types";
+import { getMinRangeCountIncludingBothDates, getMode, getZoomModeRange, modes, nextDate, zoomIndeces } from "../constants/zoom";
+import {
+  CreateDatesLookup,
+  DateRange,
+  DatesData,
+  DatesLookup,
+  LoadDataInput,
+  MacroMap,
+  NavigationValues,
+  Segment,
+  ZoomLevel,
+  ZoomLevelData
+} from "../types";
 import { dateDiffStr, dateString } from "./general";
 
 // MacroMap + NavigationValues
@@ -112,12 +123,14 @@ export const getSurroundingMacroMap = (centerDate: string, dayPixels: number, ra
     const lowerMode = modeIndex - i;
     if (lowerMode >= 0) {
       const mode = modes[lowerMode];
-      res[mode.id] = { range: getSurroundingRangeForMode(range, mode.id), offset: 0 };
+      const surroundingRangeForMode = getSurroundingRangeForMode(range, mode.id);
+      res[mode.id] = { range: surroundingRangeForMode, offset: 0 };
     }
     const upperMode = modeIndex + i;
     if (i !== 0 && upperMode < modes.length) {
       const mode = modes[upperMode];
-      res[mode.id] = { range: getSurroundingRangeForMode(range, mode.id), offset: 0 };
+      const surroundingRangeForMode = getSurroundingRangeForMode(range, mode.id);
+      res[mode.id] = { range: surroundingRangeForMode, offset: 0 };
     }
   }
   return res;
