@@ -50,18 +50,70 @@ export const loadInitialDataReducer: InitialDataReducer = () => (dayLevelData, q
   return { dates, datesLookup, habits, macroMap, mode: 0 };
 };
 
+export const removeSegmentReducer: RemoveSegmentReducer = (data) => (segment) => {
+  const { zoom, date } = segment;
+  const { macroMap, dates, segmentCount } = data;
+  // if (zoom === 'Half') {
+  //   console.log('Removing', segment, 'from');
+  //   printMacroMap(macroMap);
+  // }
+  if (!macroMap[zoom]) {
+    // console.log('Segment empty');
+    return data;
+  }
+  const { range, offset } = macroMap[zoom];
+  const next = nextDate(date, zoom, true);
+  if (date === range.start) {
+    if (next === range.end) {
+      const newDates = { ...dates, [zoom]: [] };
+      const newMacroMap = { ...macroMap, [zoom]: null };
+      // if (zoom === 'Year' || zoom === 'TwoYear') {
+      //   console.log('Only segment in zoom');
+      //   printMacroMap(newMacroMap);
+      // }
+      return { ...data, dates: newDates, macroMap: newMacroMap, segmentCount: segmentCount - 1 };
+    }
+    const newDates = { ...dates, [zoom]: dates[zoom].slice(1) };
+    const newMacroMap = { ...macroMap, [zoom]: { offset, range: { start: next, end: range.end } } };
+    // if (zoom === 'Year' || zoom === 'TwoYear') {
+    //   console.log('First segment in zoom');
+    //   printMacroMap(newMacroMap);
+    // }
+    return { ...data, dates: newDates, macroMap: newMacroMap, segmentCount: segmentCount - 1 };
+  }
+  if (next === range.end) {
+    const newDates = { ...dates, [zoom]: dates[zoom].slice(0, dates[zoom].length - 1) };
+    const newOffset = macroMap[zoom].offset - dateDiffStr(next, date);
+    const newMacroMap = { ...macroMap, [zoom]: { offset: newOffset, range: { start: range.start, end: date } } };
+    // if (zoom === 'Year' || zoom === 'TwoYear') {
+    //   console.log('Last segment in zoom');
+    //   printMacroMap(newMacroMap);
+    // }
+    return { ...data, dates: newDates, macroMap: newMacroMap, segmentCount: segmentCount - 1 };
+  }
+  console.log('Trying to remove segment in the middle of the zoom level', segment);
+  return data;
+}
+
 export const attachSegmentReducer: AttachSegmentReducer = (data) => (segment, zld, isBefore) => {
   const { zoom, date } = segment;
-  const { macroMap, dates } = data;
+  const { macroMap, dates, segmentCount } = data;
+  // if (zoom === 'Half') {
+  //   console.log('Adding segment', segment, isBefore ? 'before' : 'after');
+  //   printMacroMap(macroMap);
+  // }
   if (!macroMap[zoom]) {
     const anchorDate = findAnchorDate(macroMap);
-    if (!anchorDate) return data;
     const end = nextDate(date, zoom, true);
     const range = { start: date, end };
-    const offset = dateDiffStr(end, anchorDate);
+    const offset = anchorDate ? dateDiffStr(end, anchorDate) : 0;
     const newMacroMap = { ...macroMap, [zoom]: { offset, range } };
     const newDates = { ...dates, [zoom]: [zld] };
-    return { ...data, dates: newDates, macroMap: newMacroMap };
+    // if (zoom === 'Half') {
+    //   console.log('To empty zoom level');
+    //   printMacroMap(newMacroMap);
+    // }
+    return { ...data, dates: newDates, macroMap: newMacroMap, segmentCount: segmentCount + 1 };
   }
   const { range, offset } = macroMap[zoom];
   let start = date;
@@ -92,8 +144,12 @@ export const attachSegmentReducer: AttachSegmentReducer = (data) => (segment, zl
     range: { start, end },
     offset: offset + offsetDiff
   } };
+  // if (zoom === 'Half') {
+  //   console.log('Added');
+  //   printMacroMap(newMacroMap);
+  // }
   const datesLookup = zoom === 'Day' ? createDatesLookup(dates.Day) : data.datesLookup;
-  return { ...data, datesLookup, dates: newDates, macroMap: newMacroMap };
+  return { ...data, datesLookup, dates: newDates, macroMap: newMacroMap, segmentCount: segmentCount + 1 };
 }
 
 const removeDataIfNeeded: RemoveDataIfNeeded = (macroMap, dates, rmm) => {
@@ -288,7 +344,8 @@ export const addOptionIdReducer: AddOptionIdReducer = (data) => (habitIndex, tem
 }
 
 export default {
-  loadInitialDataReducer,
+  attachSegmentReducer,
+  removeSegmentReducer,
   setValueReducer,
   addHabitReducer,
   addHabitIdReducer,
