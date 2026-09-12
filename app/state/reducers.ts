@@ -1,7 +1,6 @@
-import { createDatesLookup, emptyDatesData, emptyMacroMap, findAnchorDate, mergeMaps } from '../utils/dataStructures';
+import { createDatesLookup, emptyDatesData, emptyMacroMap, findAnchorDate, mergeMaps, printMacroMap } from '../utils/dataStructures';
 import type {
   DatesData,
-  ZoomLevelData,
   MacroMap,
   InitialDataReducer,
   RemoveDataIfNeeded,
@@ -19,35 +18,16 @@ import type {
   AddHabitIdReducer,
   HabitWithValues,
   Option,
-  AttachSegmentReducer
+  AttachSegmentReducer,
+  RemoveSegmentReducer
 } from '../types';
-import { dateDiffStr, last } from '../utils/general';
+import { dateDiffStr } from '../utils/general';
 import { modes, nextDate } from '../constants/zoom';
 
-const getZoomLevelDataRange = (zld: ZoomLevelData[]) => {
-  if (zld.length === 0) return null;
-  const start = zld[0].range.start;
-  const end = last(zld).range.end;
-  return { start, end };
-}
-
-export const loadInitialDataReducer: InitialDataReducer = () => (dayLevelData, quarterLevelData, habits) => {
+export const loadInitialDataReducer: InitialDataReducer = () => (habits) => {
   const macroMap = emptyMacroMap();
   const dates = emptyDatesData();
-  const dayRange = getZoomLevelDataRange(dayLevelData);
-  const quarterRange = getZoomLevelDataRange(quarterLevelData);
-  if (!dayRange || !quarterRange) return { dates, datesLookup: {}, habits, macroMap, mode: 0 };
-  const diff = dateDiffStr(dayRange.end, quarterRange.end);
-  const dayOffset = diff < 0 ? diff : 0;
-  const day = { offset: dayOffset, range: dayRange };
-  macroMap.Day = day;
-  dates.Day = dayLevelData;
-  const quarterOffset = diff > 0 ? -1 * diff : 0;
-  const quarter = { offset: quarterOffset, range: quarterRange };
-  macroMap.Quarter = quarter;
-  dates.Quarter = quarterLevelData;
-  const datesLookup = createDatesLookup(dayLevelData);
-  return { dates, datesLookup, habits, macroMap, mode: 0 };
+  return { dates, datesLookup: {}, habits, macroMap, mode: 0, segmentCount: 0 }
 };
 
 export const removeSegmentReducer: RemoveSegmentReducer = (data) => (segment) => {
