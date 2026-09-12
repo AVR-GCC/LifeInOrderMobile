@@ -46,9 +46,9 @@ import type {
 } from '../types';
 import { getSurroundingMacroMap, sortMacroMapSegments } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
-import { LEFT_BAR_WIDTH } from '../constants/mainScreen';
-import { generateEightDigitNumber } from '../utils/general';
 import { nextDate } from '../constants/zoom';
+import { BOTTOM_BUFFER_HEIGHT, LEFT_BAR_WIDTH, TOP_BAR_HEIGHT, TOP_BUFFER_HEIGHT } from '../constants/mainScreen';
+import { dateDiffStr, generateEightDigitNumber } from '../utils/general';
 
 interface AppContextType {
   data: MainProps | null;

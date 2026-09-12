@@ -112,6 +112,8 @@ export type Segment = {
 
 export type SegmentStatus = 'present' | 'loading' | 'pending';
 
+export type SetNavigationValuesInput = { mode: number, offset: number, scale: number };
+
 // AppContext
 export type GetValue = (date: string, habitIndex: number) => string | null;
 export type SetValue = (date: string, habitIndex: number, values: { valueId: number, text: string | null }) => void;
