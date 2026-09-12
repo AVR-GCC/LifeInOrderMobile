@@ -6,7 +6,7 @@ export const modes: ModeInfo[] = [
   {id: 'Quarter',  name: 'Quarter  ', dayPixels: 8,  minPixels: 5.657, maxPixels: 13.856},
   {id: 'Half',     name: 'Half     ', dayPixels: 4,  minPixels: 2.828, maxPixels: 5.657},
   {id: 'Year',     name: 'Year     ', dayPixels: 2,  minPixels: 1.414, maxPixels: 2.828},
-  {id: 'TwoYear', name: 'Two Years', dayPixels: 1,  maxPixels: 1.414}
+  {id: 'TwoYear',  name: 'Two Years', dayPixels: 1,  maxPixels: 1.414}
 ];
 
 export const getMode = (pixels: number) => {
@@ -98,7 +98,7 @@ export const getZoomModeRange = (date: string, zoom: ZoomLevel, count = 1) => {
       dateObj.setUTCFullYear(dateObj.getFullYear() + count);
       end = dateString(dateObj);
       return { start, end };
-    case 'Two_year':
+    case 'TwoYear':
       dateObj.setUTCMonth(0);
       const year = dateObj.getFullYear();
       const startYear = year % 2 === 0 ? year : year + 1;

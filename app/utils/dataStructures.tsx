@@ -300,32 +300,52 @@ export const createDatesLookup: CreateDatesLookup = (days) => {
   return datesLookup;
 }
 
-const CLICK_ZOOM_CONSIDERATION_FACTOR = 1.2;
-
-export const segmentDistance = (height: number, baseDate: string, baseDayPixels: number, segmentStartDate: string, segmentZoom: ZoomLevel) => {
-  const { log2, abs, sqrt } = Math;
-  const pointDate = getZoomCenterDate(segmentStartDate, segmentZoom);
+const verticalDistance = (baseDayPixels: number, segmentZoom: ZoomLevel) => {
+  const { abs, log2 } = Math;
   const baseModeIndex = getMode(baseDayPixels);
-  const pointModeIndex = zoomIndeces[segmentZoom];
-  const pointMode = modes[pointModeIndex];
-  let pointModePixels = baseModeIndex < pointModeIndex ? pointMode.maxPixels : pointMode.minPixels;
-  if (baseModeIndex === pointModeIndex) {
-    pointModePixels = pointMode.dayPixels;
+  const segmentModeIndex = zoomIndeces[segmentZoom];
+  const segmentMode = modes[segmentModeIndex];
+  let segmentPixels = baseModeIndex < segmentModeIndex ? segmentMode.maxPixels : segmentMode.minPixels;
+  if (!segmentPixels) return 0;
+  if (baseModeIndex === segmentModeIndex) {
+    segmentPixels = baseDayPixels;
   }
-  if (!pointModePixels) return 0;
   const basePixelsLog = log2(baseDayPixels);
-  const pointPixelsLog = log2(pointModePixels);
-  const pointZoomHeightSigned = basePixelsLog - pointPixelsLog;
-  const pointZoomHeight = abs(pointZoomHeightSigned);
-  const daysDist = abs(dateDiffStr(baseDate, pointDate));
-  const pointScreenDays = height / pointModePixels;
-  const screenDateDiff = daysDist / pointScreenDays;
-  const swipingDistance = sqrt(screenDateDiff ** 2 + pointZoomHeight ** 2);
-  const distanceWithClickZoom = pointZoomHeightSigned < 0 ? swipingDistance / CLICK_ZOOM_CONSIDERATION_FACTOR : swipingDistance;
-  return distanceWithClickZoom;
+  const pointPixelsLog = log2(segmentPixels);
+  const vertical = abs(basePixelsLog - pointPixelsLog);
+  return vertical;
 }
 
-export const sortMacroMapSegments = (mm: MacroMap, height: number, baseDate: string, baseDayPixels: number) => {
+// lower zooms have greater horizontal distances, but I want smaller distances for lower zooms, so I use the current pixels for distance
+const horizontalDistance = (screenHeight: number, curCenterDate: string, curDayPixels: number, segmentStartDate: string, segmentZoom: ZoomLevel) => {
+  const halfScreenHeight = screenHeight / 2;
+  const halfScreenDays = halfScreenHeight / curDayPixels;
+  const screenLateDate = shiftDate(curCenterDate, halfScreenDays);
+  if (screenLateDate < segmentStartDate) {
+    // segment is later
+    const daysDist = dateDiffStr(segmentStartDate, screenLateDate);
+    return daysDist / halfScreenDays;
+  }
+  const segmentEndDate = nextDate(segmentStartDate, segmentZoom, true);
+  const screenEarlyDate = shiftDate(curCenterDate, -halfScreenDays);
+  if (screenEarlyDate > segmentEndDate) {
+    // segment is earlier
+    const daysDist = dateDiffStr(screenEarlyDate, segmentEndDate);
+    return daysDist / halfScreenDays;
+  }
+  // segment includes a date that is on the screen
+  return 0;
+}
+
+export const segmentDistance = (screenHeight: number, curCenterDate: string, curDayPixels: number, segmentStartDate: string, segmentZoom: ZoomLevel) => {
+  const { sqrt } = Math;
+  const vertical = verticalDistance(curDayPixels, segmentZoom);
+  const horizontal = horizontalDistance(screenHeight, curCenterDate, curDayPixels, segmentStartDate, segmentZoom);
+  const totalDistance = sqrt(horizontal ** 2 + vertical ** 2);
+  return totalDistance;
+}
+
+export const sortMacroMapSegments = (mm: MacroMap, height: number, curCenterDate: string, curDayPixels: number) => {
   const segments: Segment[] = [];
   modes.forEach(mode => {
     const zoom = mode.id;
@@ -340,8 +360,8 @@ export const sortMacroMapSegments = (mm: MacroMap, height: number, baseDate: str
   const sortFunction = (a: Segment, b: Segment) => {
     const { zoom: zoomA, date: dateA } = a;
     const { zoom: zoomB, date: dateB } = b;
-    const distA = segmentDistance(height, baseDate, baseDayPixels, dateA, zoomA);
-    const distB = segmentDistance(height, baseDate, baseDayPixels, dateB, zoomB);
+    const distA = segmentDistance(height, curCenterDate, curDayPixels, dateA, zoomA);
+    const distB = segmentDistance(height, curCenterDate, curDayPixels, dateB, zoomB);
     return distA - distB;
   }
   const sorted = segments.sort(sortFunction);
