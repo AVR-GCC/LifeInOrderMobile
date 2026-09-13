@@ -68,6 +68,7 @@ interface AppContextType {
   setScroll: SetScroll;
   getScroll: GetScroll;
   setMode: SetMode;
+  setHeight: (newHeight: number) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -77,10 +78,10 @@ const MAX_SEGMENTS = 16;
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // const userId = 1;
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
-  const height = screenHeight - TOP_BAR_HEIGHT - TOP_BUFFER_HEIGHT;
   const width = screenWidth - LEFT_BAR_WIDTH;
   const [data, setData] = useState<MainProps | null>(null);
   const dataRef = useRef(data);
+  const height = useRef(screenHeight);
   const segmentStatuses = useRef<Record<string, SegmentStatus>>({});
   const pendingSegments = useRef<Record<string, ZoomLevelData>>({});
 
@@ -88,6 +89,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     dataRef.current = newData;
     setData(newData);
   };
+
+  const setHeight = (newHeight: number) => {
+    height.current = newHeight;
+  }
 
   const scaleRef = useRef(1);
   const getScale: GetScale = () => scaleRef.current;
@@ -111,7 +116,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const key = `${segDate}-${zoom}`;
     segmentStatuses.current[key] = 'present';
     const attachedSegmentState = attachSegmentReducer(dataRef.current)(seg, zld, isBefore);
-    const attachedSegments = sortMacroMapSegments(attachedSegmentState.macroMap, height, date, dayPixels);
+    const attachedSegments = sortMacroMapSegments(attachedSegmentState.macroMap, height.current, date, dayPixels);
     let useState = attachedSegmentState;
     if (attachedSegments.length > MAX_SEGMENTS) {
       const removeSegment = attachedSegments[attachedSegments.length - 1];
@@ -128,7 +133,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const maxSegmentDistance = () => {
       if (dataRef.current === null) return Infinity;
-      const currentSegments = sortMacroMapSegments(dataRef.current.macroMap, height, date, dayPixels);
+      const currentSegments = sortMacroMapSegments(dataRef.current.macroMap, height.current, date, dayPixels);
       let maxDist = Infinity;
       if (currentSegments.length >= MAX_SEGMENTS - 2) {
         const dist = currentSegments[currentSegments.length - 1].distance;
@@ -137,7 +142,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return maxDist;
     };
 
-    const segments = sortMacroMapSegments(rmm, height, date, dayPixels);
+    const segments = sortMacroMapSegments(rmm, height.current, date, dayPixels);
     segments.forEach((seg) => {
       const { date, zoom, distance } = seg;
       const dist = distance === undefined ? Infinity : distance;
@@ -218,7 +223,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const loadAndPrefetch: LoadAndPrefetch = (date, dayPixels) => {
-    const farMap = getSurroundingMacroMap(date, dayPixels, 2, height);
+    const farMap = getSurroundingMacroMap(date, dayPixels, 2, height.current);
     loadRequiredSegments(farMap, date, dayPixels);
   }
 
@@ -420,6 +425,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setScroll,
         getScroll,
         setMode,
+        setHeight,
       }}
     >
       {children}

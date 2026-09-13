@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { useWindowDimensions, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
+import { useAppContext } from '../context/AppContext';
 import DayRowItem from '../components/DayRowItem';
 import Loading from '../components/Loading';
 import Screen from '../components/Screen';
@@ -16,13 +17,20 @@ import { dateString } from '../utils/general';
 import ImageRowItem from '../components/ImageRowItem';
 
 const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ data, getValue }) {
+  const { setHeight } = useAppContext();
   const router = useRouter();
-  const { height } = useWindowDimensions();
+  const { height: baseHeight } = useWindowDimensions();
   const loaded = useRef(false);
   const { date } = useLocalSearchParams();
 
   const separators = useSeparators(data);
   const { gesture, animatedListStyle, navigationValue, zoomToPeriod, zoomStyles, scrollToDate, isPanning } = useNavigationGesture(data);
+  const height = useRef(baseHeight);
+
+  const localSetHeight = (newHeight: number) => {
+    height.current = newHeight;
+    setHeight(newHeight)
+  };
 
   useEffect(() => {
     if (!loaded.current && data !== null && data.segmentCount > 4) {
@@ -96,7 +104,13 @@ const MainScreen: React.FC<MainScreenProps> = React.memo(function MainScreen({ d
   return (
     <Screen>
       <TopBar habits={habits.filter(h => h.habit.habit_type === 'Color')} />
-      <View style={{ display: 'flex', flexDirection: 'column-reverse', height, overflow: 'hidden' }}>
+      <View
+        testID="main-view-window"
+        onLayout={(arg) => {
+          localSetHeight(arg.nativeEvent.layout.height)
+        }}
+        style={{ display: 'flex', flexDirection: 'column-reverse', width: '100%', height: '100%', overflow: 'hidden' }}
+      >
         <GestureDetector gesture={gesture}>
           <Animated.View style={[animatedListStyle, { transformOrigin: 'bottom center' }]}>
             {modes.map(m => (
