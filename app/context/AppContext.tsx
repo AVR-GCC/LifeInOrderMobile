@@ -13,6 +13,7 @@ import {
   deleteOptionReducer,
   loadInitialDataReducer,
   removeSegmentReducer,
+  replaceSegmentReducer,
   setValueReducer,
   switchHabitsReducer,
   switchOptionsReducer,
@@ -45,7 +46,7 @@ import type {
   UpdateOption,
   ZoomLevelData
 } from '../types';
-import { getSurroundingMacroMap, sortMacroMapSegments } from '../utils/dataStructures';
+import { getSurroundingMacroMap, shiftDate, sortMacroMapSegments } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH, TOP_BAR_HEIGHT } from '../constants/mainScreen';
 import { dateDiffStr, generateEightDigitNumber } from '../utils/general';
@@ -141,12 +142,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loadAndPrefetch(date, dayPixels);
         return;
       }
+      const key = `${date}-${zoom}`;
+      segmentStatuses.current[key] = 'loading';
       client.list(segment, width).then(zld => {
         if (dataRef.current === null) {
           reject('Null data');
           return;
         };
-        const attachedSegmentState = attachSegmentReducer(dataRef.current)(segment, zld, true);
+        const mmPre = dataRef.current.macroMap[zoom];
+        let attachedSegmentState = dataRef.current;
+        if (!mmPre || mmPre.range.end === date || mmPre.range.start === endDate) {
+          const isBefore = !mmPre || mmPre.range.start === endDate;
+          attachedSegmentState = attachSegmentReducer(dataRef.current)(segment, zld, isBefore);
+        } else {
+          attachedSegmentState = replaceSegmentReducer(dataRef.current)(segment, zld);
+        }
+        segmentStatuses.current[key] = 'present';
         updateData(attachedSegmentState);
         const mm = attachedSegmentState.macroMap[zoom];
         if (mm === null) {
@@ -157,7 +168,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const dayOffset = dateDiffStr(range.end, endDate) - offset;
         const newOffset = dayOffset * scale * modeDayPixels - PATCH_OFFSET_FIX_AFTER_LOAD;
         resolve({ scale, mode, offset: newOffset });
-        loadAndPrefetch(date, dayPixels);
+        const centerDate = shiftDate(date, totalDays / 2);
+        loadAndPrefetch(centerDate, dayPixels);
       })
     })
   }

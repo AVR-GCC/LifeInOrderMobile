@@ -17,7 +17,8 @@ import type {
   HabitWithValues,
   Option,
   AttachSegmentReducer,
-  RemoveSegmentReducer
+  RemoveSegmentReducer,
+  ReplaceSegmentReducer
 } from '../types';
 import { dateDiffStr } from '../utils/general';
 import { modes, nextDate } from '../constants/zoom';
@@ -73,6 +74,27 @@ export const removeSegmentReducer: RemoveSegmentReducer = (data) => (segment) =>
   return data;
 }
 
+export const replaceSegmentReducer: ReplaceSegmentReducer = (data) => (segment, zld) => {
+  const { zoom, date } = segment;
+  const { macroMap, dates, segmentCount } = data;
+  const endDate = nextDate(date, zoom, true);
+  const anchorDate = findAnchorDate(macroMap);
+  const newZLMap = {
+    range: { start: date, end: endDate },
+    offset: anchorDate ? dateDiffStr(endDate, anchorDate) : 0
+  };
+  const newMacroMap = {
+    ...macroMap,
+    [zoom]: newZLMap
+  };
+  const newDates = {
+    ...dates,
+    [zoom]: [zld]
+  };
+  const datesLookup = zoom === 'Day' ? createDatesLookup(newDates.Day) : data.datesLookup;
+  return { ...data, datesLookup, dates: newDates, macroMap: newMacroMap, segmentCount: segmentCount + 1 };
+}
+
 export const attachSegmentReducer: AttachSegmentReducer = (data) => (segment, zld, isBefore) => {
   const { zoom, date } = segment;
   const { macroMap, dates, segmentCount } = data;
@@ -126,7 +148,7 @@ export const attachSegmentReducer: AttachSegmentReducer = (data) => (segment, zl
   //   console.log('Added');
   //   printMacroMap(newMacroMap);
   // }
-  const datesLookup = zoom === 'Day' ? createDatesLookup(dates.Day) : data.datesLookup;
+  const datesLookup = zoom === 'Day' ? createDatesLookup(newDates.Day) : data.datesLookup;
   return { ...data, datesLookup, dates: newDates, macroMap: newMacroMap, segmentCount: segmentCount + 1 };
 }
 

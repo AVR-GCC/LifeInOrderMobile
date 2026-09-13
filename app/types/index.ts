@@ -150,6 +150,7 @@ export type CreateDatesLookup = (days: ZoomLevelData[]) => DatesLookup;
 
 // reducers
 export type InitialDataReducer = () => ((habits: HabitWithValues[]) => MainProps);
+export type ReplaceSegmentReducer = (data: MainProps) => (segment: Segment, zld: ZoomLevelData) => MainProps;
 export type AttachSegmentReducer = (data: MainProps) => (segment: Segment, zld: ZoomLevelData, isBefore: boolean) => MainProps;
 export type RemoveSegmentReducer = (data: MainProps) => (segment: Segment) => MainProps;
 export type SetValueReducer = (data: MainProps) => (date: string, habitIndex: number, values: { valueId: number, text: string | null }) => MainProps;
