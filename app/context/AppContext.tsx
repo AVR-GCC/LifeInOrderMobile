@@ -117,12 +117,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   //   printMacroMap(dataRef.current.macroMap);
   // }, [dataRef.current?.macroMap]);
 
+  const PATCH_DAYS_PER_MODE_DAY_PIXELS = 32;
+  const PATCH_OFFSET_FIX_AFTER_LOAD = 32;
   const loadForZoomToPeriod: LoadForZoomToPeriod = (date, zoom) => {
     const mode = zoomIndeces[zoom];
     const modeObj = modes[mode];
     const modeDayPixels = modeObj.dayPixels;
     const endDate = nextDate(date, zoom, true);
-    const totalDays = dateDiffStr(endDate, date) + 32 / modeDayPixels;
+    const totalDays = dateDiffStr(endDate, date) + PATCH_DAYS_PER_MODE_DAY_PIXELS / modeDayPixels;
     const dayPixels = height.current / totalDays;
     const scale = dayPixels / modeDayPixels;
     const segment = { date, zoom };
@@ -153,7 +155,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         };
         const { range, offset } = mm;
         const dayOffset = dateDiffStr(range.end, endDate) - offset;
-        const newOffset = dayOffset * scale * modeDayPixels;
+        const newOffset = dayOffset * scale * modeDayPixels - PATCH_OFFSET_FIX_AFTER_LOAD;
         resolve({ scale, mode, offset: newOffset });
         loadAndPrefetch(date, dayPixels);
       })
