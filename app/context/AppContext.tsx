@@ -30,6 +30,7 @@ import type {
   GetScroll,
   GetValue,
   LoadAndPrefetch,
+  LoadForZoomToPeriod,
   MacroMap,
   MainProps,
   Option,
@@ -46,9 +47,9 @@ import type {
 } from '../types';
 import { getSurroundingMacroMap, sortMacroMapSegments } from '../utils/dataStructures';
 import { useWindowDimensions } from 'react-native';
-import { nextDate } from '../constants/zoom';
-import { BOTTOM_BUFFER_HEIGHT, LEFT_BAR_WIDTH, TOP_BAR_HEIGHT, TOP_BUFFER_HEIGHT } from '../constants/mainScreen';
+import { LEFT_BAR_WIDTH, TOP_BAR_HEIGHT } from '../constants/mainScreen';
 import { dateDiffStr, generateEightDigitNumber } from '../utils/general';
+import { modes, nextDate, zoomIndeces } from '../constants/zoom';
 
 interface AppContextType {
   data: MainProps | null;
@@ -63,6 +64,7 @@ interface AppContextType {
   updateOption: UpdateOption;
   deleteOption: DeleteOption;
   loadAndPrefetch: LoadAndPrefetch;
+  loadForZoomToPeriod: LoadForZoomToPeriod;
   setScale: SetScale;
   getScale: GetScale;
   setScroll: SetScroll;
@@ -108,6 +110,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setMode: SetMode = (mode) => {
     if (!dataRef.current) return;
     updateData({ ...dataRef.current, mode });
+  }
+
+  // useEffect(() => {
+  //   if (!dataRef.current) return;
+  //   printMacroMap(dataRef.current.macroMap);
+  // }, [dataRef.current?.macroMap]);
+
+  const loadForZoomToPeriod: LoadForZoomToPeriod = (date, zoom) => {
+    const mode = zoomIndeces[zoom];
+    const modeObj = modes[mode];
+    const modeDayPixels = modeObj.dayPixels;
+    const endDate = nextDate(date, zoom, true);
+    const totalDays = dateDiffStr(endDate, date) + 32 / modeDayPixels;
+    const dayPixels = height.current / totalDays;
+    const scale = dayPixels / modeDayPixels;
+    const segment = { date, zoom };
+    return new Promise((resolve, reject) => {
+      if (dataRef.current === null) {
+        reject('Null data');
+        return;
+      };
+      const mm = dataRef.current.macroMap[zoom];
+      if (mm && mm.range.start <= date && mm.range.end >= endDate) {
+        const dayOffset = dateDiffStr(mm.range.end, endDate) - mm.offset;
+        const newOffset = dayOffset * scale * modeDayPixels;
+        resolve({ scale, mode, offset: newOffset - TOP_BAR_HEIGHT });
+        loadAndPrefetch(date, dayPixels);
+        return;
+      }
+      client.list(segment, width).then(zld => {
+        if (dataRef.current === null) {
+          reject('Null data');
+          return;
+        };
+        const attachedSegmentState = attachSegmentReducer(dataRef.current)(segment, zld, true);
+        updateData(attachedSegmentState);
+        const mm = attachedSegmentState.macroMap[zoom];
+        if (mm === null) {
+          reject('Missing mm');
+          return;
+        };
+        const { range, offset } = mm;
+        const dayOffset = dateDiffStr(range.end, endDate) - offset;
+        const newOffset = dayOffset * scale * modeDayPixels;
+        resolve({ scale, mode, offset: newOffset });
+        loadAndPrefetch(date, dayPixels);
+      })
+    })
   }
 
   const getAddSegmentToState: (date: string, dayPixels: number) => AddSegmentToState = (date, dayPixels) => (seg, zld, isBefore) => {
@@ -426,6 +476,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         getScroll,
         setMode,
         setHeight,
+        loadForZoomToPeriod
       }}
     >
       {children}

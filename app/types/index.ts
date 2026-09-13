@@ -128,6 +128,7 @@ export type UpdateOption = (habitIndex: number, valueIndex: number, newValueValu
 
 export type LoadAndPrefetch = (date: string, dayPixels: number) => void;
 export type AddSegmentToState = (segment: Segment, zld: ZoomLevelData, isBefore: boolean) => void;
+export type LoadForZoomToPeriod = (date: string, zoom: ZoomLevel) => Promise<SetNavigationValuesInput>;
 export type SetScale = (newScale: number) => void;
 export type GetScale = () => number;
 export type SetScroll = (newScroll: number) => void;

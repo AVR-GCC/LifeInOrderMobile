@@ -4,10 +4,10 @@ import { SharedValue, useAnimatedStyle, useFrameCallback, useSharedValue } from 
 import { scheduleOnRN } from 'react-native-worklets';
 import { useAppContext } from '../context/AppContext';
 import { MacroMap, MainProps, NavigationValues, SetNavigationValuesInput, ZoomLevel } from '../types';
-import { getMode, modes, zoomIndeces, zoomMonths } from '../constants/zoom';
+import { getMode, modes, zoomIndeces } from '../constants/zoom';
 import { useEffect, useRef } from 'react';
-import { getDayPixels, getFinalDayPixels, getLocationDate, getModeInfo, mergeDateRanges } from '../utils/dataStructures';
-import { dateDiff, dateDiffStr, dateString } from '../utils/general';
+import { getDayPixels, getFinalDayPixels, getLocationDate, getModeInfo } from '../utils/dataStructures';
+import { dateDiff, dateDiffStr } from '../utils/general';
 import { throttle } from '../utils/API';
 
 const DECELERATION = 0.998;
@@ -28,7 +28,7 @@ interface UseNavigationGestureResult {
 }
 
 export const useNavigationGesture = (data: MainProps | null): UseNavigationGestureResult => {
-  const { loadAndPrefetch, getScale, setScale, setScroll, getScroll, setMode } = useAppContext();
+  const { loadForZoomToPeriod, loadAndPrefetch, getScale, setScale, setScroll, getScroll, setMode } = useAppContext();
   const { height } = useWindowDimensions();
   const dataRef = useRef(data);
   const isPanning = useRef(false);
@@ -45,6 +45,13 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     touchCount: 0,
     mode: 0,
   });
+
+  // useAnimatedReaction(
+  //   () => navigationValue.get().mode,
+  //   (curr, prev) => {
+  //     if (curr !== prev) console.log('mode', prev, '->', curr);
+  //   }
+  // );
 
   const zoomStyles = {
     Day: useAnimatedStyle<ViewStyle>(() => ({
@@ -181,35 +188,9 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
   };
 
   const zoomToPeriod = (date: string, zoom: ZoomLevel) => {
-    if (!data) return;
-    const { macroMap } = data;
-    const mm = macroMap[zoom];
-    if (!mm) return;
-    const { range, offset: macroMapDayOffset } = mm;
-    const newZoomMonths = zoomMonths[zoom];
-    const mode = zoomIndeces[zoom];
-    const newZoomDayPixels = modes[mode].dayPixels;
-    const earliestVisibleDate = new Date(date);
-    const latestVisibleDate = new Date(date);
-    latestVisibleDate.setUTCMonth(latestVisibleDate.getMonth() + newZoomMonths);
-    latestVisibleDate.setUTCDate(0);
-    const latestVisibleDateStr = dateString(latestVisibleDate);
-    const latestLoadedDate = new Date(date);
-    latestLoadedDate.setUTCMonth(latestLoadedDate.getMonth() + newZoomMonths * 2);
-    const latestLoadedDateStr = dateString(latestLoadedDate);
-    const earliestLoadedDate = new Date(date);
-    earliestLoadedDate.setUTCMonth(earliestLoadedDate.getMonth() - newZoomMonths);
-    earliestLoadedDate.setUTCDate(1);
-    const earliestLoadedDateStr = dateString(earliestLoadedDate);
-    const numDays = dateDiff(latestVisibleDate, earliestVisibleDate);
-    const scale  = height / (newZoomDayPixels * numDays);
-    const { contiguous, range: { end: lastDateInNewRange } } = mergeDateRanges(range, { start: earliestLoadedDateStr, end: latestLoadedDateStr });
-    if (!lastDateInNewRange || !range.end) return;
-    const macroMapDayOffsetFinal = contiguous ? macroMapDayOffset + dateDiffStr(lastDateInNewRange, range.end) : 0;
-    const dayOffset = dateDiffStr(lastDateInNewRange, latestVisibleDateStr) - macroMapDayOffsetFinal;
-    const offset = dayOffset * scale * newZoomDayPixels;
-    const newNav = setNavigationValues({ mode, offset, scale });
-    checkLoadMoreDataInLocation(macroMap, newNav);
+    loadForZoomToPeriod(date, zoom).then(navVals => {
+      setNavigationValues(navVals);
+    });
   };
 
   useFrameCallback((frameInfo) => {
