@@ -5,6 +5,7 @@ import type { Habit, SetValueSocket, DeleteHabitSocket, UpdateHabitSocket, Reord
 import { debounce } from '../utils/API';
 import { AppState, NativeEventSubscription } from 'react-native';
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const baseAddress = process.env.EXPO_PUBLIC_API_BASE;
 
@@ -22,6 +23,12 @@ interface SocketMessage<T = unknown> {
   error?: string;
 }
 
+interface AnonSocketRequestPayload<TParams = unknown> {
+  route: string;
+  method: string;
+  params: TParams;
+}
+
 interface SocketRequestPayload<TParams = unknown> {
   id: string;
   route: string;
@@ -32,10 +39,30 @@ interface RNMessageEvent {
   data: string;
 }
 
+const storageKey = 'life-in-order-pending';
+
+const saveToDevice = async (value: AnonSocketRequestPayload<any>) => {
+  try {
+    await AsyncStorage.setItem(storageKey, JSON.stringify(value));
+  } catch (e) {
+    console.error('Failed to save data', e);
+  }
+};
+
+const getFromDevice = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem(storageKey);
+    return jsonValue != null ? JSON.parse(jsonValue) : null;
+  } catch (e) {
+    console.error('Failed to fetch data', e);
+  }
+};
+
 // socketClient.js
 class SocketClient {
   private socket: WebSocket | null = null;
   private pending: Map<string, PendingRequest<any>> = new Map();
+  private persist: Record<string, AnonSocketRequestPayload<any>> = {};
   private connected: boolean = false;
   private attempt: number = 0;
   private baseDelay: number = 1000;
@@ -65,6 +92,9 @@ class SocketClient {
       }
       this.appIsActive = newAppIsActive;
     });
+    getFromDevice().then(persist => {
+      this.persist = persist || {};
+    });
   }
 
   connect() {
@@ -76,6 +106,14 @@ class SocketClient {
       console.log('socket connected');
       this.connected = true;
       this.attempt = 0;
+      const persistKeys = Object.keys(this.persist);
+      persistKeys.forEach(pk => {
+        const persistReq = this.persist[pk];
+        if (!persistReq) return;
+        const { route, method, params } = persistReq;
+        delete this.persist[pk];
+        this.persistRequest(pk, route, method, params);
+      })
     }
     this.socket.onclose = () => {
       console.log('socket disconnected');
@@ -127,6 +165,23 @@ class SocketClient {
     this.pending.delete(id);
   }
 
+  persistRequest<T>(key: string, routeRaw: string, method: string, params: any) {
+    const anonSocketRequestPayload = {
+      route: routeRaw, method, params
+    };
+    this.persist[key] = anonSocketRequestPayload;
+    saveToDevice(this.persist);
+    return new Promise<T>((resolve, reject) => {
+      this.request<T>(routeRaw, method, params).then(res => {
+        delete this.persist[key];
+        saveToDevice(this.persist);
+        resolve(res);
+      }).catch(e => {
+        reject(e);
+      })
+    })
+  }
+
   request<T>(routeRaw: string, method: string, params: any) {
     const id = Crypto.randomUUID();
     if (this.socket) {
@@ -151,7 +206,8 @@ class SocketClient {
         text,
         number: null
       };
-      return this.request<Option>(route, method, params);
+      const key = `setValue-${habitId}-${valueId}`;
+      return this.persistRequest(key, route, method, params);
     };
     return debounce((date, habitId) => `${date}-${habitId}`, func, 1000);
   })();
