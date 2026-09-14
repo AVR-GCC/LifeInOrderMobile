@@ -3,6 +3,8 @@ import * as Crypto from 'expo-crypto';
 
 import type { Habit, SetValueSocket, DeleteHabitSocket, UpdateHabitSocket, ReorderHabitsSocket, Option, DeleteOptionSocket, UpdateOptionSocket, ReorderOptionsSocket, CreateOptionSocket, CreateHabitSocket, Segment } from '../types';
 import { debounce } from '../utils/API';
+import { AppState, NativeEventSubscription } from 'react-native';
+import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 
 const baseAddress = process.env.EXPO_PUBLIC_API_BASE;
 
@@ -34,25 +36,74 @@ interface RNMessageEvent {
 class SocketClient {
   private socket: WebSocket | null = null;
   private pending: Map<string, PendingRequest<any>> = new Map();
+  private connected: boolean = false;
+  private attempt: number = 0;
+  private baseDelay: number = 1000;
+  private maxDelay: number = 30000;
+  private appIsActive: boolean = false;
+  private internetIsReachable: boolean = false;
+  private netInfoUnsubscribe: NetInfoSubscription | null = null;
+  private appStateSubscription: NativeEventSubscription | null = null;
 
   constructor() {
     this.socket = null;
     this.pending = new Map(); // requestId -> { resolve, reject }
+    this.connected = false;
+    this.appIsActive = true;
+    this.internetIsReachable = true;
+    this.netInfoUnsubscribe = NetInfo.addEventListener((state) => {
+      const newInternetIsReachable = state.isInternetReachable || false;
+      if (newInternetIsReachable && !this.internetIsReachable) {
+        this.scheduleReconnect();
+      }
+      this.internetIsReachable = newInternetIsReachable;
+    });
+    this.appStateSubscription = AppState.addEventListener('change', (nextAppState) => {
+      const newAppIsActive = nextAppState === 'active';
+      if (!this.connected && !this.appIsActive && newAppIsActive) {
+        this.scheduleReconnect();
+      }
+      this.appIsActive = newAppIsActive;
+    });
   }
 
   connect() {
+    if (this.socket && (this.socket.readyState === WebSocket.CONNECTING || this.socket.readyState === WebSocket.OPEN)) {
+      return;
+    }
     this.socket = new WebSocket(WS_URL);
     this.socket.onopen = () => {
       console.log('socket connected');
+      this.connected = true;
+      this.attempt = 0;
     }
     this.socket.onclose = () => {
       console.log('socket disconnected');
+      this.connected = false;
     }
     this.socket.onerror = (e) => {
-      // this.connected = false;
       console.log('WS error:', e);
+      this.connected = false;
+      if (this.appIsActive) {
+        this.scheduleReconnect();
+      }
     };
     this.socket.onmessage = (e) => this.handleMessage(e);
+  }
+
+  scheduleReconnect() {
+    const exponential = Math.min(this.maxDelay, this.baseDelay * Math.pow(2, this.attempt));
+    const delay = Math.floor(Math.random() * exponential);
+
+    this.attempt++;
+    console.log(`Reconnecting in ${delay}ms (Attempt ${this.attempt})...`);
+    setTimeout(() => this.connect(), delay);
+  }
+
+  destroy() {
+    if (this.netInfoUnsubscribe) this.netInfoUnsubscribe();
+    if (this.appStateSubscription) this.appStateSubscription.remove();
+    if (this.socket) this.socket.close();
   }
 
   private handleMessage(event: RNMessageEvent): void {
