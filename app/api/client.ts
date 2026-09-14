@@ -23,12 +23,6 @@ interface SocketMessage<T = unknown> {
   error?: string;
 }
 
-interface AnonSocketRequestPayload<TParams = unknown> {
-  route: string;
-  method: string;
-  params: TParams;
-}
-
 interface SocketRequestPayload<TParams = unknown> {
   id: string;
   route: string;
@@ -39,9 +33,17 @@ interface RNMessageEvent {
   data: string;
 }
 
+interface AnonSocketRequestPayload<TParams = unknown> {
+  route: string;
+  method: string;
+  params: TParams;
+}
+
+type PersistObject = Record<string, AnonSocketRequestPayload<any>>;
+
 const storageKey = 'life-in-order-pending';
 
-const saveToDevice = async (value: AnonSocketRequestPayload<any>) => {
+const saveToDevice = async (value: PersistObject) => {
   try {
     await AsyncStorage.setItem(storageKey, JSON.stringify(value));
   } catch (e) {
@@ -62,7 +64,7 @@ const getFromDevice = async () => {
 class SocketClient {
   private socket: WebSocket | null = null;
   private pending: Map<string, PendingRequest<any>> = new Map();
-  private persist: Record<string, AnonSocketRequestPayload<any>> = {};
+  private persist: PersistObject = {};
   private connected: boolean = false;
   private attempt: number = 0;
   private baseDelay: number = 1000;
