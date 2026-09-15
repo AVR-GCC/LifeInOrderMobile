@@ -292,10 +292,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }
 
   const loadInitialData = async () => {
-    const userConfigPromise = getUserConfig();
-    const today = new Date().toISOString().split('T')[0];
-    const habits = await userConfigPromise;
+    const habits = await getUserConfig();
     if (habits) {
+      const today = new Date().toISOString().split('T')[0];
       updateData(loadInitialDataReducer()(habits));
       loadAndPrefetch(today, 24);
     }
