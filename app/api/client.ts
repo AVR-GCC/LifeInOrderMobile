@@ -75,7 +75,7 @@ class SocketClient {
 
   constructor() {
     this.socket = null;
-    this.pending = new Map(); // requestId -> { resolve, reject }
+    this.pending = new Map();
     this.connected = false;
     this.appIsActive = true;
     this.internetIsReachable = true;
