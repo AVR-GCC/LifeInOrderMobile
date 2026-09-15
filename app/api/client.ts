@@ -7,10 +7,8 @@ import { AppState, NativeEventSubscription } from 'react-native';
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const baseAddress = process.env.EXPO_PUBLIC_API_BASE;
-
-const baseUrl = `http://${baseAddress}`;
-const WS_URL = `ws://${baseAddress}/ws`;
+const baseUrl = process.env.EXPO_PUBLIC_API_BASE;
+const wsUrl = (baseUrl || '').replace(/^http/, 'ws') + '/ws';
 
 type PendingRequest<T = unknown> = {
   resolve: (value: T | PromiseLike<T>) => void;
@@ -102,7 +100,7 @@ class SocketClient {
     if (this.socket && (this.socket.readyState === WebSocket.CONNECTING || this.socket.readyState === WebSocket.OPEN)) {
       return;
     }
-    this.socket = new WebSocket(WS_URL);
+    this.socket = new WebSocket(wsUrl);
     this.socket.onopen = () => {
       console.log('socket connected');
       this.connected = true;
