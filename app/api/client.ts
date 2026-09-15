@@ -60,7 +60,6 @@ const getFromDevice = async () => {
   }
 };
 
-// socketClient.js
 class SocketClient {
   private socket: WebSocket | null = null;
   private pending: Map<string, PendingRequest<any>> = new Map();
