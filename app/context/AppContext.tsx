@@ -310,9 +310,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setValue: SetValue = (date, habitIndex, values) => {
     if (dataRef.current === null) return;
     const { habits } = dataRef.current;
+    const keys = Object.keys(segmentStatuses.current);
+    keys.forEach(key => {
+      const splitted = key.split('-');
+      if (splitted[splitted.length - 1] !== 'Day') {
+        delete segmentStatuses.current[key];
+      }
+    })
     updateData(setValueReducer(dataRef.current)(date, habitIndex, values));
-    client.setValue(date, habits[habitIndex].habit.id, values).then(data => {
-      console.log(data, 'has been set, remove from local storage');
+    client.setValue(date, habits[habitIndex].habit.id, values).then(_data => {
+      loadAndPrefetch(date, 24);
     }).catch(e => {
       console.log('setValue error:', e);
     });

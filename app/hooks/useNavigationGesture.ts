@@ -112,8 +112,10 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const newPixelsPerDay = modes[mode].dayPixels;
     const ratio = newPixelsPerDay / curPixelsPerDay;
     const scale = curScale / ratio;
-    const oldmm = macroMap[modes[navigationValue.get().mode].id]
-    const newmm = macroMap[modes[mode].id];
+    const curMode = modes[navigationValue.get().mode].id;
+    const newMode = modes[mode].id;
+    const oldmm = macroMap[curMode];
+    const newmm = macroMap[newMode];
     if (!oldmm || !newmm) return;
     const { range: { end: oldEnd }, offset: oldOffset } = oldmm;
     const { range: { end: newEnd }, offset: newOffset } = newmm;
@@ -156,12 +158,20 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     const dayPixels = getFinalDayPixels(nv);
     const centerDate = getLocationDate(mm, nv, height);
     loadAndPrefetch(centerDate, dayPixels);
-    const newMode = getMode(dayPixels);
-    if (newMode === nv.mode) return;
-    const modeTransitionValues = getModeTransitionValues(mm, newMode);
+  }, 50);
+
+  const switchMode = throttle((_, __, fromMode, toMode) => `${fromMode}-${toMode}`, (mm: MacroMap, _fromMode: number, toMode: number) => {
+    const modeTransitionValues = getModeTransitionValues(mm, toMode);
     if (!modeTransitionValues) return;
     setNavigationValues(modeTransitionValues);
   }, 50);
+
+  const switchModeIfNeeded = (mm: MacroMap, nv: NavigationValues) => {
+    const dayPixels = getFinalDayPixels(nv);
+    const newMode = getMode(dayPixels);
+    if (newMode === nv.mode) return;
+    switchMode(mm, nv.mode, newMode);
+  };
 
   const checkLoadMoreData = () => {
     if (dataRef.current === null) {
@@ -169,6 +179,7 @@ export const useNavigationGesture = (data: MainProps | null): UseNavigationGestu
     }
     const { macroMap } = dataRef.current;
     checkLoadMoreDataInLocation(macroMap, navigationValue.get());
+    switchModeIfNeeded(macroMap, navigationValue.get());
   };
 
   const scrollToDate = (date: string) => {
