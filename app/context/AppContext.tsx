@@ -1,7 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
-import client, {
-  getUserConfig,
-} from '../api/client';
+import client from '../api/client';
 import { colorOptions } from '../components/OptionCard';
 import {
   addHabitIdReducer,
@@ -51,6 +49,7 @@ import { useWindowDimensions } from 'react-native';
 import { LEFT_BAR_WIDTH, TOP_BAR_HEIGHT } from '../constants/mainScreen';
 import { dateDiffStr, generateEightDigitNumber } from '../utils/general';
 import { modes, nextDate, zoomIndeces } from '../constants/zoom';
+import { useSession } from './AuthContext';
 
 interface AppContextType {
   data: MainProps | null;
@@ -80,6 +79,7 @@ const MAX_SEGMENTS = 16;
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // const userId = 1;
+  const { status, authData } = useSession();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const width = screenWidth - LEFT_BAR_WIDTH;
   const [data, setData] = useState<MainProps | null>(null);
@@ -291,20 +291,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadRequiredSegments(farMap, date, dayPixels);
   }
 
-  const loadInitialData = async () => {
-    const habits = await getUserConfig();
-    if (habits) {
-      const today = new Date().toISOString().split('T')[0];
-      updateData(loadInitialDataReducer()(habits));
-      loadAndPrefetch(today, 24);
-    }
-  };
-
   useEffect(() => {
-    client.connect();
-    setImmediate(loadInitialData);
+    if (status === 'authenticated' && authData) {
+      client.connect(authData.accessToken).then(() => {
+        const today = new Date().toISOString().split('T')[0];
+        setImmediate(() => updateData(loadInitialDataReducer()(authData.habits)));
+        loadAndPrefetch(today, 24);
+      });
+    } else {
+      client.destroy();
+      segmentStatuses.current = {};
+      pendingSegments.current = {};
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      updateData(null);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [status, authData]);
 
   // Values
   const setValue: SetValue = (date, habitIndex, values) => {
@@ -339,7 +341,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       color: colorOptions[0],
       habit_id: habits[habitIndex].habit.id,
       sequence,
-      created_at: 'new'
+      created_at: new Date().toISOString().slice(0, -1)
     };
     const id = generateEightDigitNumber();
     updateData(addOptionReducer(dataRef.current)(habitIndex, { id, ...newOption }));

@@ -1,4 +1,3 @@
-import axios from 'axios';
 import * as Crypto from 'expo-crypto';
 
 import type { Habit, SetValueSocket, DeleteHabitSocket, UpdateHabitSocket, ReorderHabitsSocket, Option, DeleteOptionSocket, UpdateOptionSocket, ReorderOptionsSocket, CreateOptionSocket, CreateHabitSocket, Segment } from '../types';
@@ -70,6 +69,7 @@ class SocketClient {
   private internetIsReachable: boolean = false;
   private netInfoUnsubscribe: NetInfoSubscription | null = null;
   private appStateSubscription: NativeEventSubscription | null = null;
+  private lastAccessToken: string | null = null;
 
   constructor() {
     this.socket = null;
@@ -96,36 +96,41 @@ class SocketClient {
     });
   }
 
-  connect() {
-    if (this.socket && (this.socket.readyState === WebSocket.CONNECTING || this.socket.readyState === WebSocket.OPEN)) {
-      return;
-    }
-    this.socket = new WebSocket(wsUrl);
-    this.socket.onopen = () => {
-      console.log('socket connected');
-      this.connected = true;
-      this.attempt = 0;
-      const persistKeys = Object.keys(this.persist);
-      persistKeys.forEach(pk => {
-        const persistReq = this.persist[pk];
-        if (!persistReq) return;
-        const { route, method, params } = persistReq;
-        delete this.persist[pk];
-        this.persistRequest(pk, route, method, params);
-      })
-    }
-    this.socket.onclose = () => {
-      console.log('socket disconnected');
-      this.connected = false;
-    }
-    this.socket.onerror = (e) => {
-      console.log('WS error:', e);
-      this.connected = false;
-      if (this.appIsActive) {
-        this.scheduleReconnect();
+  connect(accessToken?: string) {
+    return new Promise((resolve, reject) => {
+      this.lastAccessToken = accessToken || this.lastAccessToken;
+      if (this.socket && (this.socket.readyState === WebSocket.CONNECTING || this.socket.readyState === WebSocket.OPEN)) {
+        resolve(true);
       }
-    };
-    this.socket.onmessage = (e) => this.handleMessage(e);
+      this.socket = new WebSocket(`${wsUrl}?t=${this.lastAccessToken}`);
+      this.socket.onopen = () => {
+        console.log('socket connected');
+        this.connected = true;
+        this.attempt = 0;
+        const persistKeys = Object.keys(this.persist);
+        persistKeys.forEach(pk => {
+          const persistReq = this.persist[pk];
+          if (!persistReq) return;
+          const { route, method, params } = persistReq;
+          delete this.persist[pk];
+          this.persistRequest(pk, route, method, params);
+        });
+        resolve(true);
+      }
+      this.socket.onclose = () => {
+        console.log('socket disconnected');
+        this.connected = false;
+      }
+      this.socket.onerror = (e) => {
+        console.log('WS error:', e);
+        this.connected = false;
+        if (this.appIsActive) {
+          this.scheduleReconnect();
+        }
+        reject();
+      };
+      this.socket.onmessage = (e) => this.handleMessage(e);
+    });
   }
 
   scheduleReconnect() {
@@ -292,19 +297,5 @@ class SocketClient {
     return JSON.parse(data);
   }
 }
-
-export const getUserConfig = async () => {
-  try {
-    const route = `${baseUrl}/users/1/config`;
-    const res = await axios.get(route);
-    if (res.data) {
-      return res.data;
-    }
-    return null;
-  } catch (error) {
-    console.error('Error fetching user config:', error);
-    return null;
-  }
-};
 
 export default new SocketClient();

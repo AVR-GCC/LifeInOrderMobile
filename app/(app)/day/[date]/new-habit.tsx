@@ -1,5 +1,5 @@
 import NewHabitScreen from '@/app/screens/NewHabitScreen';
-import { useAppContext } from '../../context/AppContext';
+import { useAppContext } from '../../../context/AppContext';
 
 export default function NewHabitRoute() {
   const { data, createHabit } = useAppContext();
