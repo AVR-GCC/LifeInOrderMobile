@@ -9,8 +9,10 @@ import {
 } from 'react-native';
 import { useSession } from '../context/AuthContext';
 import { COLORS } from '../constants/theme';
+import { useRouter } from 'expo-router';
 
 const Login = () => {
+  const router = useRouter();
   const { signUp, signIn } = useSession();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
@@ -24,9 +26,11 @@ const Login = () => {
     try {
       const func = mode === 'signup' ? signUp : signIn;
       await func(email, password);
+      if (mode === 'signup') {
+        router.replace(`/email-confirm?email=${email}&password=${password}`);
+      }
     } catch (err) {
       console.log('sign err', err);
-
     } finally {
       setLoading(false);
     }

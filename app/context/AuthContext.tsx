@@ -17,6 +17,7 @@ type AuthState = {
   status: Status;
   authData: AuthData;
   signUp: (email: string, password: string) => Promise<void>;
+  confirmEmail: (email: string, otp: number) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   retry: () => void;
@@ -66,7 +67,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
       if (!res.ok) return { kind: 'network' as const };
       const data: ReturnData = await res.json();
       return { kind: 'ok' as const, data };
-    } catch {
+    } catch (e) {
+      console.log('e', e);
       return { kind: 'network' as const };
     } finally {
       clearTimeout(timer);
@@ -103,6 +105,22 @@ export function AuthProvider({ children }: PropsWithChildren) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  async function confirmEmail(email: string, otp: number) {
+    const body = { email, otp };
+    console.log('body', body);
+    const res = await fetch(`${baseUrl}/confirm_email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      console.log('Email confirmation failed', res);
+      throw new Error('Email confirmation failed');
+    }
+    const data = await res.json();
+    updateAuthData(data);
+  }
+
   async function signUp(email: string, password: string) {
     const res = await fetch(`${baseUrl}/signup`, {
       method: 'POST',
@@ -113,8 +131,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
       console.log('Signup failed', res);
       throw new Error('Signup failed');
     }
-    const data = await res.json();
-    updateAuthData(data);
   }
 
   async function signIn(email: string, password: string) {
@@ -151,7 +167,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   return (
-    <AuthContext.Provider value={{ status, authData, signUp, signIn, signOut, retry }}>
+    <AuthContext.Provider value={{ status, authData, signUp, confirmEmail, signIn, signOut, retry }}>
       {children}
     </AuthContext.Provider>
   );
