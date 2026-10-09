@@ -16,6 +16,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import MailCheck from '@expo/vector-icons/Feather'; // Using Feather/Lucide vector icons
 import { useSession } from '../context/AuthContext';
 import { COLORS } from '../constants/theme';
+import Screen from '../components/Screen';
 
 const OTP_VALIDITY_SECONDS = 600; // 10 minutes
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -84,113 +85,114 @@ export default function ConfirmEmail() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.inner}>
-          <View style={styles.card}>
-            {/* Header */}
-            <View style={styles.header}>
-              <View style={styles.iconContainer}>
-                <MailCheck name='mail' size={24} color='#2563eb' />
-              </View>
-              <Text style={styles.title}>Confirm your email</Text>
-              <Text style={styles.subtitle}>
-                We sent a 6-digit code to{' '}
-                <Text style={styles.emailText}>{email}</Text>. Enter it below to
-                activate your account.
-              </Text>
-            </View>
-
-            {/* Form */}
-            <View style={styles.form}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Confirmation code</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType='number-pad'
-                  textContentType='oneTimeCode'
-                  maxLength={6}
-                  value={otp}
-                  onChangeText={(text) => setOtp(text.replace(/\D/g, ''))}
-                  placeholder='123456'
-                  placeholderTextColor='#9ca3af'
-                />
+    <Screen>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.inner}>
+            <View style={styles.card}>
+              {/* Header */}
+              <View style={styles.header}>
+                <View style={styles.iconContainer}>
+                  <MailCheck name='mail' size={24} color='#2563eb' />
+                </View>
+                <Text style={styles.title}>Confirm your email</Text>
+                <Text style={styles.subtitle}>
+                  We sent a 6-digit code to{' '}
+                  <Text style={styles.emailText}>{email}</Text>. Enter it below to
+                  activate your account.
+                </Text>
               </View>
 
-              <Text
-                style={[
-                  styles.timerText,
-                  expired ? styles.expiredText : styles.validText,
-                ]}
-              >
-                {expired
-                  ? 'This code has expired — request a new one below.'
-                  : `Code valid for ${formatTime(validityLeft)}`}
-              </Text>
+              {/* Form */}
+              <View style={styles.form}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Confirmation code</Text>
+                  <TextInput
+                    style={styles.input}
+                    keyboardType='number-pad'
+                    textContentType='oneTimeCode'
+                    maxLength={6}
+                    value={otp}
+                    onChangeText={(text) => setOtp(text.replace(/\D/g, ''))}
+                    placeholder='123456'
+                    placeholderTextColor='#9ca3af'
+                  />
+                </View>
 
-              <TouchableOpacity
-                style={[
-                  styles.button,
-                  styles.primaryButton,
-                  (loading || expired || otp.length < 6) && styles.disabledButton,
-                ]}
-                onPress={handleVerify}
-                disabled={loading || expired || otp.length < 6}
-                activeOpacity={0.8}
-              >
-                {loading ? (
-                  <ActivityIndicator color='#ffffff' size='small' />
-                ) : (
-                  <Text style={styles.primaryButtonText}>Confirm email</Text>
-                )}
-              </TouchableOpacity>
-            </View>
+                <Text
+                  style={[
+                    styles.timerText,
+                    expired ? styles.expiredText : styles.validText,
+                  ]}
+                >
+                  {expired
+                    ? 'This code has expired — request a new one below.'
+                    : `Code valid for ${formatTime(validityLeft)}`}
+                </Text>
 
-            {/* Actions */}
-            <View style={styles.actions}>
-              <TouchableOpacity
-                style={[
-                  styles.button,
-                  styles.outlineButton,
-                  (resendLoading || cooldownLeft > 0) && styles.disabledButton,
-                ]}
-                onPress={handleResend}
-                disabled={resendLoading || cooldownLeft > 0}
-                activeOpacity={0.8}
-              >
-                {resendLoading ? (
-                  <ActivityIndicator color='#1f2937' size='small' />
-                ) : (
-                  <Text style={styles.outlineButtonText}>
-                    {cooldownLeft > 0
-                      ? `Resend code in ${cooldownLeft}s`
-                      : 'Resend code'}
-                  </Text>
-                )}
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.button,
+                    styles.primaryButton,
+                    (loading || expired || otp.length < 6) && styles.disabledButton,
+                  ]}
+                  onPress={handleVerify}
+                  disabled={loading || expired || otp.length < 6}
+                  activeOpacity={0.8}
+                >
+                  {loading ? (
+                    <ActivityIndicator color='#ffffff' size='small' />
+                  ) : (
+                      <Text style={styles.primaryButtonText}>Confirm email</Text>
+                    )}
+                </TouchableOpacity>
+              </View>
 
-              <TouchableOpacity
-                style={[styles.button, styles.ghostButton]}
-                onPress={() => router.replace('/auth')}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.ghostButtonText}>Back to sign in</Text>
-              </TouchableOpacity>
+              {/* Actions */}
+              <View style={styles.actions}>
+                <TouchableOpacity
+                  style={[
+                    styles.button,
+                    styles.outlineButton,
+                    (resendLoading || cooldownLeft > 0) && styles.disabledButton,
+                  ]}
+                  onPress={handleResend}
+                  disabled={resendLoading || cooldownLeft > 0}
+                  activeOpacity={0.8}
+                >
+                  {resendLoading ? (
+                    <ActivityIndicator color='#1f2937' size='small' />
+                  ) : (
+                      <Text style={styles.outlineButtonText}>
+                        {cooldownLeft > 0
+                          ? `Resend code in ${cooldownLeft}s`
+                          : 'Resend code'}
+                      </Text>
+                    )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.button, styles.ghostButton]}
+                  onPress={() => router.replace('/auth')}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.ghostButtonText}>Back to sign in</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bg,
   },
   inner: {
     flex: 1,
