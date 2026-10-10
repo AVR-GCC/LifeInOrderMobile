@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import Toast from 'react-native-toast-message';
 import { AuthProvider, useSession } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import SplashScreenController from './splash';
@@ -9,6 +10,7 @@ export default function RootLayout() {
       <AppProvider>
         <SplashScreenController />
         <RootNavigator />
+        <Toast />
       </AppProvider>
     </AuthProvider>
   );

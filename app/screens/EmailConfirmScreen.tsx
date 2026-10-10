@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
@@ -17,6 +16,7 @@ import MailCheck from '@expo/vector-icons/Feather'; // Using Feather/Lucide vect
 import { useSession } from '../context/AuthContext';
 import { COLORS } from '../constants/theme';
 import Screen from '../components/Screen';
+import Toast from 'react-native-toast-message';
 
 const OTP_VALIDITY_SECONDS = 600; // 10 minutes
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -57,10 +57,13 @@ export default function ConfirmEmail() {
       const otpNum = parseInt(otp, 10);
       await confirmEmail(email, otpNum);
     } catch (err) {
-      Alert.alert(
-        'Verification failed',
-        err instanceof Error ? err.message : 'Invalid or expired code'
-      );
+      Toast.show({
+        type: 'error',
+        text1: 'Verification failed',
+        text2: err instanceof Error ? err.message : 'Invalid or expired code',
+        position: 'top',
+        visibilityTime: 4000,
+      });
     } finally {
       setLoading(false);
     }
@@ -73,12 +76,21 @@ export default function ConfirmEmail() {
       setValidityLeft(OTP_VALIDITY_SECONDS);
       setCooldownLeft(RESEND_COOLDOWN_SECONDS);
       setOtp('');
-      Alert.alert('Code resent', `A new code was sent to ${email}.`);
+      Toast.show({
+        type: 'success',
+        text1: 'Code resent',
+        text2: `A new code was sent to ${email}.`,
+        position: 'top',
+        visibilityTime: 4000,
+      });
     } catch (err) {
-      Alert.alert(
-        'Couldn\'t resend code',
-        err instanceof Error ? err.message : 'Something went wrong'
-      );
+      Toast.show({
+        type: 'error',
+        text1: 'Couldn\'t resend code',
+        text2: err instanceof Error ? err.message : 'Something went wrong',
+        position: 'top',
+        visibilityTime: 4000,
+      });
     } finally {
       setResendLoading(false);
     }
@@ -146,8 +158,8 @@ export default function ConfirmEmail() {
                   {loading ? (
                     <ActivityIndicator color='#ffffff' size='small' />
                   ) : (
-                      <Text style={styles.primaryButtonText}>Confirm email</Text>
-                    )}
+                    <Text style={styles.primaryButtonText}>Confirm email</Text>
+                  )}
                 </TouchableOpacity>
               </View>
 
@@ -166,12 +178,12 @@ export default function ConfirmEmail() {
                   {resendLoading ? (
                     <ActivityIndicator color='#1f2937' size='small' />
                   ) : (
-                      <Text style={styles.outlineButtonText}>
-                        {cooldownLeft > 0
-                          ? `Resend code in ${cooldownLeft}s`
-                          : 'Resend code'}
-                      </Text>
-                    )}
+                    <Text style={styles.outlineButtonText}>
+                      {cooldownLeft > 0
+                        ? `Resend code in ${cooldownLeft}s`
+                        : 'Resend code'}
+                    </Text>
+                  )}
                 </TouchableOpacity>
 
                 <TouchableOpacity
