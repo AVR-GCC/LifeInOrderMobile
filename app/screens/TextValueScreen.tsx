@@ -1,12 +1,11 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Platform, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import BackArrow from '../components/BackArrow';
 import Screen from '../components/Screen';
 import TitleBar from '../components/TitleBar';
 import { COLORS } from '../constants/theme';
 import type { GetValue, MainProps, SetValue } from '../types';
-import useKeyboardScroll from '../hooks/useKeyboardScroll';
 
 interface TextValueScreenProps {
   data: MainProps | null;
@@ -21,9 +20,6 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
   const date = Array.isArray(dateStrs) ? dateStrs[0] : dateStrs;
   const router = useRouter();
   const inputRef = useRef<TextInput>(null);
-  const prevHeight = useRef<number | null>(null);
-
-  const { KeyboardScrollView, setTargetY, scrollDelta } = useKeyboardScroll();
 
   const habitIndex = parseInt(Array.isArray(habitIndexParam) ? habitIndexParam[0] : habitIndexParam ?? '0', 10);
 
@@ -33,12 +29,8 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
   // Auto-focus the input when the screen mounts
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.measure((_x, _y, _w, height, _px, pageY) => {
         inputRef.current?.focus()
-        setTargetY(height + pageY + 20);
-      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!data || !habit) {
@@ -50,14 +42,6 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
   }
 
   const handleChangeText = (newText: string) => {
-    if (inputRef.current) {
-      inputRef.current.measure((_x, _y, _w, height, _px, _pageY) => {
-        if (prevHeight.current !== height && prevHeight.current) {
-          scrollDelta(height - prevHeight.current);
-        }
-        prevHeight.current = height;
-      });
-    }
     setValue(date, habitIndex, {
       valueId: habit.values[0].id,
       text: newText,
@@ -78,7 +62,10 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
         </Text>
         <View style={styles.rightSpacer} />
       </TitleBar>
-      <KeyboardScrollView style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
         <TextInput
           ref={inputRef}
           style={styles.textInput}
@@ -86,19 +73,11 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
           placeholderTextColor={COLORS.muted}
           value={currentValue}
           onChangeText={handleChangeText}
-          onPressIn={(e) => {
-            const { locationY } = e.nativeEvent;
-            if (inputRef.current) {
-              inputRef.current.measure((_x, _y, _w, _height, _px, pageY) => {
-                setTargetY(locationY + pageY + 20);
-              });
-            }
-          }}
           multiline
           textAlignVertical="top"
           autoFocus
         />
-      </KeyboardScrollView>
+      </KeyboardAvoidingView>
     </Screen>
   );
 });
