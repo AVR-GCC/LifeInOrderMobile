@@ -1,15 +1,29 @@
 import { createContext, useContext, useEffect, useState, type PropsWithChildren } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { HabitWithValues } from '../types';
+import { tryCatchBlock } from '../utils/general';
 
 const RT_KEY = 'refresh_token';
 const baseUrl = process.env.EXPO_PUBLIC_API_BASE;
 
 type Status = 'loading' | 'authenticated' | 'unauthenticated' | 'offline';
 
+type User = {
+  id: number,
+  email: string,
+  created_at: string
+};
+
+type Claims = {
+  exp: number,
+  iss: string,
+  sub: string,
+  user: User
+}
+
 type AuthData = {
   accessToken: string,
-  userId: number,
+  user: User,
   habits: HabitWithValues[]
 } | null;
 
@@ -30,12 +44,13 @@ type ReturnData = {
     expires_in: number,
     refresh_token: string
   },
-  user: {
-    sub: number,
-    exp: number,
-    iss: string
-  },
+  claims: Claims,
   habits: HabitWithValues[]
+}
+
+type Response = {
+  kind: string,
+  data?: ReturnData
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -53,32 +68,33 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [status, setStatus] = useState<Status>('loading');
   const [authData, setAuthData] = useState<AuthData>(null);
 
-  async function callRefresh(rt: string) {
+  const callRefresh: (rt: string) => Promise<Response> = async(rt) => {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 8000);
-    try {
-      const res = await fetch(`${baseUrl}/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh_token: rt }),
-        signal: ctrl.signal,
-      });
+    const url = `${baseUrl}/refresh`;
+    const body = JSON.stringify({ refresh_token: rt });
+    const cfg = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      signal: ctrl.signal,
+    };
+    const tryFunc = async() => {
+      const res = await fetch(url, cfg);
       if (res.status === 401) return { kind: 'rejected' as const };
       if (!res.ok) return { kind: 'network' as const };
       const data: ReturnData = await res.json();
       return { kind: 'ok' as const, data };
-    } catch (e) {
-      console.log('e', e);
-      return { kind: 'network' as const };
-    } finally {
-      clearTimeout(timer);
     }
+    const timer = setTimeout(() => ctrl.abort(), 8000);
+    const res = await tryCatchBlock<Response>(tryFunc, 'Authntication failed');
+    clearTimeout(timer);
+    return res || { kind: 'network' as const } as Response;
   }
 
   const updateAuthData = async (data: ReturnData) => {
     const { refresh_token, access_token } = data.tokens;
     await SecureStore.setItemAsync(RT_KEY, refresh_token);
-    const newAuthData = { accessToken: access_token, userId: data.user.sub, habits: data.habits };
+    const newAuthData = { accessToken: access_token, user: data.claims.user, habits: data.habits };
     setAuthData(newAuthData);
     setStatus('authenticated');
   }
@@ -87,8 +103,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const rt = await SecureStore.getItemAsync(RT_KEY);
     if (!rt) return setStatus('unauthenticated');
 
-    const result = await callRefresh(rt);
-    if (result.kind === 'ok') {
+    const result: Response = await callRefresh(rt);
+    // const result: Response = { kind: 'rejected' };
+    if (result.kind === 'ok' && result.data) {
       const data: ReturnData = result.data;
       await SecureStore.setItemAsync(RT_KEY, data.tokens.refresh_token);
       updateAuthData(data);
@@ -107,7 +124,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   async function confirmEmail(email: string, otp: number) {
     const body = { email, otp };
-    console.log('body', body);
     const res = await fetch(`${baseUrl}/confirm_email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

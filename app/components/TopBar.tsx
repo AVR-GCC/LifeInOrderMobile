@@ -4,19 +4,23 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { LEFT_BAR_WIDTH, TOP_BAR_HEIGHT } from '../constants/mainScreen';
 import { COLORS } from '../constants/theme';
 import { HabitWithValues } from '../types';
-import { useSession } from '../context/AuthContext';
+import { useRouter } from 'expo-router';
+// import { useSession } from '../context/AuthContext';
 
 interface TopBarProps {
   habits: HabitWithValues[];
 }
 
 const TopBar: React.FC<TopBarProps> = React.memo(function TopBar({ habits }) {
-  const { signOut } = useSession();
+  // const { signOut } = useSession();
+  const router = useRouter();
   return (
     <View style={styles.topBar}>
       <TouchableOpacity
         style={styles.hamburger}
-        onPress={signOut}
+        onPress={() => {
+          router.replace('/account');
+        }}
       >
         <Ionicons
           name="reorder-three"

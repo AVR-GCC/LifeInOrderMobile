@@ -1,6 +1,6 @@
 import * as Crypto from 'expo-crypto';
 
-import type { Habit, SetValueSocket, DeleteHabitSocket, UpdateHabitSocket, ReorderHabitsSocket, Option, DeleteOptionSocket, UpdateOptionSocket, ReorderOptionsSocket, CreateOptionSocket, CreateHabitSocket, Segment } from '../types';
+import type { Habit, SetValueSocket, DeleteHabitSocket, UpdateHabitSocket, ReorderHabitsSocket, Option, DeleteOptionSocket, UpdateOptionSocket, ReorderOptionsSocket, CreateOptionSocket, CreateHabitSocket, Segment, ChangePasswordSocket } from '../types';
 import { debounce } from '../utils/API';
 import { AppState, NativeEventSubscription } from 'react-native';
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
@@ -117,12 +117,15 @@ class SocketClient {
         });
         resolve(true);
       }
-      this.socket.onclose = () => {
+      this.socket.onclose = (event) => {
         console.log('socket disconnected');
+        if (!event.wasClean) {
+          console.log(event.code, event.reason);
+        }
         this.connected = false;
       }
-      this.socket.onerror = (e) => {
-        console.log('WS error:', e);
+      this.socket.onerror = () => {
+        console.log('WS error');
         this.connected = false;
         if (this.appIsActive) {
           this.scheduleReconnect();
@@ -156,6 +159,7 @@ class SocketClient {
       console.log('malformed: ', event.data);
       return; // ignore malformed frames
     }
+    // console.log('message', message);
 
     const { id, data, error } = message;
     const req = this.pending.get(id);
@@ -197,6 +201,17 @@ class SocketClient {
       this.pending.set(id, { resolve, reject });
     });
   }
+
+  // User
+  changePassword: ChangePasswordSocket = (oldpw, newpw) => {
+    const route = 'users';
+    const method = 'put';
+    const params = {
+      old_password: oldpw,
+      new_password: newpw,
+    };
+    return this.request(route, method, params);
+  };
 
   // Values
   setValue: SetValueSocket = (() => {

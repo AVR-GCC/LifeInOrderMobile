@@ -115,6 +115,7 @@ export type SegmentStatus = 'present' | 'loading' | 'pending';
 export type SetNavigationValuesInput = { mode: number, offset: number, scale: number };
 
 // AppContext
+export type ChangePassword = (oldpw: string, newpw: string) => Promise<void>;
 export type GetValue = (date: string, habitIndex: number) => string | null;
 export type SetValue = (date: string, habitIndex: number, values: { valueId: number, text: string | null }) => void;
 export type CreateHabit = (sequence: number, type: HabitType, name: string) => Promise<null | undefined>;
@@ -136,6 +137,7 @@ export type GetScroll = () => number;
 export type SetMode = (mode: number) => void;
 
 // socket
+export type ChangePasswordSocket = (oldpw: string, newpw: string) => Promise<void>;
 export type SetValueSocket = (date: string, habitId: number, values: { valueId: number, text: string | null }) => Promise<Option>;
 export type CreateOptionSocket = (newOption: Partial<Option>) => Promise<Option>;
 export type UpdateOptionSocket = (newOption: Option) => Promise<Option>;

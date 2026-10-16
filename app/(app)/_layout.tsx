@@ -13,6 +13,12 @@ function RootLayout() {
           }}
         />
         <Stack.Screen
+          name='account'
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
           name='day/[date]'
           options={{
             headerShown: false,

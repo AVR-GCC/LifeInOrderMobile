@@ -21,6 +21,7 @@ import {
 import { getValueSelector } from '../state/selectors';
 import type {
   AddSegmentToState,
+  ChangePassword,
   CreateHabit,
   CreateOption,
   DeleteHabit,
@@ -53,6 +54,7 @@ import { useSession } from './AuthContext';
 
 interface AppContextType {
   data: MainProps | null;
+  changePassword: ChangePassword;
   setValue: SetValue;
   getValue: GetValue;
   createHabit: CreateHabit;
@@ -308,6 +310,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, authData]);
 
+  // Users
+  const changePassword: ChangePassword = async (oldpw, newpw) => {
+    client.changePassword(oldpw, newpw).then(() => {
+      console.log('Password', oldpw, 'successfully changed to', newpw);
+    }).catch(e => {
+      console.log('changePassword error:', e);
+    });
+  };
+
   // Values
   const setValue: SetValue = (date, habitIndex, values) => {
     if (dataRef.current === null) return;
@@ -481,6 +492,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <AppContext.Provider
       value={{
         data,
+        changePassword,
         setValue,
         getValue,
         createHabit,
