@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type PropsWithChildren 
 import * as SecureStore from 'expo-secure-store';
 import { HabitWithValues } from '../types';
 import { tryCatchBlock } from '../utils/general';
+import SocketClient from '../api/client';
 
 const RT_KEY = 'refresh_token';
 const baseUrl = process.env.EXPO_PUBLIC_API_BASE;
@@ -30,6 +31,7 @@ type AuthData = {
 type AuthState = {
   status: Status;
   authData: AuthData;
+  client: SocketClient;
   signUp: (email: string, password: string) => Promise<void>;
   confirmEmail: (email: string, otp: number) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
@@ -183,7 +185,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   return (
-    <AuthContext.Provider value={{ status, authData, signUp, confirmEmail, signIn, signOut, retry }}>
+    <AuthContext.Provider
+      value={{
+        status,
+        authData,
+        signUp,
+        confirmEmail,
+        signIn,
+        signOut,
+        retry,
+        client: new SocketClient()
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

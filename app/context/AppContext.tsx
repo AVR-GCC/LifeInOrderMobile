@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
-import client from '../api/client';
 import { colorOptions } from '../components/OptionCard';
 import {
   addHabitIdReducer,
@@ -81,7 +80,7 @@ const MAX_SEGMENTS = 16;
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // const userId = 1;
-  const { status, authData } = useSession();
+  const { status, authData, client } = useSession();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const width = screenWidth - LEFT_BAR_WIDTH;
   const [data, setData] = useState<MainProps | null>(null);

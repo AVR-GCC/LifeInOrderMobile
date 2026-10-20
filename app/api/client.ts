@@ -323,4 +323,4 @@ class SocketClient {
   }
 }
 
-export default new SocketClient();
+export default SocketClient;
