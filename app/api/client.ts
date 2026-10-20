@@ -104,23 +104,16 @@ class SocketClient {
       }
       this.socket = new WebSocket(`${wsUrl}?t=${this.lastAccessToken}`);
       this.socket.onopen = () => {
-        console.log('socket connected');
-        this.connected = true;
-        this.attempt = 0;
-        const persistKeys = Object.keys(this.persist);
-        persistKeys.forEach(pk => {
-          const persistReq = this.persist[pk];
-          if (!persistReq) return;
-          const { route, method, params } = persistReq;
-          delete this.persist[pk];
-          this.persistRequest(pk, route, method, params);
-        });
-        resolve(true);
+        console.log('socket open, authenticating...');
       }
       this.socket.onclose = (event) => {
         console.log('socket disconnected');
         if (!event.wasClean) {
           console.log(event.code, event.reason);
+          if (event.code === 4001) {
+            console.log('token expired, rejecting');
+            reject('token expired');
+          }
         }
         this.connected = false;
       }
@@ -132,7 +125,24 @@ class SocketClient {
         }
         reject();
       };
-      this.socket.onmessage = (e) => this.handleMessage(e);
+      this.socket.onmessage = (e) => {
+        if (e.data === 'connected') {
+          console.log('socket connected');
+          this.connected = true;
+          this.attempt = 0;
+          const persistKeys = Object.keys(this.persist);
+          persistKeys.forEach(pk => {
+            const persistReq = this.persist[pk];
+            if (!persistReq) return;
+            const { route, method, params } = persistReq;
+            delete this.persist[pk];
+            this.persistRequest(pk, route, method, params);
+          });
+          resolve(true);
+          return;
+        }
+        this.handleMessage(e);
+      }
     });
   }
 

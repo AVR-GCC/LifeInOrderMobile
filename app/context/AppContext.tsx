@@ -299,6 +299,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const today = new Date().toISOString().split('T')[0];
         setImmediate(() => updateData(loadInitialDataReducer()(authData.habits)));
         loadAndPrefetch(today, 24);
+      }).catch(e => {
+        console.log('Failed initial socket connection', e);
       });
     } else {
       client.destroy();
