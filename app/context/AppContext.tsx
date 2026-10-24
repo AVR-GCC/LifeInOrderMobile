@@ -35,6 +35,7 @@ import type {
   Option,
   SegmentStatus,
   SetMode,
+  SetNavigationValuesInput,
   SetScale,
   SetScroll,
   SetValue,
@@ -80,7 +81,7 @@ const MAX_SEGMENTS = 16;
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // const userId = 1;
-  const { status, authData, client } = useSession();
+  const { authData, clientWithStatus } = useSession();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const width = screenWidth - LEFT_BAR_WIDTH;
   const [data, setData] = useState<MainProps | null>(null);
@@ -122,6 +123,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const PATCH_DAYS_PER_MODE_DAY_PIXELS = 32;
   const PATCH_OFFSET_FIX_AFTER_LOAD = 32;
   const loadForZoomToPeriod: LoadForZoomToPeriod = (date, zoom) => {
+    if (clientWithStatus.status !== 'authenticated') return Promise.resolve({ scale: 1, mode: 0, offset: 0 } as SetNavigationValuesInput);
     const mode = zoomIndeces[zoom];
     const modeObj = modes[mode];
     const modeDayPixels = modeObj.dayPixels;
@@ -145,7 +147,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       const key = `${date}-${zoom}`;
       segmentStatuses.current[key] = 'loading';
-      client.list(segment, width).then(zld => {
+      clientWithStatus.client?.list(segment, width).then(zld => {
         if (dataRef.current === null) {
           reject('Null data');
           return;
@@ -194,6 +196,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const loadRequiredSegments = (rmm: MacroMap, date: string, dayPixels: number) => {
+    if (clientWithStatus.status !== 'authenticated') return;
     const addToState = getAddSegmentToState(date, dayPixels);
 
     const maxSegmentDistance = () => {
@@ -215,7 +218,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const maxDist = maxSegmentDistance();
       if (!segmentStatuses.current[key] && dist < maxDist) {
         segmentStatuses.current[key] = 'loading';
-        client.list(seg, width).then(zld => {
+        clientWithStatus.client?.list(seg, width).then(zld => {
           const maxDist = maxSegmentDistance();
           if (dataRef.current === null) return;
           const { macroMap } = dataRef.current;
@@ -293,27 +296,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }
 
   useEffect(() => {
-    if (status === 'authenticated' && authData) {
-      client.connect(authData.accessToken).then(() => {
-        const today = new Date().toISOString().split('T')[0];
-        setImmediate(() => updateData(loadInitialDataReducer()(authData.habits)));
-        loadAndPrefetch(today, 24);
-      }).catch(e => {
-        console.log('Failed initial socket connection', e);
-      });
+    if (clientWithStatus.status === 'authenticated' && authData) {
+      const today = new Date().toISOString().split('T')[0];
+      setImmediate(() => updateData(loadInitialDataReducer()(authData.habits)));
+      loadAndPrefetch(today, 24);
     } else {
-      client.destroy();
       segmentStatuses.current = {};
       pendingSegments.current = {};
       // eslint-disable-next-line react-hooks/set-state-in-effect
       updateData(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, authData]);
+  }, [clientWithStatus, authData]);
 
   // Users
   const changePassword: ChangePassword = async (oldpw, newpw) => {
-    client.changePassword(oldpw, newpw).then(() => {
+    if (clientWithStatus.status !== 'authenticated') return;
+    clientWithStatus.client?.changePassword(oldpw, newpw).then(() => {
       console.log('Password', oldpw, 'successfully changed to', newpw);
     }).catch(e => {
       console.log('changePassword error:', e);
@@ -322,7 +321,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Values
   const setValue: SetValue = (date, habitIndex, values) => {
-    if (dataRef.current === null) return;
+    if (dataRef.current === null || clientWithStatus.status !== 'authenticated') return;
     const { habits } = dataRef.current;
     const keys = Object.keys(segmentStatuses.current);
     keys.forEach(key => {
@@ -332,7 +331,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     })
     updateData(setValueReducer(dataRef.current)(date, habitIndex, values));
-    client.setValue(date, habits[habitIndex].habit.id, values).then(_data => {
+    clientWithStatus.client.setValue(date, habits[habitIndex].habit.id, values).then(_data => {
       loadAndPrefetch(date, 24);
     }).catch(e => {
       console.log('setValue error:', e);
@@ -346,7 +345,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Options
   const createOption: CreateOption = async (habitIndex, sequence) => {
-    if (dataRef.current === null) return null;
+    if (dataRef.current === null || clientWithStatus.status !== 'authenticated') return null;
     const { habits } = dataRef.current;
     const newOption = {
       label: '',
@@ -357,7 +356,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     const id = generateEightDigitNumber();
     updateData(addOptionReducer(dataRef.current)(habitIndex, { id, ...newOption }));
-    client.createOption(newOption).then(data => {
+    clientWithStatus.client.createOption(newOption).then(data => {
       if (dataRef.current === null) return null;
       updateData(addOptionIdReducer(dataRef.current)(habitIndex, id, data.id));
     }).catch(e => {
@@ -366,12 +365,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateOption: UpdateOption = (habitIndex, optionIndex, newOptionValues) => {
-    if (dataRef.current === null) return;
+    if (dataRef.current === null || clientWithStatus.status !== 'authenticated') return;
     const { habits } = dataRef.current;
     const oldOption = habits[habitIndex].values[optionIndex];
     const newOption = { ...oldOption, ...newOptionValues };
     updateData(updateOptionReducer(dataRef.current)(habitIndex, optionIndex, newOptionValues));
-    client.updateOption(newOption).then(data => {
+    clientWithStatus.client.updateOption(newOption).then(data => {
       console.log(data, 'has been set, remove from local storage');
     }).catch(e => {
       console.log('updateOption error:', e);
@@ -379,7 +378,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const switchOptions: SwitchOptions = (isDown, habitIndex, optionIndex) => {
-    if (dataRef.current === null) return;
+    if (dataRef.current === null || clientWithStatus.status !== 'authenticated') return;
     const { habits } = dataRef.current;
     const otherIndex = optionIndex + (isDown ? 1 : -1);
     const values = habits[habitIndex].values;
@@ -387,7 +386,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ids[optionIndex] = values[otherIndex].id;
     ids[otherIndex] = values[optionIndex].id;
     updateData(switchOptionsReducer(dataRef.current)(isDown, habitIndex, optionIndex));
-    client.reorderOptions(ids).then(() => {
+    clientWithStatus.client.reorderOptions(ids).then(() => {
       console.log('Reordered options successfully');
     }).catch(e => {
       console.log('switchOptions error:', e);
@@ -395,11 +394,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteOption: DeleteOption = (habitIndex, optionIndex) => {
-    if (dataRef.current === null) return;
+    if (dataRef.current === null || clientWithStatus.status !== 'authenticated') return;
     const { habits } = dataRef.current;
     const id = habits[habitIndex].values[optionIndex].id;
     updateData(deleteOptionReducer(dataRef.current)(habitIndex, optionIndex));
-    client.deleteOption(id).then(() => {
+    clientWithStatus.client.deleteOption(id).then(() => {
       console.log('Deleted', id, 'successfully deleted');
     }).catch(e => {
       console.log('deleteOption error:', e);
@@ -408,7 +407,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Habits
   const createHabit: CreateHabit = async (sequence, type = 'Color', name = '') => {
-    if (dataRef.current === null) return null;
+    if (dataRef.current === null || clientWithStatus.status !== 'authenticated') return null;
     const newHabit = {
       name,
       weight: 1,
@@ -434,13 +433,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     const habitWithValues = { habit, values, values_hashmap, freshly_created: true };
     updateData(addHabitReducer(dataRef.current)(habitWithValues));
-    client.createHabit(newHabit).then(h => {
-      if (dataRef.current === null) return null;
+    clientWithStatus.client.createHabit(newHabit).then(h => {
+      if (dataRef.current === null || clientWithStatus.status !== 'authenticated') return null;
       const habitIndex = dataRef.current.habits.findIndex(h => h.habit.id === habitId);
       updateData(addHabitIdReducer(dataRef.current)(habitId, h.id));
       if (optionId) {
-        client.createOption({ ...newOption, habit_id: h.id }).then(data => {
-          if (dataRef.current === null) return null;
+        clientWithStatus.client.createOption({ ...newOption, habit_id: h.id }).then(data => {
+          if (dataRef.current === null || clientWithStatus.status !== 'authenticated') return null;
           updateData(addOptionIdReducer(dataRef.current)(habitIndex, optionId, data.id));
         }).catch(e => {
           console.log('createOption in createHabit error:', e);
@@ -452,11 +451,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }
 
   const updateHabit: UpdateHabit = (habitIndex, newHabitValues) => {
-    if (dataRef.current === null) return;
+    if (dataRef.current === null || clientWithStatus.status !== 'authenticated') return;
     const newData = updateHabitReducer(dataRef.current)(habitIndex, newHabitValues);
     updateData(newData);
     const { habits } = newData;
-    client.updateHabit(habits[habitIndex].habit).then(data => {
+    clientWithStatus.client.updateHabit(habits[habitIndex].habit).then(data => {
       console.log(data, 'has been set, remove from local storage');
     }).catch(e => {
       console.log('updateHabit error:', e);
@@ -464,14 +463,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const switchHabits: SwitchHabits = (isDown, index) => {
-    if (dataRef.current === null) return;
+    if (dataRef.current === null || clientWithStatus.status !== 'authenticated') return;
     const { habits } = dataRef.current;
     const otherIndex = index + (isDown ? 1 : -1);
     const ids = habits.map(h => h.habit.id);
     ids[index] = habits[otherIndex].habit.id;
     ids[otherIndex] = habits[index].habit.id;
     updateData(switchHabitsReducer(dataRef.current)(isDown, index));
-    client.reorderHabits(ids).then(() => {
+    clientWithStatus.client.reorderHabits(ids).then(() => {
       console.log('Reordered options successfully');
     }).catch(e => {
       console.log('switchHabits error:', e);
@@ -479,10 +478,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteHabit: DeleteHabit = (index) => {
-    if (dataRef.current === null) return;
+    if (dataRef.current === null || clientWithStatus.status !== 'authenticated') return;
     const { habits } = dataRef.current;
     updateData(deleteHabitReducer(dataRef.current)(index));
-    client.deleteHabit(habits[index].habit.id).then(() => {
+    clientWithStatus.client.deleteHabit(habits[index].habit.id).then(() => {
       console.log('Deleted', habits[index].habit.id, 'successfully deleted');
     }).catch(e => {
       console.log('deleteHabit error:', e);

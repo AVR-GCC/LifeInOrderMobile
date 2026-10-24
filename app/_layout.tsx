@@ -17,8 +17,7 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { status } = useSession();
-  // console.log('RootNavigator status', status);
+  const { clientWithStatus: { status } } = useSession();
   const appGuard = status === 'authenticated';
   const authGuard = status === 'unauthenticated' || status === 'offline';
   // console.log('appGuard', appGuard);

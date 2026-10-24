@@ -7,8 +7,6 @@ import SocketClient from '../api/client';
 const RT_KEY = 'refresh_token';
 const baseUrl = process.env.EXPO_PUBLIC_API_BASE;
 
-type Status = 'loading' | 'authenticated' | 'unauthenticated' | 'offline';
-
 type User = {
   id: number,
   email: string,
@@ -28,10 +26,16 @@ type AuthData = {
   habits: HabitWithValues[]
 } | null;
 
-type AuthState = {
-  status: Status;
-  authData: AuthData;
+type ClientWithStatus = {
+  status: 'authenticated';
   client: SocketClient;
+} | {
+  status: 'loading' | 'unauthenticated' | 'offline';
+}
+
+type AuthState = {
+  clientWithStatus: ClientWithStatus;
+  authData: AuthData;
   signUp: (email: string, password: string) => Promise<void>;
   confirmEmail: (email: string, otp: number) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
@@ -67,7 +71,7 @@ export function useSession() {
 }
 
 export function AuthProvider({ children }: PropsWithChildren) {
-  const [status, setStatus] = useState<Status>('loading');
+  const [clientWithStatus, setClientWithStatus] = useState<ClientWithStatus>({ status: 'loading' });
   const [authData, setAuthData] = useState<AuthData>(null);
 
   const callRefresh: (rt: string) => Promise<Response> = async(rt) => {
@@ -97,13 +101,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const { refresh_token, access_token } = data.tokens;
     await SecureStore.setItemAsync(RT_KEY, refresh_token);
     const newAuthData = { accessToken: access_token, user: data.claims.user, habits: data.habits };
+    const client = new SocketClient();
+    await client.connect(access_token);
     setAuthData(newAuthData);
-    setStatus('authenticated');
+    setClientWithStatus({
+      status: 'authenticated',
+      client
+    });
   }
 
   async function bootstrap() {
     const rt = await SecureStore.getItemAsync(RT_KEY);
-    if (!rt) return setStatus('unauthenticated');
+    if (!rt) return setClientWithStatus({ status: 'unauthenticated' });
 
     const result: Response = await callRefresh(rt);
     // const result: Response = { kind: 'rejected' };
@@ -113,9 +122,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
       updateAuthData(data);
     } else if (result.kind === 'rejected') {
       await SecureStore.deleteItemAsync(RT_KEY);
-      setStatus('unauthenticated');
+      setClientWithStatus({ status: 'unauthenticated' });
     } else {
-      setStatus('offline');
+      setClientWithStatus({ status: 'offline' });
     }
   }
 
@@ -175,26 +184,25 @@ export function AuthProvider({ children }: PropsWithChildren) {
       }).catch(() => {}); // best-effort; local state clears regardless
     }
     await SecureStore.deleteItemAsync(RT_KEY);
-    setStatus('unauthenticated');
+    setClientWithStatus({ status: 'unauthenticated' });
     setAuthData(null);
   }
 
   function retry() {
-    setStatus('loading');
+    setClientWithStatus({ status: 'offline' });
     bootstrap();
   }
 
   return (
     <AuthContext.Provider
       value={{
-        status,
+        clientWithStatus,
         authData,
         signUp,
         confirmEmail,
         signIn,
         signOut,
         retry,
-        client: new SocketClient()
       }}
     >
       {children}

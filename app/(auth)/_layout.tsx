@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { useSession } from '../context/AuthContext';
 
 function AuthLayout() {
-  const { status } = useSession();
+  const { clientWithStatus: { status } } = useSession();
   // console.log('(auth)', status);
   return (
     <Stack screenOptions={{ headerShown: false }}>

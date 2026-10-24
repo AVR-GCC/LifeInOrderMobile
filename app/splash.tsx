@@ -5,7 +5,7 @@ import { useSession } from './context/AuthContext';
 SplashScreen.preventAutoHideAsync();
 
 function SplashScreenController() {
-  const { status } = useSession();
+  const { clientWithStatus: { status } } = useSession();
   useEffect(() => {
     if (status !== 'loading') SplashScreen.hideAsync();
   }, [status]);

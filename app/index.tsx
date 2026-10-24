@@ -2,7 +2,7 @@ import { Redirect } from 'expo-router';
 import { useSession } from './context/AuthContext';
 
 function Index() {
-  const { status } = useSession();
+  const { clientWithStatus: { status } } = useSession();
   // console.log('index', status);
 
   if (status === 'authenticated') return <Redirect href='/(app)/main' />;
