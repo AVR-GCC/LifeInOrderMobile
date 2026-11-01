@@ -307,7 +307,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updateData(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientWithStatus, authData]);
+  }, [clientWithStatus]);
 
   // Users
   const changePassword: ChangePassword = async (oldpw, newpw) => {

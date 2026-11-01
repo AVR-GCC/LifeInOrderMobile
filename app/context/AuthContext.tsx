@@ -97,22 +97,28 @@ export function AuthProvider({ children }: PropsWithChildren) {
     return res || { kind: 'network' as const } as Response;
   }
 
-  const updateAuthData = async (data: ReturnData) => {
-    const { refresh_token, access_token } = data.tokens;
-    await SecureStore.setItemAsync(RT_KEY, refresh_token);
-    const newAuthData = { accessToken: access_token, user: data.claims.user, habits: data.habits };
-    const client = new SocketClient();
-    await client.connect(access_token);
-    setAuthData(newAuthData);
+  const connectSocket = async (token: string) => {
+    const client = new SocketClient(() => bootstrap(false));
+    await client.connect(token);
     setClientWithStatus({
       status: 'authenticated',
       client
     });
   }
 
-  async function bootstrap() {
+  const updateAuthData = async (data: ReturnData) => {
+    const { refresh_token, access_token } = data.tokens;
+    await SecureStore.setItemAsync(RT_KEY, refresh_token);
+    const newAuthData = { accessToken: access_token, user: data.claims.user, habits: data.habits };
+    setAuthData(newAuthData);
+  }
+
+  async function bootstrap(newSocket = true) {
     const rt = await SecureStore.getItemAsync(RT_KEY);
-    if (!rt) return setClientWithStatus({ status: 'unauthenticated' });
+    if (!rt) {
+      setClientWithStatus({ status: 'unauthenticated' });
+      return "";
+    }
 
     const result: Response = await callRefresh(rt);
     // const result: Response = { kind: 'rejected' };
@@ -120,12 +126,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
       const data: ReturnData = result.data;
       await SecureStore.setItemAsync(RT_KEY, data.tokens.refresh_token);
       updateAuthData(data);
+      if (newSocket) {
+        await connectSocket(data.tokens.access_token);
+      }
+      return data.tokens.access_token;
     } else if (result.kind === 'rejected') {
       await SecureStore.deleteItemAsync(RT_KEY);
       setClientWithStatus({ status: 'unauthenticated' });
     } else {
       setClientWithStatus({ status: 'offline' });
     }
+    return "";
   }
 
   useEffect(() => {

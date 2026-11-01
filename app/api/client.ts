@@ -38,6 +38,8 @@ interface AnonSocketRequestPayload<TParams = unknown> {
 
 type PersistObject = Record<string, AnonSocketRequestPayload<any>>;
 
+type TriggerRefresh = () => Promise<string>;
+
 const storageKey = 'life-in-order-pending';
 
 const saveToDevice = async (value: PersistObject) => {
@@ -70,8 +72,9 @@ class SocketClient {
   private netInfoUnsubscribe: NetInfoSubscription | null = null;
   private appStateSubscription: NativeEventSubscription | null = null;
   private lastAccessToken: string | null = null;
+  private triggerRefresh: TriggerRefresh | null = null;
 
-  constructor() {
+  constructor(triggerRefresh: TriggerRefresh) {
     this.socket = null;
     this.pending = new Map();
     this.connected = false;
@@ -94,6 +97,7 @@ class SocketClient {
     getFromDevice().then(persist => {
       this.persist = persist || {};
     });
+    this.triggerRefresh = triggerRefresh;
   }
 
   connect(accessToken?: string) {
@@ -172,6 +176,18 @@ class SocketClient {
     // console.log('message', message);
 
     const { id, data, error } = message;
+    if (data === 'refresh_required' && this.triggerRefresh) {
+      this.triggerRefresh().then(t => {
+        const route = 'refresh';
+        const method = 'post';
+        const params = { t };
+        this.request(route, method, params);
+      });
+      return;
+    }
+    if (data === 'token_processed' && this.triggerRefresh) {
+      return;
+    }
     const req = this.pending.get(id);
     if (!req) return; // no one is waiting on this response (or it already timed out)
 
