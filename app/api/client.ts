@@ -150,13 +150,23 @@ class SocketClient {
     });
   }
 
+  tryReconnect() {
+    this.connect.bind(this)().catch(e => {
+      if (e === 'token expired' && this.triggerRefresh) {
+        this.triggerRefresh().then(t => {
+          this.connect(t);
+        });
+      }
+    });
+  }
+
   scheduleReconnect() {
     const exponential = Math.min(this.maxDelay, this.baseDelay * Math.pow(2, this.attempt));
     const delay = Math.floor(Math.random() * exponential);
 
     this.attempt++;
     console.log(`Reconnecting in ${delay}ms (Attempt ${this.attempt})...`);
-    setTimeout(() => this.connect(), delay);
+    setTimeout(this.tryReconnect.bind(this), delay);
   }
 
   destroy() {
@@ -181,11 +191,12 @@ class SocketClient {
         const route = 'refresh';
         const method = 'post';
         const params = { t };
+        this.lastAccessToken = t;
         this.request(route, method, params);
       });
       return;
     }
-    if (data === 'token_processed' && this.triggerRefresh) {
+    if (data === 'token_processed') {
       return;
     }
     const req = this.pending.get(id);
