@@ -126,7 +126,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     if (result.kind === 'ok' && result.data) {
       const data: ReturnData = result.data;
       await SecureStore.setItemAsync(RT_KEY, data.tokens.refresh_token);
-      updateAuthData(data);
+      await updateAuthData(data);
       if (newSocket) {
         await connectSocket(data.tokens.access_token);
       }
@@ -164,7 +164,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
       });
     }
     const data = await res.json();
-    updateAuthData(data);
+    await updateAuthData(data);
+    await connectSocket(data.tokens.access_token);
   }
 
   async function signUp(email: string, password: string) {
@@ -203,7 +204,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
       return;
     }
     const data = await res.json();
-    updateAuthData(data);
+    await updateAuthData(data);
+    await connectSocket(data.tokens.access_token);
   }
 
   async function signOut() {
