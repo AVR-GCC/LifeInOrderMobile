@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { HabitWithValues } from '../types';
 import { tryCatchBlock } from '../utils/general';
 import SocketClient from '../api/client';
+import Toast from 'react-native-toast-message';
 
 const RT_KEY = 'refresh_token';
 const baseUrl = process.env.EXPO_PUBLIC_API_BASE;
@@ -153,7 +154,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
     });
     if (!res.ok) {
       console.log('Email confirmation failed', res);
-      throw new Error('Email confirmation failed');
+      const text2 = res.statusText;
+      Toast.show({
+        type: 'error',
+        text1: 'Signup failed',
+        text2,
+        position: 'top',
+        visibilityTime: 4000,
+      });
     }
     const data = await res.json();
     updateAuthData(data);
@@ -167,7 +175,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
     });
     if (!res.ok) {
       console.log('Signup failed', res);
-      throw new Error('Signup failed');
+      const text2 = res.statusText;
+      Toast.show({
+        type: 'error',
+        text1: 'Signup failed',
+        text2,
+        position: 'top',
+        visibilityTime: 4000,
+      });
     }
   }
 
@@ -179,7 +194,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
     });
     if (!res.ok) {
       console.log('Invalid credentials', res);
-      throw new Error('Invalid credentials');
+      Toast.show({
+        type: 'error',
+        text1: 'Incorrect email or password',
+        position: 'top',
+        visibilityTime: 4000,
+      });
+      return;
     }
     const data = await res.json();
     updateAuthData(data);
