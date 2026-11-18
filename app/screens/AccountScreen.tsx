@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, type ComponentRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  FocusEvent,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { Feather } from '@expo/vector-icons';
@@ -25,6 +24,7 @@ const AccountScreen = ({ changePassword }: AccountScreenProps) => {
   const router = useRouter();
   const { authData, signOut } = useSession();
   const { KeyboardScrollView, setTargetY } = useKeyboardScroll();
+  const inputRef = useRef<ComponentRef<typeof TextInput>>(null);
 
   const [showReset, setShowReset] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -89,8 +89,8 @@ const AccountScreen = ({ changePassword }: AccountScreenProps) => {
     });
   };
 
-  const onFocus = (e: FocusEvent) => {
-    e.target.measure((_x, _y, _w, height, _px, pageY) => {
+  const onFocus = () => {
+    inputRef.current?.measure((_x, _y, _w, height, _px, pageY) => {
       setTargetY(pageY + height);
     });
   };
@@ -156,6 +156,7 @@ const AccountScreen = ({ changePassword }: AccountScreenProps) => {
                   <Text style={styles.label}>Current password</Text>
                   <View style={styles.inputWrapper}>
                     <TextInput
+                      ref={inputRef}
                       onFocus={onFocus}
                       style={styles.input}
                       secureTextEntry={!showCurrent}

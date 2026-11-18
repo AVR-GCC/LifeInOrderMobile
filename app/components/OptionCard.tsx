@@ -1,5 +1,5 @@
 import { AntDesign, Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, type ComponentRef } from 'react';
 import { TextInput, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { DeleteOption, HabitWithValues, SwitchOptions, UpdateOption, Option } from '../types';
 import VerticalChevrons from './VerticalChevrons';
@@ -51,7 +51,7 @@ const OptionCard: React.FC<OptionCardProps> = React.memo(function OptionCard({
   setFocusLastCardRef
 }) {
   const [inputFocused, setInputFocused] = useState(false);
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<ComponentRef<typeof TextInput>>(null);
 
   useEffect(() => {
     setFocusLastCardRef(() => inputRef.current?.focus());

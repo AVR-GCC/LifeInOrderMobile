@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, type ComponentRef } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../constants/theme';
 import { UNFILLED_COLOR } from './DayRow';
@@ -18,7 +18,7 @@ const DayHabitCard: React.FC<DayHabitCardProps> = React.memo(function DayHabitCa
   date, habitIndex, getValue, setValue, habit, onInputFocused
 }) {
     const [focused, setFocused] = useState(false);
-    const inputRef = useRef<TextInput>(null);
+    const inputRef = useRef<ComponentRef<typeof TextInput>>(null);
     const router = useRouter();
 
     if (habit.habit.habit_type === 'Color') {

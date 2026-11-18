@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, type ComponentRef } from 'react';
 import { Dimensions, Keyboard, Platform, ScrollView, StyleProp, View, ViewStyle } from 'react-native';
 
 interface KeyboardScrollViewProps {
@@ -10,7 +10,7 @@ export default function useKeyboardScroll() {
   const [targetY, setTargetYState] = useState(0);
   const scrollRef = useRef(0);
   const keyboardHeightRef = useRef(0);
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<ComponentRef<typeof ScrollView>>(null);
   const [, forceRender] = useState(0);
 
   const setTargetY = (y: number) => {
@@ -57,10 +57,10 @@ export default function useKeyboardScroll() {
 
   const KeyboardScrollView = useRef(({ style, children }: KeyboardScrollViewProps) => {
     return React.createElement(ScrollView, {
-      style,
-      ref: scrollViewRef,
-      onScroll,
-    },
+        style,
+        ref: scrollViewRef,
+        onScroll,
+      },
       children,
       React.createElement(View, { style: { height: keyboardHeightRef.current } }),
     );

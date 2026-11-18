@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, type ComponentRef } from 'react';
 import { Platform, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import BackArrow from '../components/BackArrow';
 import Screen from '../components/Screen';
@@ -17,9 +17,9 @@ const TextValueScreen: React.FC<TextValueScreenProps> = React.memo(function Text
   data, getValue, setValue,
 }) {
   const { date: dateStrs, habitIndex: habitIndexParam } = useLocalSearchParams();
-  const date = Array.isArray(dateStrs) ? dateStrs[0] : dateStrs;
+  const date = (Array.isArray(dateStrs) ? dateStrs[0] : dateStrs) || '';
   const router = useRouter();
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<ComponentRef<typeof TextInput>>(null);
 
   const habitIndex = parseInt(Array.isArray(habitIndexParam) ? habitIndexParam[0] : habitIndexParam ?? '0', 10);
 

@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, type ComponentRef } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Screen from '../components/Screen';
 import TitleBar from '../components/TitleBar';
@@ -36,7 +36,7 @@ const OptionsScreen: React.FC<OptionsScreenProps> = React.memo(function OptionsS
 
   const { KeyboardScrollView, setTargetY } = useKeyboardScroll();
 
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<ComponentRef<typeof TextInput>>(null);
   const focusLastCardRef = useRef<() => void>(null);
 
   useEffect(() => {
