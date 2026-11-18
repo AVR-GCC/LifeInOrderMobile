@@ -1,7 +1,7 @@
 import { View, Text, Pressable } from 'react-native';
-import { useSession } from '../context/AuthContext';
-import Screen from '../components/Screen';
-import { COLORS } from '../constants/theme';
+import { useSession } from '@/src/context/AuthContext';
+import Screen from '@/src/components/Screen';
+import { COLORS } from '@/src/constants/theme';
 
 export default function Offline() {
   const { retry } = useSession();

@@ -1,6 +1,6 @@
 import React from 'react';
 // import { useAppContext } from './context/AppContext';
-import EmailConfirmScreen from '../screens/EmailConfirmScreen';
+import EmailConfirmScreen from '@/src/screens/EmailConfirmScreen';
 
 const EmailConfirmRoute: React.FC = React.memo(function EmailConfirmRoute() {
   // const { data, getValue } = useAppContext();

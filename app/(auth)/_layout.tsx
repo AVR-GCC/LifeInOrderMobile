@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-import { useSession } from '../context/AuthContext';
+import { useSession } from '@/src/context/AuthContext';
 
 function AuthLayout() {
   const { clientWithStatus: { status } } = useSession();

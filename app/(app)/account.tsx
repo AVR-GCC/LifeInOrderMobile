@@ -1,5 +1,5 @@
-import { useAppContext } from '../context/AppContext';
-import AccountScreen from '../screens/AccountScreen';
+import { useAppContext } from '@/src/context/AppContext';
+import AccountScreen from '@/src/screens/AccountScreen';
 
 export default function AccountRoute() {
   const { changePassword } = useAppContext();

@@ -1,6 +1,6 @@
 import React from 'react';
 // import { useAppContext } from './context/AppContext';
-import AuthScreen from '../screens/AuthScreen';
+import AuthScreen from '@/src/screens/AuthScreen';
 
 const AuthRoute: React.FC = React.memo(function AuthRoute() {
   // const { data, getValue } = useAppContext();

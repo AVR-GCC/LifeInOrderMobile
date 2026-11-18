@@ -1,5 +1,5 @@
-import { useAppContext } from '../../../context/AppContext';
-import TextValueScreen from '../../../screens/TextValueScreen';
+import { useAppContext } from '@/src/context/AppContext';
+import TextValueScreen from '@/src/screens/TextValueScreen';
 
 export default function TextValueRoute() {
   const { data, getValue, setValue } = useAppContext();

@@ -1,5 +1,5 @@
 import { Redirect } from 'expo-router';
-import { useSession } from './context/AuthContext';
+import { useSession } from '@/src/context/AuthContext';
 
 function Index() {
   const { clientWithStatus: { status } } = useSession();

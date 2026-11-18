@@ -1,5 +1,5 @@
-import { useAppContext } from '../../../../context/AppContext';
-import OptionsScreen from '../../../../screens/OptionsScreen';
+import { useAppContext } from '@/src/context/AppContext';
+import OptionsScreen from '@/src/screens/OptionsScreen';
 
 export default function OptionsRoute() {
   const { data, switchOptions, deleteOption, createOption, updateOption, updateHabit } = useAppContext();
