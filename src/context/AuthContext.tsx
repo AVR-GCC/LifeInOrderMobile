@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type PropsWithChildren } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type PropsWithChildren } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { HabitWithValues } from '../types';
 import { tryCatchBlock } from '../utils/general';
@@ -74,6 +74,7 @@ export function useSession() {
 export function AuthProvider({ children }: PropsWithChildren) {
   const [clientWithStatus, setClientWithStatus] = useState<ClientWithStatus>({ status: 'loading' });
   const [authData, setAuthData] = useState<AuthData>(null);
+  const stepRef = useRef('start');
 
   const callRefresh: (rt: string) => Promise<Response> = async(rt) => {
     const ctrl = new AbortController();
@@ -116,37 +117,51 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   async function bootstrap(newSocket = true) {
     try {
+      stepRef.current = 'reading token';
       const rt = await SecureStore.getItemAsync(RT_KEY);
+      console.log('[boot] token present:', !!rt);
       if (!rt) {
         setClientWithStatus({ status: 'unauthenticated' });
         return "";
       }
 
-      const result: Response = await callRefresh(rt);
-      // const result: Response = { kind: 'rejected' };
+      stepRef.current = 'calling refresh';
+      const result = await callRefresh(rt);
+      console.log('[boot] refresh result:', result.kind);
+
       if (result.kind === 'ok' && result.data) {
-        const data: ReturnData = result.data;
-        await SecureStore.setItemAsync(RT_KEY, data.tokens.refresh_token);
-        await updateAuthData(data);
+        stepRef.current = 'saving auth data';
+        await updateAuthData(result.data);
         if (newSocket) {
-          await connectSocket(data.tokens.access_token);
+          stepRef.current = 'connecting socket';
+          await connectSocket(result.data.tokens.access_token);
         }
-        return data.tokens.access_token;
-      } else if (result.kind === 'rejected') {
+        return result.data.tokens.access_token;
+      }
+      if (result.kind === 'rejected') {
         await SecureStore.deleteItemAsync(RT_KEY);
         setClientWithStatus({ status: 'unauthenticated' });
       } else {
         setClientWithStatus({ status: 'offline' });
       }
-    } catch (e) {
-      console.log('bootstrap failed', e);
+    } catch (e: any) {
+      console.log('[boot] failed at', stepRef.current, e);
+      Toast.show({ type: 'error', text1: `Boot failed: ${stepRef.current}`, text2: String(e?.message ?? e), visibilityTime: 15000 });
       setClientWithStatus({ status: 'offline' });
+    } finally {
+      stepRef.current = 'done';
     }
     return "";
   }
 
   useEffect(() => {
     setTimeout(bootstrap);
+    const watchdog = setTimeout(() => {
+      if (stepRef.current === 'done') return;
+      Toast.show({ type: 'error', text1: 'Startup stalled', text2: stepRef.current, visibilityTime: 15000 });
+      setClientWithStatus(prev => (prev.status === 'loading' ? { status: 'offline' } : prev));
+    }, 10000);
+    return () => clearTimeout(watchdog);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
