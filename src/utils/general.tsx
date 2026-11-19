@@ -28,9 +28,9 @@ export const generateEightDigitNumber = () => {
   return 10000000 + (value % 90000000);
 }
 
-export const tryCatchBlock = <T = unknown>(tryFunc: () => Promise<T>, text2: string) => {
+export const tryCatchBlock = async <T = unknown>(tryFunc: () => Promise<T>, text2: string) => {
   try {
-    return tryFunc();
+    return await tryFunc();
   } catch (err) {
     if (err instanceof Error) {
       Toast.show({
