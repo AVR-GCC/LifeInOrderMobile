@@ -115,26 +115,31 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   async function bootstrap(newSocket = true) {
-    const rt = await SecureStore.getItemAsync(RT_KEY);
-    if (!rt) {
-      setClientWithStatus({ status: 'unauthenticated' });
-      return "";
-    }
-
-    const result: Response = await callRefresh(rt);
-    // const result: Response = { kind: 'rejected' };
-    if (result.kind === 'ok' && result.data) {
-      const data: ReturnData = result.data;
-      await SecureStore.setItemAsync(RT_KEY, data.tokens.refresh_token);
-      await updateAuthData(data);
-      if (newSocket) {
-        await connectSocket(data.tokens.access_token);
+    try {
+      const rt = await SecureStore.getItemAsync(RT_KEY);
+      if (!rt) {
+        setClientWithStatus({ status: 'unauthenticated' });
+        return "";
       }
-      return data.tokens.access_token;
-    } else if (result.kind === 'rejected') {
-      await SecureStore.deleteItemAsync(RT_KEY);
-      setClientWithStatus({ status: 'unauthenticated' });
-    } else {
+
+      const result: Response = await callRefresh(rt);
+      // const result: Response = { kind: 'rejected' };
+      if (result.kind === 'ok' && result.data) {
+        const data: ReturnData = result.data;
+        await SecureStore.setItemAsync(RT_KEY, data.tokens.refresh_token);
+        await updateAuthData(data);
+        if (newSocket) {
+          await connectSocket(data.tokens.access_token);
+        }
+        return data.tokens.access_token;
+      } else if (result.kind === 'rejected') {
+        await SecureStore.deleteItemAsync(RT_KEY);
+        setClientWithStatus({ status: 'unauthenticated' });
+      } else {
+        setClientWithStatus({ status: 'offline' });
+      }
+    } catch (e) {
+      console.log('bootstrap failed', e);
       setClientWithStatus({ status: 'offline' });
     }
     return "";
